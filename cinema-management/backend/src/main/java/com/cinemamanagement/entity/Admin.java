@@ -1,17 +1,20 @@
 package com.cinemamanagement.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "members")
+@Table(name = "admins")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member {
+public class Admin  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,22 +32,8 @@ public class Member {
     @Column(length = 20)
     private String phone;
 
-    @Column(name = "date_of_birth")
-    private LocalDate dateOfBirth;
-
-    @Column(length = 20)
-    private String gender;
-
-    @Column(length = 255)
     private String avatar;
 
-    @Column(name = "point_balance")
-    private Integer pointBalance = 0;
-
-    @Column(name = "membership_level", length = 50)
-    private String membershipLevel;
-
-    @Column(length = 20)
     private String status = "ACTIVE";
 
     @Column(name = "created_at")
