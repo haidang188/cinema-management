@@ -6,12 +6,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "members")
+@Table(name = "employees")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member {
+public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,6 +19,9 @@ public class Member {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
+
+    @Column(name = "employee_code", nullable = false, unique = true, length = 50)
+    private String employeeCode;
 
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
@@ -36,13 +39,13 @@ public class Member {
     private String gender;
 
     @Column(length = 255)
+    private String address;
+
+    @Column(length = 100)
+    private String position;
+
+    @Column(length = 255)
     private String avatar;
-
-    @Column(name = "point_balance")
-    private Integer pointBalance = 0;
-
-    @Column(name = "membership_level", length = 50)
-    private String membershipLevel;
 
     @Column(length = 20)
     private String status = "ACTIVE";
