@@ -1,0 +1,585 @@
+/* =========================================================
+   SHOWTIME PAGE
+   ========================================================= */
+
+.showtime-page {
+    width: 100%;
+    min-height: 100vh;
+
+    padding: 30px 34px;
+
+    box-sizing: border-box;
+
+    background-color: #0d1112;
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   PAGE TITLE
+   ========================================================= */
+
+.showtime-page h1 {
+    margin: 0;
+
+    text-align: center;
+
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+.showtime-subtitle {
+    margin: 6px 0 28px;
+
+    text-align: center;
+
+    font-size: 11px;
+    color: #b5b5b5;
+}
+
+
+/* =========================================================
+   FILTER
+   ========================================================= */
+
+.showtime-page .filter-container {
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 10px;
+
+    width: 100%;
+
+    padding: 12px;
+
+    margin-bottom: 15px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #33383a;
+
+    background-color: #15191a;
+}
+
+.showtime-page .filter-item {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+
+    gap: 7px;
+}
+
+.showtime-page .filter-item label {
+    display: block;
+
+    text-align: center;
+
+    font-size: 11px;
+    font-weight: 400;
+
+    color: #dddddd;
+
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   FILTER INPUT / SELECT
+   ========================================================= */
+
+.showtime-page .filter-item input,
+.showtime-page .filter-item select {
+    display: block;
+
+    width: 100%;
+    height: 40px;
+
+    padding: 0 10px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #2d3448;
+
+    border-radius: 0;
+
+    background-color: #171c2c;
+
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.showtime-page .filter-item input:focus,
+.showtime-page .filter-item select:focus {
+    outline: none;
+
+    border-color: #e50914;
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+
+.showtime-page .showtime-content {
+    display: grid;
+
+    /*
+     * Không dùng 40% + 60% vì còn có gap.
+     * 38% + minmax(0, 1fr) giúp tổng chiều rộng luôn hợp lệ.
+     */
+    grid-template-columns: 38% minmax(0, 1fr);
+
+    gap: 10px;
+
+    width: 100%;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   MOVIE LIST
+   ========================================================= */
+
+.showtime-page .movie-list {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+
+    gap: 6px;
+
+    min-width: 0;
+}
+
+
+/* =========================================================
+   MOVIE ITEM
+   ========================================================= */
+
+.showtime-page .movie-item {
+    display: flex;
+
+    width: 100%;
+    height: 125px;
+
+    min-width: 0;
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    border: 1px solid #33383a;
+
+    background-color: #1a1e1f;
+
+    cursor: pointer;
+
+    transition: border-color 0.15s ease;
+}
+
+.showtime-page .movie-item:hover {
+    border-color: #666666;
+}
+
+.showtime-page .movie-item.active {
+    border-color: #e50914;
+
+    background-color: #151a28;
+}
+
+
+/* =========================================================
+   POSTER CONTAINER
+   ========================================================= */
+
+.showtime-page .movie-poster {
+    /*
+     * Poster luôn có kích thước cố định.
+     * Không để flex làm nó phình ra.
+     */
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+
+    height: 123px;
+
+    margin: 0;
+    padding: 0;
+
+    flex: 0 0 80px;
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    background-color: #111111;
+}
+
+
+/* =========================================================
+   POSTER IMAGE
+   ========================================================= */
+
+.showtime-page .movie-poster img {
+    display: block;
+
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+
+    height: 123px;
+
+    margin: 0;
+    padding: 0;
+
+    object-fit: cover;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   MOVIE INFO
+   ========================================================= */
+
+.showtime-page .movie-info {
+    display: flex;
+    flex-direction: column;
+
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 10px;
+
+    box-sizing: border-box;
+}
+
+.showtime-page .movie-info h3 {
+    width: 100%;
+
+    margin: 0 0 6px;
+
+    overflow: hidden;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    line-height: 1.3;
+
+    color: #ffffff;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.showtime-page .movie-info p {
+    margin: 0;
+
+    font-size: 10px;
+
+    line-height: 1.4;
+
+    color: #dddddd;
+}
+
+
+/* =========================================================
+   MOVIE META
+   ========================================================= */
+
+.showtime-page .movie-meta {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: auto;
+}
+
+.showtime-page .movie-meta span {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 30px;
+
+    padding: 0 7px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #555555;
+
+    font-size: 9px;
+
+    color: #dddddd;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   MOVIE DETAIL
+   ========================================================= */
+
+.showtime-page .movie-detail {
+    width: 100%;
+    min-width: 0;
+
+    min-height: 500px;
+
+    padding: 20px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #33383a;
+
+    background-color: #151a28;
+}
+
+
+/* =========================================================
+   MOVIE DETAIL HEADER
+   ========================================================= */
+
+.showtime-page .movie-detail-header {
+    display: flex;
+
+    width: 100%;
+
+    gap: 20px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   MOVIE DETAIL POSTER
+   ========================================================= */
+
+.showtime-page .movie-detail-poster {
+    width: 150px;
+    height: 220px;
+
+    flex: 0 0 150px;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+    border: 1px solid #444;
+}
+
+.showtime-page .movie-detail-poster img {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+}
+
+
+/* =========================================================
+   MOVIE DETAIL INFO
+   ========================================================= */
+
+.showtime-page .movie-detail-info {
+    flex: 1;
+
+    min-width: 0;
+
+    padding-top: 10px;
+}
+
+.showtime-page .movie-detail-info h2 {
+    margin: 0 0 12px;
+
+    font-size: 24px;
+    font-weight: 600;
+
+    color: #ffffff;
+}
+
+.showtime-page .movie-detail-info p {
+    margin: 6px 0;
+
+    font-size: 14px;
+
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .showtime-page {
+        padding: 25px 20px;
+    }
+
+    .showtime-page .showtime-content {
+        grid-template-columns: 1fr;
+    }
+
+    .showtime-page .movie-detail {
+        min-height: 350px;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .showtime-page {
+        padding: 20px 12px;
+    }
+
+    .showtime-page h1 {
+        font-size: 25px;
+    }
+
+    .showtime-page .filter-container {
+        grid-template-columns: 1fr;
+    }
+
+    .showtime-page .movie-item {
+        height: 110px;
+    }
+
+    .showtime-page .movie-poster {
+        width: 70px;
+        min-width: 70px;
+        max-width: 70px;
+
+        height: 108px;
+
+        flex-basis: 70px;
+    }
+
+    .showtime-page .movie-poster img {
+        width: 70px;
+        min-width: 70px;
+        max-width: 70px;
+
+        height: 108px;
+    }
+}
+/* =========================================================
+   SHOWTIME LIST
+   ========================================================= */
+
+.showtime-page .showtime-list {
+    margin-top: 30px;
+}
+
+.showtime-page .showtime-list-title {
+    margin: 0 0 18px;
+
+    font-size: 20px;
+    font-weight: 500;
+
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   ROOM
+   ========================================================= */
+
+.showtime-page .showtime-room {
+    margin-bottom: 20px;
+}
+
+.showtime-page .showtime-room-name {
+    margin-bottom: 8px;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    color: #ffffff;
+
+    text-transform: uppercase;
+}
+
+.showtime-page .showtime-room-name span {
+    color: #aaaaaa;
+}
+
+
+/* =========================================================
+   SHOWTIME BUTTONS
+   ========================================================= */
+
+.showtime-page .showtime-times {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+}
+
+.showtime-page .showtime-time {
+    min-width: 65px;
+    height: 35px;
+
+    padding: 0 10px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #555555;
+
+    background-color: #171c2c;
+
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 11px;
+
+    cursor: pointer;
+}
+
+.showtime-page .showtime-time:hover {
+    border-color: #e50914;
+
+    background-color: #1d2233;
+}
+.showtime-page .showtime-time.selected {
+    border-color: #e50914;
+    background-color: #e50914;
+    color: #ffffff;
+}
+.showtime-page .selected-showtime {
+    margin-top: 20px;
+    padding: 12px;
+
+    border: 1px solid #33383a;
+
+    background-color: #101522;
+
+    font-size: 12px;
+}
+
+.showtime-page .selected-showtime p {
+    margin: 0 0 6px;
+
+    font-size: 10px;
+    color: #aaaaaa;
+}
+
+.showtime-page .selected-showtime strong {
+    color: #ffffff;
+}
+
+.showtime-page .selected-showtime span {
+    color: #dddddd;
+}
