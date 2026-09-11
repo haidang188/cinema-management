@@ -1,122 +1,81 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { useEffect, useState } from 'react'
+import CinemaRoomDetail from './pages/admin/rooms/CinemaRoomDetail.jsx'
+import CinemaRoomList from './pages/admin/rooms/CinemaRoomList.jsx'
+import MovieCreate from './pages/admin/movies/MovieCreate.jsx'
+import MovieEdit from './pages/admin/movies/MovieEdit.jsx'
+import MovieList from './pages/admin/movies/MovieList.jsx'
 import './App.css'
 
+function navigate(path) {
+  window.history.pushState({}, '', path)
+  window.dispatchEvent(new PopStateEvent('popstate'))
+}
+
+function getRoute(pathname) {
+  if (pathname === '/' || pathname === '/admin') {
+    return { name: 'list' }
+  }
+  if (pathname === '/admin/movies') {
+    return { name: 'list' }
+  }
+  if (pathname === '/admin/movies/create') {
+    return { name: 'create' }
+  }
+  if (pathname === '/admin/cinema-rooms') {
+    return { name: 'roomList' }
+  }
+  const roomDetailMatch = pathname.match(/^\/admin\/cinema-rooms\/(\d+)$/)
+  if (roomDetailMatch) {
+    return { name: 'roomDetail', id: roomDetailMatch[1] }
+  }
+
+  const editMatch = pathname.match(/^\/admin\/movies\/(\d+)\/edit$/)
+  if (editMatch) {
+    return { name: 'edit', id: editMatch[1] }
+  }
+
+  return { name: 'notFound' }
+}
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [route, setRoute] = useState(() => getRoute(window.location.pathname))
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+  useEffect(() => {
+    const handleRouteChange = () => setRoute(getRoute(window.location.pathname))
+    window.addEventListener('popstate', handleRouteChange)
+    return () => window.removeEventListener('popstate', handleRouteChange)
+  }, [])
 
-      <div className="ticks"></div>
+  if (route.name === 'create') {
+    return <MovieCreate onNavigate={navigate} />
+  }
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+  if (route.name === 'edit') {
+    return <MovieEdit movieId={route.id} onNavigate={navigate} />
+  }
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+  if (route.name === 'roomList') {
+    return <CinemaRoomList onNavigate={navigate} />
+  }
+
+  if (route.name === 'roomDetail') {
+    return <CinemaRoomDetail roomId={route.id} onNavigate={navigate} />
+  }
+
+  if (route.name === 'notFound') {
+    return (
+      <main className="app-shell">
+        <section className="notice-panel">
+          <h1>Không tìm thấy trang</h1>
+          <button type="button" className="primary-button" onClick={() => navigate('/admin/cinema-rooms')}>
+            Về quản lý phòng chiếu
+          </button>
+        </section>
+      </main>
+    )
+  }
+
+  return <MovieList onNavigate={navigate} />
 }
 
 export default App

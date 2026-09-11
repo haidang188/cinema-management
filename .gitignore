@@ -1,0 +1,5 @@
+cinema-management/.tmp-gradle-home/
+cinema-management/backend/.gradle-user-home/
+.env
+.env.*
+!.env.example
