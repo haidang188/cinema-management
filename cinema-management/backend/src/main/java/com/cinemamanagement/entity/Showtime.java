@@ -22,6 +22,8 @@ public class Showtime {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
     private CinemaRoom room;
+    @Column(length = 50)
+    private String format;
 
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
