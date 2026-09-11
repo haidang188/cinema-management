@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Promotion {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,6 +26,9 @@ public class Promotion {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
 
     @Column(unique = true, length = 50)
     private String code;
