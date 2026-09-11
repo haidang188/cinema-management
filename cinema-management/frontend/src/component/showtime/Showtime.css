@@ -1,585 +1,368 @@
-/* =========================================================
-   SHOWTIME PAGE
-   ========================================================= */
-
 .showtime-page {
     width: 100%;
-    min-height: 100vh;
+    max-width: 820px;
+    margin: 0 auto;
 
-    padding: 30px 34px;
+    padding: 20px 16px 35px;
 
     box-sizing: border-box;
-
-    background-color: #0d1112;
-    color: #ffffff;
 }
 
-
-/* =========================================================
-   PAGE TITLE
-   ========================================================= */
-
-.showtime-page h1 {
-    margin: 0;
-
+.showtime-header {
     text-align: center;
-
-    font-size: 32px;
-    font-weight: 400;
-    line-height: 1.2;
+    margin-bottom: 17px;
 }
 
-.showtime-subtitle {
-    margin: 6px 0 28px;
-
-    text-align: center;
-
-    font-size: 11px;
-    color: #b5b5b5;
-}
-
-
-/* =========================================================
-   FILTER
-   ========================================================= */
-
-.showtime-page .filter-container {
-    display: grid;
-
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-
-    gap: 10px;
-
-    width: 100%;
-
-    padding: 12px;
-
-    margin-bottom: 15px;
-
-    box-sizing: border-box;
-
-    border: 1px solid #33383a;
-
-    background-color: #15191a;
-}
-
-.showtime-page .filter-item {
-    display: flex;
-    flex-direction: column;
-
-    min-width: 0;
-
-    gap: 7px;
-}
-
-.showtime-page .filter-item label {
-    display: block;
-
-    text-align: center;
-
-    font-size: 11px;
-    font-weight: 400;
-
-    color: #dddddd;
-
-    text-transform: uppercase;
-}
-
-
-/* =========================================================
-   FILTER INPUT / SELECT
-   ========================================================= */
-
-.showtime-page .filter-item input,
-.showtime-page .filter-item select {
-    display: block;
-
-    width: 100%;
-    height: 40px;
-
-    padding: 0 10px;
-
-    box-sizing: border-box;
-
-    border: 1px solid #2d3448;
-
-    border-radius: 0;
-
-    background-color: #171c2c;
-
-    color: #ffffff;
-
-    font-family: inherit;
-    font-size: 12px;
-}
-
-.showtime-page .filter-item input:focus,
-.showtime-page .filter-item select:focus {
-    outline: none;
-
-    border-color: #e50914;
-}
-
-
-/* =========================================================
-   MAIN CONTENT
-   ========================================================= */
-
-.showtime-page .showtime-content {
-    display: grid;
-
-    /*
-     * Không dùng 40% + 60% vì còn có gap.
-     * 38% + minmax(0, 1fr) giúp tổng chiều rộng luôn hợp lệ.
-     */
-    grid-template-columns: 38% minmax(0, 1fr);
-
-    gap: 10px;
-
-    width: 100%;
-
-    box-sizing: border-box;
-}
-
-
-/* =========================================================
-   MOVIE LIST
-   ========================================================= */
-
-.showtime-page .movie-list {
-    display: flex;
-    flex-direction: column;
-
-    width: 100%;
-
-    gap: 6px;
-
-    min-width: 0;
-}
-
-
-/* =========================================================
-   MOVIE ITEM
-   ========================================================= */
-
-.showtime-page .movie-item {
-    display: flex;
-
-    width: 100%;
-    height: 125px;
-
-    min-width: 0;
-
-    box-sizing: border-box;
-
-    overflow: hidden;
-
-    border: 1px solid #33383a;
-
-    background-color: #1a1e1f;
-
-    cursor: pointer;
-
-    transition: border-color 0.15s ease;
-}
-
-.showtime-page .movie-item:hover {
-    border-color: #666666;
-}
-
-.showtime-page .movie-item.active {
-    border-color: #e50914;
-
-    background-color: #151a28;
-}
-
-
-/* =========================================================
-   POSTER CONTAINER
-   ========================================================= */
-
-.showtime-page .movie-poster {
-    /*
-     * Poster luôn có kích thước cố định.
-     * Không để flex làm nó phình ra.
-     */
-    width: 80px;
-    min-width: 80px;
-    max-width: 80px;
-
-    height: 123px;
-
+.showtime-header h1 {
     margin: 0;
-    padding: 0;
-
-    flex: 0 0 80px;
-
-    box-sizing: border-box;
-
-    overflow: hidden;
-
-    background-color: #111111;
-}
-
-
-/* =========================================================
-   POSTER IMAGE
-   ========================================================= */
-
-.showtime-page .movie-poster img {
-    display: block;
-
-    width: 80px;
-    min-width: 80px;
-    max-width: 80px;
-
-    height: 123px;
-
-    margin: 0;
-    padding: 0;
-
-    object-fit: cover;
-
-    box-sizing: border-box;
-}
-
-
-/* =========================================================
-   MOVIE INFO
-   ========================================================= */
-
-.showtime-page .movie-info {
-    display: flex;
-    flex-direction: column;
-
-    flex: 1;
-
-    min-width: 0;
-
-    padding: 10px;
-
-    box-sizing: border-box;
-}
-
-.showtime-page .movie-info h3 {
-    width: 100%;
-
-    margin: 0 0 6px;
-
-    overflow: hidden;
-
-    font-size: 14px;
-    font-weight: 500;
-
-    line-height: 1.3;
-
-    color: #ffffff;
-
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-.showtime-page .movie-info p {
-    margin: 0;
-
-    font-size: 10px;
-
-    line-height: 1.4;
-
-    color: #dddddd;
-}
-
-
-/* =========================================================
-   MOVIE META
-   ========================================================= */
-
-.showtime-page .movie-meta {
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    margin-top: auto;
-}
-
-.showtime-page .movie-meta span {
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    min-height: 30px;
-
-    padding: 0 7px;
-
-    box-sizing: border-box;
-
-    border: 1px solid #555555;
-
-    font-size: 9px;
-
-    color: #dddddd;
-
-    white-space: nowrap;
-}
-
-
-/* =========================================================
-   MOVIE DETAIL
-   ========================================================= */
-
-.showtime-page .movie-detail {
-    width: 100%;
-    min-width: 0;
-
-    min-height: 500px;
-
-    padding: 20px;
-
-    box-sizing: border-box;
-
-    border: 1px solid #33383a;
-
-    background-color: #151a28;
-}
-
-
-/* =========================================================
-   MOVIE DETAIL HEADER
-   ========================================================= */
-
-.showtime-page .movie-detail-header {
-    display: flex;
-
-    width: 100%;
-
-    gap: 20px;
-
-    box-sizing: border-box;
-}
-
-
-/* =========================================================
-   MOVIE DETAIL POSTER
-   ========================================================= */
-
-.showtime-page .movie-detail-poster {
-    width: 150px;
-    height: 220px;
-
-    flex: 0 0 150px;
-
-    overflow: hidden;
-
-    box-sizing: border-box;
-
-    border: 1px solid #444;
-}
-
-.showtime-page .movie-detail-poster img {
-    display: block;
-
-    width: 100%;
-    height: 100%;
-
-    object-fit: cover;
-}
-
-
-/* =========================================================
-   MOVIE DETAIL INFO
-   ========================================================= */
-
-.showtime-page .movie-detail-info {
-    flex: 1;
-
-    min-width: 0;
-
-    padding-top: 10px;
-}
-
-.showtime-page .movie-detail-info h2 {
-    margin: 0 0 12px;
 
     font-size: 24px;
     font-weight: 600;
-
-    color: #ffffff;
 }
 
-.showtime-page .movie-detail-info p {
-    margin: 6px 0;
-
-    font-size: 14px;
-
-    color: #ffffff;
-}
-
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 900px) {
-
-    .showtime-page {
-        padding: 25px 20px;
-    }
-
-    .showtime-page .showtime-content {
-        grid-template-columns: 1fr;
-    }
-
-    .showtime-page .movie-detail {
-        min-height: 350px;
-    }
-}
-
-
-@media (max-width: 600px) {
-
-    .showtime-page {
-        padding: 20px 12px;
-    }
-
-    .showtime-page h1 {
-        font-size: 25px;
-    }
-
-    .showtime-page .filter-container {
-        grid-template-columns: 1fr;
-    }
-
-    .showtime-page .movie-item {
-        height: 110px;
-    }
-
-    .showtime-page .movie-poster {
-        width: 70px;
-        min-width: 70px;
-        max-width: 70px;
-
-        height: 108px;
-
-        flex-basis: 70px;
-    }
-
-    .showtime-page .movie-poster img {
-        width: 70px;
-        min-width: 70px;
-        max-width: 70px;
-
-        height: 108px;
-    }
-}
-/* =========================================================
-   SHOWTIME LIST
-   ========================================================= */
-
-.showtime-page .showtime-list {
-    margin-top: 30px;
-}
-
-.showtime-page .showtime-list-title {
-    margin: 0 0 18px;
-
-    font-size: 20px;
-    font-weight: 500;
-
-    color: #ffffff;
-}
-
-
-/* =========================================================
-   ROOM
-   ========================================================= */
-
-.showtime-page .showtime-room {
-    margin-bottom: 20px;
-}
-
-.showtime-page .showtime-room-name {
-    margin-bottom: 8px;
+.showtime-header p {
+    margin: 4px 0 0;
 
     font-size: 11px;
+    color: #aaa;
+}
+
+.date-selector {
+    display: flex;
+    align-items: stretch;
+
+    gap: 5px;
+
+    margin-bottom: 10px;
+}
+
+
+.week-arrow {
+    width: 28px;
+
+    flex-shrink: 0;
+
+    border: 1px solid #333;
+    border-radius: 5px;
+
+    background: #171717;
+    color: #ddd;
+
+    font-size: 21px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.week-arrow:hover {
+    background: #292929;
+}
+
+.week-arrow:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.week-arrow:disabled:hover {
+    background: #171717;
+}
+
+.date-list {
+    display: flex;
+    flex: 1;
+
+    overflow: hidden;
+
+    border-radius: 5px;
+}
+
+.date-item {
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 7px 3px;
+
+    border: 1px solid #333;
+    border-right: none;
+
+    background: #171717;
+    color: #aaa;
+
+    cursor: pointer;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    transition: 0.2s;
+}
+
+.date-item:first-child {
+    border-radius: 5px 0 0 5px;
+}
+
+.date-item:last-child {
+    border-right: 1px solid #333;
+    border-radius: 0 5px 5px 0;
+}
+
+.date-item:hover {
+    background: #242424;
+}
+
+.date-item.active {
+    background: #e5e5e5;
+    color: #111;
+    border-color: #e5e5e5;
+}
+
+.date-number {
+    font-size: 14px;
     font-weight: 600;
-
-    color: #ffffff;
-
-    text-transform: uppercase;
 }
 
-.showtime-page .showtime-room-name span {
-    color: #aaaaaa;
+.date-weekday {
+    margin-top: 2px;
+
+    font-size: 10px;
 }
 
 
-/* =========================================================
-   SHOWTIME BUTTONS
-   ========================================================= */
+.calendar-wrapper {
+    position: relative;
 
-.showtime-page .showtime-times {
+    flex-shrink: 0;
+}
+
+.calendar-button {
+    width: 34px;
+    height: 100%;
+
+    min-height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #333;
+    border-radius: 5px;
+
+    background: #171717;
+
+    font-size: 15px;
+
+    cursor: pointer;
+}
+
+.calendar-wrapper input {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+}
+
+
+.selected-date {
+    padding: 8px 11px;
+
+    margin-bottom: 10px;
+
+    border-left: 2px solid #fff;
+
+    background: #171717;
+
+    font-size: 11px;
+}
+
+.selected-date strong {
+    margin-left: 3px;
+}
+
+
+.showtime-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+
+.showtime-movie-card {
+    display: flex;
+
+    padding: 10px;
+
+    gap: 13px;
+
+    background: #151515;
+
+    border: 1px solid #2b2b2b;
+    border-radius: 6px;
+}
+
+
+.movie-poster-wrapper {
+    flex-shrink: 0;
+}
+
+.showtime-movie-poster {
+    width: 75px;
+    height: 110px;
+
+    object-fit: cover;
+
+    border-radius: 4px;
+}
+
+
+.showtime-movie-content {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.showtime-movie-content h2 {
+    margin: 0 0 4px;
+
+    font-size: 16px;
+    font-weight: 600;
+}
+
+
+.movie-meta {
+    display: flex;
+
+    gap: 8px;
+
+    margin-bottom: 7px;
+
+    font-size: 10px;
+
+    color: #999;
+}
+
+
+.showtime-room {
+    padding: 6px 0;
+
+    border-top: 1px solid #292929;
+}
+
+.room-info {
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+
+    margin-bottom: 5px;
+}
+
+.room-name {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.room-type {
+    padding: 1px 5px;
+
+    border: 1px solid #4d4d4d;
+    border-radius: 3px;
+
+    font-size: 8px;
+
+    color: #aaa;
+}
+
+
+.showtime-times {
     display: flex;
 
     flex-wrap: wrap;
 
-    gap: 8px;
+    gap: 4px;
 }
 
-.showtime-page .showtime-time {
-    min-width: 65px;
-    height: 35px;
+.showtime-time {
+    min-width: 55px;
 
-    padding: 0 10px;
+    padding: 5px 7px;
 
-    box-sizing: border-box;
+    border: 1px solid #555;
+    border-radius: 4px;
 
-    border: 1px solid #555555;
+    background: transparent;
 
-    background-color: #171c2c;
+    color: #fff;
 
-    color: #ffffff;
-
-    font-family: inherit;
-    font-size: 11px;
+    font-size: 10px;
 
     cursor: pointer;
+
+    transition: 0.2s;
 }
 
-.showtime-page .showtime-time:hover {
-    border-color: #e50914;
-
-    background-color: #1d2233;
+.showtime-time:hover {
+    background: #fff;
+    color: #111;
+    border-color: #fff;
 }
-.showtime-page .showtime-time.selected {
-    border-color: #e50914;
-    background-color: #e50914;
-    color: #ffffff;
-}
-.showtime-page .selected-showtime {
-    margin-top: 20px;
-    padding: 12px;
 
-    border: 1px solid #33383a;
+.no-showtime {
+    padding: 25px 15px;
 
-    background-color: #101522;
+    text-align: center;
+
+    background: #151515;
+
+    border: 1px solid #2b2b2b;
+    border-radius: 6px;
+
+    color: #999;
 
     font-size: 12px;
 }
 
-.showtime-page .selected-showtime p {
-    margin: 0 0 6px;
-
-    font-size: 10px;
-    color: #aaaaaa;
+.format-info {
+    text-align: left;
+    font-size: 18px;
+    margin-bottom: 8px;
 }
 
-.showtime-page .selected-showtime strong {
-    color: #ffffff;
-}
 
-.showtime-page .selected-showtime span {
-    color: #dddddd;
+@media (max-width: 768px) {
+
+    .showtime-page {
+        padding: 18px 10px 30px;
+    }
+
+    .week-arrow {
+        width: 25px;
+    }
+
+    .calendar-button {
+        width: 32px;
+    }
+
+    .date-number {
+        font-size: 12px;
+    }
+
+    .date-weekday {
+        font-size: 9px;
+    }
+
+    .showtime-movie-poster {
+        width: 70px;
+        height: 102px;
+    }
+
+    .showtime-movie-card {
+        gap: 10px;
+        padding: 9px;
+    }
+
 }

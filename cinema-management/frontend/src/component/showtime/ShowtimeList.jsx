@@ -4,61 +4,94 @@ function ShowtimeList({
                           onSelectShowtime
                       }) {
 
+    const groupedShowtimes = showtimes.reduce((groups, showtime) => {
+        const roomId = showtime.roomId;
+
+        if (!groups[roomId]) {
+            groups[roomId] = {
+                roomId: showtime.roomId,
+                roomName: showtime.roomName,
+                roomType: showtime.roomType,
+                showtimes: []
+            };
+        }
+
+        groups[roomId].showtimes.push(showtime);
+
+        return groups;
+    }, {});
+
+    const rooms = Object.values(groupedShowtimes);
+
+    const formatTime = (startTime) => {
+        return new Date(startTime).toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    };
+
     return (
         <div className="showtime-list">
+
             <h3 className="showtime-list-title">
                 LỊCH CHIẾU
-
             </h3>
-            {showtimes.length === 0 ? (
+
+            {rooms.length === 0 ? (
                 <p className="no-showtime">
                     Không có suất chiếu phù hợp
-
                 </p>
             ) : (
-
-                showtimes.map((showtime) => (
-
-                    <div className="showtime-room"
-                         key={showtime.id}>
+                rooms.map((room) => (
+                    <div
+                        className="showtime-room"
+                        key={room.roomId}
+                    >
 
                         <div className="showtime-room-name">
-                            {showtime.roomName}
+                            {room.roomName}
 
                             <span>
                                 {" - "}
-                                {showtime.roomType}
+                                {room.roomType}
                             </span>
-
-
                         </div>
 
                         <div className="showtime-times">
-                            {showtime.times.map((time) => {
-                                const isSelected =
-                                    selectedShowtime?.showtimeId === showtime.id &&
-                                    selectedShowtime?.time === time;
-                                return (
-                                    <button key={time}
-                                            className={
-                                                isSelected
-                                                    ? "showtime-time selected"
-                                                : "showtime-time"
-                                            }
-                                            onClick={() => onSelectShowtime({
-                                                    showtimeId: showtime.id,
-                                                    roomName: showtime.roomName,
-                                                    roomType: showtime.roomType,
-                                                    time: time,
-                                                })}
-                                                >
-                                                {time}
-                                                </button>
-                                                );
 
-                                            })}
+                            {room.showtimes.map((showtime) => {
+
+                                const time = formatTime(
+                                    showtime.startTime
+                                );
+
+                                const isSelected =
+                                    selectedShowtime?.showtimeId === showtime.id;
+
+                                return (
+                                    <button
+                                        key={showtime.id}
+                                        className={
+                                            isSelected
+                                                ? "showtime-time selected"
+                                                : "showtime-time"
+                                        }
+                                        onClick={() =>
+                                            onSelectShowtime({
+                                                showtimeId: showtime.id,
+                                                roomName: showtime.roomName,
+                                                roomType: showtime.roomType,
+                                                time: time
+                                            })
+                                        }
+                                    >
+                                        {time}
+                                    </button>
+                                );
+                            })}
 
                         </div>
+
                     </div>
                 ))
             )}
