@@ -9,7 +9,7 @@ import lombok.Setter;
 @Entity
 @Table(
         name = "seats",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"room_id", "row_lable", "seat_number"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"room_id", "row_label", "seat_number"})
 )
 @Getter
 @Setter
@@ -24,8 +24,8 @@ public class Seat {
     @JoinColumn(name = "room_id", nullable = false)
     private CinemaRoom room;
 
-    @Column(name = "row_lable", nullable = false, length = 5)
-    private String rowLable;
+    @Column(name = "row_label", nullable = false, length = 5)
+    private String rowLabel;
 
     @Column(name = "seat_number", nullable = false)
     private Integer seatNumber;
