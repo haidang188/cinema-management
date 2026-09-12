@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "cinema_rooms")
 @Getter
@@ -28,4 +31,7 @@ public class CinemaRoom {
 
     @Column(length = 30)
     private String status;
+
+    @OneToMany(mappedBy = "room")
+    private List<Seat> seats = new ArrayList<>();
 }

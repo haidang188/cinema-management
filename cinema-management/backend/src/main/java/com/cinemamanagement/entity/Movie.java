@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "movies")
@@ -58,4 +60,24 @@ public class Movie {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @ManyToMany
+    @JoinTable(
+            name = "movie_genres",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
+    private Set<Genre> genres = new HashSet<>();
+
+    @PrePersist
+    void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    void preUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
