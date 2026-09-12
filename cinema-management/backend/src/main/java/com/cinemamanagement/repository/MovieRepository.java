@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MovieRepository extends JpaRepository<Movie, Long> {
@@ -19,4 +20,10 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     @Query("select movie from Movie movie left join fetch movie.genres where movie.id = :id")
     Optional<Movie> findByIdWithGenres(@Param("id") Long id);
+
+    List<Movie> findByStatusOrderByReleaseDateDesc(String status);
+
+    boolean existsByTitle(String title);
+
+    Optional<Movie> findFirstByStatusOrderByReleaseDateDesc(String status);
 }

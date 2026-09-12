@@ -1,5 +1,6 @@
 package com.cinemamanagement.controller;
 
+import com.cinemamanagement.dto.movie.MovieResponse;
 import com.cinemamanagement.request.MovieRequest;
 import com.cinemamanagement.response.MovieDetailResponse;
 import com.cinemamanagement.response.MovieListResponse;
@@ -20,8 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/admin/movies")
+@RequestMapping("/api/movies")
 @CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173"})
 public class MovieController {
     private final MovieService movieService;
@@ -30,7 +33,12 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @GetMapping
+    @GetMapping("/now-showing")
+    public List<MovieResponse> getNowShowingMovies() {
+        return movieService.getNowShowingMovies();
+    }
+
+    @GetMapping("/admin")
     public Page<MovieListResponse> getMovies(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String status,
@@ -39,12 +47,12 @@ public class MovieController {
         return movieService.getMovies(keyword, status, pageable);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/admin/{id}")
     public MovieDetailResponse getMovieById(@PathVariable Long id) {
         return movieService.getMovieById(id);
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/admin", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public MovieDetailResponse createMovie(
             @Valid @RequestPart("movie") MovieRequest request,
             @RequestPart("poster") MultipartFile poster
@@ -52,7 +60,7 @@ public class MovieController {
         return movieService.createMovie(request, poster);
     }
 
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/admin/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public MovieDetailResponse updateMovie(
             @PathVariable Long id,
             @Valid @RequestPart("movie") MovieRequest request,

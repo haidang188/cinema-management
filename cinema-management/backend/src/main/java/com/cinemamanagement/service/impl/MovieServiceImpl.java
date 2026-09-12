@@ -1,5 +1,6 @@
 package com.cinemamanagement.service.impl;
 
+import com.cinemamanagement.dto.movie.MovieResponse;
 import com.cinemamanagement.entity.Genre;
 import com.cinemamanagement.entity.Movie;
 import com.cinemamanagement.exception.BadRequestException;
@@ -24,6 +25,7 @@ import java.util.Set;
 @Service
 public class MovieServiceImpl implements MovieService {
     private static final String POSTER_FOLDER = "cinema/posters";
+    private static final String SHOWING = "SHOWING";
 
     private final MovieRepository movieRepository;
     private final GenreRepository genreRepository;
@@ -37,6 +39,15 @@ public class MovieServiceImpl implements MovieService {
         this.movieRepository = movieRepository;
         this.genreRepository = genreRepository;
         this.cloudinaryService = cloudinaryService;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieResponse> getNowShowingMovies() {
+        return movieRepository.findByStatusOrderByReleaseDateDesc(SHOWING)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
@@ -113,5 +124,22 @@ public class MovieServiceImpl implements MovieService {
             return null;
         }
         return value.trim();
+    }
+
+    private MovieResponse toResponse(Movie movie) {
+        return new MovieResponse(
+                movie.getId(),
+                movie.getTitle(),
+                movie.getDescription(),
+                movie.getDurationMinutes(),
+                movie.getReleaseDate(),
+                movie.getAgeRating(),
+                movie.getDirector(),
+                movie.getCast(),
+                movie.getLanguage(),
+                movie.getPosterUrl(),
+                movie.getTrailerUrl(),
+                movie.getStatus()
+        );
     }
 }

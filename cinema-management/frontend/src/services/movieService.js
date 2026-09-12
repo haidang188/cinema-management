@@ -54,22 +54,22 @@ export function getMovies({ page = 0, size = 10, keyword = '', status = '' } = {
     params.set('status', status)
   }
 
-  return request(`/api/admin/movies?${params.toString()}`)
+  return request(`/api/movies/admin?${params.toString()}`)
 }
 
 export function getMovie(id) {
-  return request(`/api/admin/movies/${id}`)
+  return request(`/api/movies/admin/${id}`)
 }
 
 export function createMovie(payload, posterFile) {
-  return request('/api/admin/movies', {
+  return request('/api/movies/admin', {
     method: 'POST',
     body: buildMovieFormData(payload, posterFile),
   })
 }
 
 export function updateMovie(id, payload, posterFile) {
-  return request(`/api/admin/movies/${id}`, {
+  return request(`/api/movies/admin/${id}`, {
     method: 'PUT',
     body: buildMovieFormData(payload, posterFile),
   })
