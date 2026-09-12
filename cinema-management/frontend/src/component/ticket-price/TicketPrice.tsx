@@ -1,10 +1,22 @@
 import "./TicketPrice.css";
 import { useEffect, useState } from "react";
-import { getTicketPrices } from "../../service/ticketPriceService.js";
+import { getTicketPrices } from "../../service/ticket-price/ticketPriceService";
+
+interface TicketPriceData {
+    id: number;
+    roomType: string;
+    seatType: string;
+    dayType: string;
+    price: number;
+}
+
+interface TypeNameMap {
+    [key: string]: string;
+}
 
 function TicketPrice() {
 
-    const [ticketPrices, setTicketPrices] = useState([]);
+    const [ticketPrices, setTicketPrices] = useState<TicketPriceData[]>([]);
 
     useEffect(() => {
 
@@ -20,9 +32,9 @@ function TicketPrice() {
 
     }, []);
 
-    const getRoomTypeName = (roomType) => {
+    const getRoomTypeName = (roomType: string): string => {
 
-        const roomTypes = {
+        const roomTypes: TypeNameMap = {
             STANDARD: "Phòng tiêu chuẩn",
             SPECIAL: "Phòng đặc biệt",
             PREMIUM: "Phòng cao cấp"
@@ -31,9 +43,9 @@ function TicketPrice() {
         return roomTypes[roomType] || roomType;
     };
 
-    const getSeatTypeName = (seatType) => {
+    const getSeatTypeName = (seatType: string): string => {
 
-        const seatTypes = {
+        const seatTypes: TypeNameMap = {
             NORMAL: "Ghế thường",
             VIP: "Ghế VIP"
         };
@@ -41,9 +53,9 @@ function TicketPrice() {
         return seatTypes[seatType] || seatType;
     };
 
-    const getDayTypeName = (dayType) => {
+    const getDayTypeName = (dayType: string): string => {
 
-        const dayTypes = {
+        const dayTypes: TypeNameMap = {
             WEEKDAY: "Ngày thường",
             WEEKEND: "Cuối tuần",
             HOLIDAY: "Ngày lễ"
@@ -52,42 +64,47 @@ function TicketPrice() {
         return dayTypes[dayType] || dayType;
     };
 
-    const formatPrice = (price) => {
+    const formatPrice = (price: number): string => {
 
         return new Intl.NumberFormat("vi-VN").format(price) + "đ";
 
     };
 
-    const dayTypes = [
+    const dayTypes: string[] = [
         ...new Set(
-            ticketPrices.map(item => item.dayType))
-    ];
-
-    const roomTypes = [
-        ...new Set(ticketPrices.map(item => item.roomType)
+            ticketPrices.map(item => item.dayType)
         )
     ];
 
-    const seatTypes = [
-        ...new Set(ticketPrices.map(item => item.seatType)
+    const roomTypes: string[] = [
+        ...new Set(
+            ticketPrices.map(item => item.roomType)
         )
     ];
 
-    const getPrice = (roomType, seatType, dayType) => {
+    const seatTypes: string[] = [
+        ...new Set(
+            ticketPrices.map(item => item.seatType)
+        )
+    ];
 
-        const ticketPrice =
-            ticketPrices.find(
-                item =>
-                    item.roomType === roomType &&
-                    item.seatType === seatType &&
-                    item.dayType === dayType
-            );
+    const getPrice = (
+        roomType: string,
+        seatType: string,
+        dayType: string
+    ): string => {
+
+        const ticketPrice = ticketPrices.find(
+            item =>
+                item.roomType === roomType &&
+                item.seatType === seatType &&
+                item.dayType === dayType
+        );
 
         return ticketPrice
             ? formatPrice(ticketPrice.price)
             : "-";
     };
-
 
     return (
 
@@ -133,7 +150,6 @@ function TicketPrice() {
 
                                 </div>
 
-
                                 <div className="ticket-price-table-wrapper">
 
                                     <table className="ticket-price-table">
@@ -163,7 +179,6 @@ function TicketPrice() {
                                         </tr>
 
                                         </thead>
-
 
                                         <tbody>
 
