@@ -1,16 +1,22 @@
-import { useEffect, useMemo, useState } from 'react'
-import SeatMap from '../../../components/room/SeatMap.jsx'
-import { getRoomDetail, updateSeatTypes } from '../../../services/cinemaRoomService.js'
+import { useEffect, useMemo, useState } from "react"
+import SeatMap from "../../../component/room/SeatMap"
+import { getRoomDetail, updateSeatTypes } from "../../../service/cinema-room/cinemaRoomService"
+import type { CinemaRoom, NavigateHandler, Seat } from "../../../types/admin"
 
-const STATUS_LABELS = {
+const STATUS_LABELS: Record<string, string> = {
   ACTIVE: 'Hoạt động',
   INACTIVE: 'Ngừng hoạt động',
   MAINTENANCE: 'Bảo trì',
 }
 
-function CinemaRoomDetail({ roomId, onNavigate }) {
-  const [room, setRoom] = useState(null)
-  const [pendingSeatTypes, setPendingSeatTypes] = useState({})
+interface CinemaRoomDetailProps {
+  roomId: string
+  onNavigate: NavigateHandler
+}
+
+function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
+  const [room, setRoom] = useState<CinemaRoom | null>(null)
+  const [pendingSeatTypes, setPendingSeatTypes] = useState<Record<number, string>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -28,7 +34,7 @@ function CinemaRoomDetail({ roomId, onNavigate }) {
           setPendingSeatTypes({})
         }
       })
-      .catch((requestError) => {
+      .catch((requestError: Error) => {
         if (!ignore) setError(requestError.message)
       })
       .finally(() => {
@@ -52,7 +58,7 @@ function CinemaRoomDetail({ roomId, onNavigate }) {
     }
   }, [pendingSeatTypes, room])
 
-  function handleToggleSeat(seat) {
+  function handleToggleSeat(seat: Seat) {
     const currentType = pendingSeatTypes[seat.id] || seat.seatType
     const nextType = currentType === 'VIP' ? 'NORMAL' : 'VIP'
 
@@ -83,7 +89,7 @@ function CinemaRoomDetail({ roomId, onNavigate }) {
       setPendingSeatTypes({})
       setSuccess('Lưu thay đổi ghế thành công')
     } catch (requestError) {
-      setError(requestError.message)
+      setError((requestError as Error).message)
     } finally {
       setSaving(false)
     }

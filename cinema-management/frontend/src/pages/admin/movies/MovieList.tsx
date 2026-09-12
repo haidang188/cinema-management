@@ -1,15 +1,20 @@
-import { useEffect, useState } from 'react'
-import { getMovies } from '../../../services/movieService.js'
+import { useEffect, useState } from "react"
+import { getMovies } from "../../../service/movie/movieService"
+import type { AdminMovie, NavigateHandler } from "../../../types/admin"
 
-const STATUS_LABELS = {
+const STATUS_LABELS: Record<string, string> = {
   UPCOMING: 'Sắp chiếu',
   SHOWING: 'Đang chiếu',
   ENDED: 'Đã kết thúc',
   INACTIVE: 'Ngừng hoạt động',
 }
 
-function MovieList({ onNavigate }) {
-  const [movies, setMovies] = useState([])
+interface MovieListProps {
+  onNavigate: NavigateHandler
+}
+
+function MovieList({ onNavigate }: MovieListProps) {
+  const [movies, setMovies] = useState<AdminMovie[]>([])
   const [keyword, setKeyword] = useState('')
   const [status, setStatus] = useState('')
   const [page, setPage] = useState(0)
@@ -32,7 +37,7 @@ function MovieList({ onNavigate }) {
           setTotalPages(data.totalPages || 0)
         }
       })
-      .catch((requestError) => {
+      .catch((requestError: Error) => {
         if (!ignore) setError(requestError.message)
       })
       .finally(() => {
@@ -44,10 +49,11 @@ function MovieList({ onNavigate }) {
     }
   }, [keyword, page, status])
 
-  function handleSearch(event) {
+  function handleSearch(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    const form = event.currentTarget
     setPage(0)
-    setKeyword(event.currentTarget.elements.keyword.value)
+    setKeyword((form.elements.namedItem("keyword") as HTMLInputElement).value)
   }
 
   return (

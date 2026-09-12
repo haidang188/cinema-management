@@ -1,5 +1,13 @@
-function groupSeatsByRow(seats) {
-  return seats.reduce((rows, seat) => {
+import type { Seat } from "../../types/admin"
+
+interface SeatMapProps {
+  seats: Seat[]
+  pendingSeatTypes: Record<number, string>
+  onToggleSeat: (seat: Seat) => void
+}
+
+function groupSeatsByRow(seats: Seat[]): Record<string, Seat[]> {
+  return seats.reduce<Record<string, Seat[]>>((rows, seat) => {
     const row = seat.rowLabel || '?'
     if (!rows[row]) {
       rows[row] = []
@@ -9,7 +17,7 @@ function groupSeatsByRow(seats) {
   }, {})
 }
 
-function SeatMap({ seats, pendingSeatTypes, onToggleSeat }) {
+function SeatMap({ seats, pendingSeatTypes, onToggleSeat }: SeatMapProps) {
   const rows = groupSeatsByRow(seats)
   const sortedRowLabels = Object.keys(rows).sort((a, b) => a.localeCompare(b))
 
