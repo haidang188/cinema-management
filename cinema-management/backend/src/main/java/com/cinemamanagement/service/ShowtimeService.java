@@ -2,7 +2,7 @@ package com.cinemamanagement.service;
 
 import com.cinemamanagement.dto.ShowtimeDTO;
 import com.cinemamanagement.entity.Showtime;
-import com.cinemamanagement.repositoty.ShowtimeRepository;
+import com.cinemamanagement.repository.ShowtimeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
