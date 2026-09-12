@@ -2,7 +2,7 @@ package com.cinemamanagement.service;
 
 import com.cinemamanagement.dto.TicketPriceDTO;
 import com.cinemamanagement.entity.TicketPrice;
-import com.cinemamanagement.repositoty.TicketPriceRepository;
+import com.cinemamanagement.repository.TicketPriceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

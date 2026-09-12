@@ -1,4 +1,4 @@
-package com.cinemamanagement.repositoty;
+package com.cinemamanagement.repository;
 
 import com.cinemamanagement.entity.Showtime;
 import org.springframework.data.jpa.repository.JpaRepository;
