@@ -1,29 +1,63 @@
+
+interface Showtime {
+    id: number;
+    roomId: number;
+    roomName: string;
+    roomType: string;
+    startTime: string;
+}
+
+interface SelectedShowtime {
+    showtimeId: number;
+    roomName: string;
+    roomType: string;
+    time: string;
+}
+
+interface ShowtimeListProps {
+    showtimes: Showtime[];
+    selectedShowtime?: SelectedShowtime | null;
+    onSelectShowtime: (showtime: SelectedShowtime) => void;
+}
+
+interface RoomGroup {
+    roomId: number;
+    roomName: string;
+    roomType: string;
+    showtimes: Showtime[];
+}
+
 function ShowtimeList({
                           showtimes,
                           selectedShowtime,
                           onSelectShowtime
-                      }) {
+                      }: ShowtimeListProps) {
 
-    const groupedShowtimes = showtimes.reduce((groups, showtime) => {
-        const roomId = showtime.roomId;
+    const groupedShowtimes = showtimes.reduce<Record<number, RoomGroup>>(
+        (groups, showtime) => {
 
-        if (!groups[roomId]) {
-            groups[roomId] = {
-                roomId: showtime.roomId,
-                roomName: showtime.roomName,
-                roomType: showtime.roomType,
-                showtimes: []
-            };
-        }
+            const roomId = showtime.roomId;
 
-        groups[roomId].showtimes.push(showtime);
+            if (!groups[roomId]) {
+                groups[roomId] = {
+                    roomId: showtime.roomId,
+                    roomName: showtime.roomName,
+                    roomType: showtime.roomType,
+                    showtimes: []
+                };
+            }
 
-        return groups;
-    }, {});
+            groups[roomId].showtimes.push(showtime);
+
+            return groups;
+
+        },
+        {}
+    );
 
     const rooms = Object.values(groupedShowtimes);
 
-    const formatTime = (startTime) => {
+    const formatTime = (startTime: string): string => {
         return new Date(startTime).toLocaleTimeString("vi-VN", {
             hour: "2-digit",
             minute: "2-digit"
@@ -98,7 +132,6 @@ function ShowtimeList({
 
         </div>
     );
-
 }
 
 export default ShowtimeList;
