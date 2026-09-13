@@ -9,11 +9,6 @@
     box-sizing: border-box;
 }
 
-
-/* =========================
-   HEADER
-========================= */
-
 .ticket-price-header {
     text-align: center;
 
@@ -35,10 +30,6 @@
 }
 
 
-/* =========================
-   LIST
-========================= */
-
 .ticket-price-list {
     display: flex;
 
@@ -47,10 +38,6 @@
     gap: 12px;
 }
 
-
-/* =========================
-   CARD
-========================= */
 
 .ticket-price-card {
     background: #151515;
@@ -63,10 +50,6 @@
 }
 
 
-/* =========================
-   TITLE
-========================= */
-
 .ticket-price-title {
     padding: 11px 15px;
 
@@ -78,11 +61,6 @@
 
     font-weight: 600;
 }
-
-
-/* =========================
-   TABLE
-========================= */
 
 .ticket-price-table-wrapper {
     width: 100%;
@@ -158,11 +136,6 @@
     background: #1c1c1c;
 }
 
-
-/* =========================
-   EMPTY
-========================= */
-
 .ticket-price-empty {
     padding: 30px;
 
@@ -179,10 +152,6 @@
     font-size: 12px;
 }
 
-
-/* =========================
-   MOBILE
-========================= */
 
 @media (max-width: 768px) {
 
