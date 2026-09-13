@@ -2,6 +2,7 @@ cinema-management/.tmp-gradle-home/
 cinema-management/backend/.gradle-user-home/
 cinema-management/backend/.gradle-home-verify/
 cinema-management/backend/.gradle-user-home-verify/
+cinema-management/backend/.gradle-user/
 .env
 .env.*
 !.env.example

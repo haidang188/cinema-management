@@ -3,7 +3,7 @@ package com.cinemamanagement.service.impl;
 import com.cinemamanagement.entity.Promotion;
 import com.cinemamanagement.exception.PromotionNotFoundException;
 import com.cinemamanagement.exception.PromotionValidationException;
-import com.cinemamanagement.repositoty.PromotionRepository;
+import com.cinemamanagement.repository.PromotionRepository;
 import com.cinemamanagement.request.PromotionCreateRequest;
 import com.cinemamanagement.response.PromotionResponse;
 import com.cinemamanagement.response.PromotionStatisticsResponse;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getNowShowingMovies } from '../../services/movieApi'
+import { getNowShowingMovies } from '../../service/movieApi'
 import type { AuthResponse } from '../../types/auth'
 import type { Movie } from '../../types/movie'
 import HomeFooter from './HomeFooter'
