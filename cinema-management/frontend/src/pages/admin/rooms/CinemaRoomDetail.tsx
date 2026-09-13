@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react"
+import AppModal from "../../../component/common/AppModal"
 import SeatMap from "../../../component/room/SeatMap"
 import { getRoomDetail, updateSeatTypes } from "../../../service/cinema-room/cinemaRoomService"
 import type { CinemaRoom, NavigateHandler, Seat } from "../../../types/admin"
 
 const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: 'Hoạt động',
-  INACTIVE: 'Ngừng hoạt động',
-  MAINTENANCE: 'Bảo trì',
+  ACTIVE: "Hoạt động",
+  INACTIVE: "Ngừng hoạt động",
+  MAINTENANCE: "Bảo trì",
 }
 
 interface CinemaRoomDetailProps {
@@ -19,13 +20,14 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
   const [pendingSeatTypes, setPendingSeatTypes] = useState<Record<number, string>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const [error, setError] = useState("")
+  const [showLeaveModal, setShowLeaveModal] = useState(false)
+  const [showSaveSuccessModal, setShowSaveSuccessModal] = useState(false)
 
   useEffect(() => {
     let ignore = false
     setLoading(true)
-    setError('')
+    setError("")
 
     getRoomDetail(roomId)
       .then((data) => {
@@ -52,15 +54,15 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
     const seats = room?.seats || []
     return {
       total: seats.length,
-      normal: seats.filter((seat) => (pendingSeatTypes[seat.id] || seat.seatType) === 'NORMAL').length,
-      vip: seats.filter((seat) => (pendingSeatTypes[seat.id] || seat.seatType) === 'VIP').length,
-      inactive: seats.filter((seat) => seat.status !== 'ACTIVE').length,
+      normal: seats.filter((seat) => (pendingSeatTypes[seat.id] || seat.seatType) === "NORMAL").length,
+      vip: seats.filter((seat) => (pendingSeatTypes[seat.id] || seat.seatType) === "VIP").length,
+      inactive: seats.filter((seat) => seat.status !== "ACTIVE").length,
     }
   }, [pendingSeatTypes, room])
 
   function handleToggleSeat(seat: Seat) {
     const currentType = pendingSeatTypes[seat.id] || seat.seatType
-    const nextType = currentType === 'VIP' ? 'NORMAL' : 'VIP'
+    const nextType = currentType === "VIP" ? "NORMAL" : "VIP"
 
     setPendingSeatTypes((current) => {
       const updated = { ...current }
@@ -71,7 +73,6 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
       }
       return updated
     })
-    setSuccess('')
   }
 
   async function handleSave() {
@@ -81,13 +82,12 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
     }))
 
     setSaving(true)
-    setError('')
-    setSuccess('')
+    setError("")
     try {
       const updatedRoom = await updateSeatTypes(roomId, seats)
       setRoom(updatedRoom)
       setPendingSeatTypes({})
-      setSuccess('Lưu thay đổi ghế thành công')
+      setShowSaveSuccessModal(true)
     } catch (requestError) {
       setError((requestError as Error).message)
     } finally {
@@ -96,10 +96,11 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
   }
 
   function handleBack() {
-    if (hasChanges && !window.confirm('Bạn có thay đổi chưa lưu. Quay lại danh sách?')) {
+    if (hasChanges) {
+      setShowLeaveModal(true)
       return
     }
-    onNavigate('/admin/cinema-rooms')
+    onNavigate("/admin/cinema-rooms")
   }
 
   return (
@@ -111,8 +112,12 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
           <span>Trình chỉnh sửa loại ghế</span>
         </div>
         <nav className="module-nav">
-          <button type="button" onClick={() => onNavigate('/admin/movies')}>Phim</button>
-          <button type="button" className="active" onClick={() => onNavigate('/admin/cinema-rooms')}>Phòng chiếu</button>
+          <button type="button" onClick={() => onNavigate("/admin/movies")}>
+            Phim
+          </button>
+          <button type="button" className="active" onClick={() => onNavigate("/admin/cinema-rooms")}>
+            Phòng chiếu
+          </button>
         </nav>
       </div>
 
@@ -120,14 +125,17 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
         <div>
           <p className="eyebrow">Sprint 2</p>
           <h1>Chi tiết phòng chiếu</h1>
-          <p className="page-subtitle">Chọn ghế để chuyển giữa ghế thường và ghế VIP, sau đó lưu một lần.</p>
+          <p className="page-subtitle">
+            Chọn ghế để chuyển giữa ghế thường và ghế VIP, sau đó lưu một lần.
+          </p>
         </div>
-        <button type="button" className="secondary-button" onClick={handleBack}>Quay lại</button>
+        <button type="button" className="secondary-button" onClick={handleBack}>
+          Quay lại
+        </button>
       </header>
 
       {loading && <div className="alert">Đang tải sơ đồ ghế...</div>}
       {error && <div className="alert error-alert">{error}</div>}
-      {success && <div className="alert success-alert">{success}</div>}
 
       {!loading && !error && room && (
         <>
@@ -138,7 +146,7 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
             </div>
             <div className="summary-card">
               <span>Loại phòng</span>
-              <strong>{room.roomType || '-'}</strong>
+              <strong>{room.roomType || "-"}</strong>
             </div>
             <div className="summary-card summary-blue">
               <span>Tổng ghế</span>
@@ -146,7 +154,7 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
             </div>
             <div className="summary-card summary-green">
               <span>Trạng thái</span>
-              <strong className="status-text">{STATUS_LABELS[room.status] || room.status || '-'}</strong>
+              <strong className="status-text">{STATUS_LABELS[room.status] || room.status || "-"}</strong>
             </div>
           </section>
 
@@ -160,14 +168,47 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
           <SeatMap seats={room.seats || []} pendingSeatTypes={pendingSeatTypes} onToggleSeat={handleToggleSeat} />
 
           <div className="form-actions sticky-actions">
-            <span className={hasChanges ? 'dirty-note active' : 'dirty-note'}>
-              {hasChanges ? `${Object.keys(pendingSeatTypes).length} ghế chưa lưu` : 'Chưa có thay đổi'}
+            <span className={hasChanges ? "dirty-note active" : "dirty-note"}>
+              {hasChanges ? `${Object.keys(pendingSeatTypes).length} ghế chưa lưu` : "Chưa có thay đổi"}
             </span>
             <button type="button" className="primary-button" disabled={!hasChanges || saving} onClick={handleSave}>
-              {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+              {saving ? "Đang lưu..." : "Lưu thay đổi"}
             </button>
           </div>
         </>
+      )}
+
+      {showLeaveModal && (
+        <AppModal
+          title="Bạn có thay đổi chưa lưu"
+          message="Nếu rời trang bây giờ, các thay đổi ghế chưa lưu sẽ bị bỏ qua."
+          variant="warning"
+          actions={[
+            {
+              label: "Ở lại",
+              variant: "secondary",
+              onClick: () => setShowLeaveModal(false),
+            },
+            {
+              label: "Rời trang",
+              onClick: () => onNavigate("/admin/cinema-rooms"),
+            },
+          ]}
+        />
+      )}
+
+      {showSaveSuccessModal && (
+        <AppModal
+          title="Lưu thay đổi thành công"
+          message="Sơ đồ ghế của phòng chiếu đã được cập nhật."
+          variant="success"
+          actions={[
+            {
+              label: "OK",
+              onClick: () => setShowSaveSuccessModal(false),
+            },
+          ]}
+        />
       )}
     </main>
   )

@@ -1,3 +1,5 @@
+import { useState } from "react"
+import AppModal from "../../../component/common/AppModal"
 import MovieForm from "../../../component/movie/MovieForm"
 import { createMovie } from "../../../service/movie/movieService"
 import type { MoviePayload, NavigateHandler } from "../../../types/admin"
@@ -7,10 +9,11 @@ interface MovieCreateProps {
 }
 
 function MovieCreate({ onNavigate }: MovieCreateProps) {
-  async function handleSubmit(payload: MoviePayload, posterFile: File | null) {
-    await createMovie(payload, posterFile)
-    window.alert('Thêm phim thành công')
-    onNavigate('/admin/movies')
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+
+  async function handleSubmit(payload: MoviePayload) {
+    await createMovie(payload)
+    setShowSuccessModal(true)
   }
 
   return (
@@ -22,8 +25,12 @@ function MovieCreate({ onNavigate }: MovieCreateProps) {
           <span>Không gian quản trị rạp chiếu</span>
         </div>
         <nav className="module-nav">
-          <button type="button" className="active" onClick={() => onNavigate('/admin/movies')}>Phim</button>
-          <button type="button" onClick={() => onNavigate('/admin/cinema-rooms')}>Phòng chiếu</button>
+          <button type="button" className="active" onClick={() => onNavigate("/admin/movies")}>
+            Phim
+          </button>
+          <button type="button" onClick={() => onNavigate("/admin/cinema-rooms")}>
+            Phòng chiếu
+          </button>
         </nav>
       </div>
 
@@ -31,10 +38,27 @@ function MovieCreate({ onNavigate }: MovieCreateProps) {
         <div>
           <p className="eyebrow">Quản lý phim</p>
           <h1>Thêm phim mới</h1>
-          <p className="page-subtitle">Nhập thông tin phát hành, phân loại và nội dung hiển thị cho phim mới.</p>
+          <p className="page-subtitle">
+            Nhập thông tin phát hành, phân loại và nội dung hiển thị cho phim mới.
+          </p>
         </div>
       </header>
-      <MovieForm submitLabel="Thêm phim" onSubmit={handleSubmit} onCancel={() => onNavigate('/admin/movies')} />
+
+      <MovieForm submitLabel="Thêm phim" onSubmit={handleSubmit} onCancel={() => onNavigate("/admin/movies")} />
+
+      {showSuccessModal && (
+        <AppModal
+          title="Thêm phim thành công"
+          message="Phim mới đã được lưu vào hệ thống."
+          variant="success"
+          actions={[
+            {
+              label: "OK",
+              onClick: () => onNavigate("/admin/movies"),
+            },
+          ]}
+        />
+      )}
     </main>
   )
 }
