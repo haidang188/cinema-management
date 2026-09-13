@@ -8,6 +8,10 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+<<<<<<< HEAD
+=======
+.npm-cache
+>>>>>>> 0594784ec9746a7697c56977aa7ff6335768b4d3
 dist
 dist-ssr
 *.local
