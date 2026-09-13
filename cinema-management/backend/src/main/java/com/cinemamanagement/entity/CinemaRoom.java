@@ -30,8 +30,8 @@ public class CinemaRoom {
     private Integer totalSeats;
 
     @Column(length = 30)
-    private String status;
+    private String status;<<<<<<<HEAD=======
 
     @OneToMany(mappedBy = "room")
-    private List<Seat> seats = new ArrayList<>();
+    private List<Seat> seats = new ArrayList<>();>>>>>>>0594784ec 9746 a7697c56977aa7ff6335768b4d3
 }
