@@ -1,14 +1,19 @@
-import { useEffect, useState } from 'react'
-import { getRooms } from '../../../services/cinemaRoomService.js'
+import { useEffect, useState } from "react"
+import { getRooms } from "../../../service/cinema-room/cinemaRoomService"
+import type { CinemaRoom, NavigateHandler } from "../../../types/admin"
 
-const STATUS_LABELS = {
+const STATUS_LABELS: Record<string, string> = {
   ACTIVE: 'Hoạt động',
   INACTIVE: 'Ngừng hoạt động',
   MAINTENANCE: 'Bảo trì',
 }
 
-function CinemaRoomList({ onNavigate }) {
-  const [rooms, setRooms] = useState([])
+interface CinemaRoomListProps {
+  onNavigate: NavigateHandler
+}
+
+function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
+  const [rooms, setRooms] = useState<CinemaRoom[]>([])
   const [keyword, setKeyword] = useState('')
   const [status, setStatus] = useState('')
   const [page, setPage] = useState(0)
@@ -28,7 +33,7 @@ function CinemaRoomList({ onNavigate }) {
           setTotalPages(data.totalPages || 0)
         }
       })
-      .catch((requestError) => {
+      .catch((requestError: Error) => {
         if (!ignore) setError(requestError.message)
       })
       .finally(() => {
@@ -40,10 +45,11 @@ function CinemaRoomList({ onNavigate }) {
     }
   }, [keyword, page, status])
 
-  function handleSearch(event) {
+  function handleSearch(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    const form = event.currentTarget
     setPage(0)
-    setKeyword(event.currentTarget.elements.keyword.value)
+    setKeyword((form.elements.namedItem("keyword") as HTMLInputElement).value)
   }
 
   return (

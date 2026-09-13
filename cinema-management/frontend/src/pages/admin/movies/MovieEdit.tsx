@@ -1,9 +1,15 @@
-import { useEffect, useState } from 'react'
-import MovieForm from '../../../components/movie/MovieForm.jsx'
-import { getMovie, updateMovie } from '../../../services/movieService.js'
+import { useEffect, useState } from "react"
+import MovieForm from "../../../component/movie/MovieForm"
+import { getMovie, updateMovie } from "../../../service/movie/movieService"
+import type { AdminMovie, MoviePayload, NavigateHandler } from "../../../types/admin"
 
-function MovieEdit({ movieId, onNavigate }) {
-  const [movie, setMovie] = useState(null)
+interface MovieEditProps {
+  movieId: string
+  onNavigate: NavigateHandler
+}
+
+function MovieEdit({ movieId, onNavigate }: MovieEditProps) {
+  const [movie, setMovie] = useState<AdminMovie | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -16,7 +22,7 @@ function MovieEdit({ movieId, onNavigate }) {
       .then((data) => {
         if (!ignore) setMovie(data)
       })
-      .catch((requestError) => {
+      .catch((requestError: Error) => {
         if (!ignore) setError(requestError.message)
       })
       .finally(() => {
@@ -28,7 +34,7 @@ function MovieEdit({ movieId, onNavigate }) {
     }
   }, [movieId])
 
-  async function handleSubmit(payload, posterFile) {
+  async function handleSubmit(payload: MoviePayload, posterFile: File | null) {
     await updateMovie(movieId, payload, posterFile)
     window.alert('Cập nhật phim thành công')
     onNavigate('/admin/movies')

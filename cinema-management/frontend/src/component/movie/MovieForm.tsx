@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import { getGenres } from '../../services/movieService.js'
+import { useEffect, useMemo, useState } from "react"
+import { getGenres } from "../../service/movie/movieService"
+import type { AdminMovie, ApiRequestError, Genre, MovieFormValues, MoviePayload } from "../../types/admin"
 
 const MAX_POSTER_SIZE = 5 * 1024 * 1024
 const ALLOWED_POSTER_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -11,7 +12,7 @@ const STATUSES = [
   { value: 'INACTIVE', label: 'Ngừng hoạt động' },
 ]
 
-const EMPTY_MOVIE = {
+const EMPTY_MOVIE: MovieFormValues = {
   title: '',
   description: '',
   durationMinutes: '',
@@ -26,7 +27,14 @@ const EMPTY_MOVIE = {
   genreIds: [],
 }
 
-function normalizeInitialMovie(movie) {
+interface MovieFormProps {
+  initialMovie?: AdminMovie | null
+  submitLabel: string
+  onSubmit: (payload: MoviePayload, posterFile: File | null) => Promise<void>
+  onCancel: () => void
+}
+
+function normalizeInitialMovie(movie?: AdminMovie | null): MovieFormValues {
   if (!movie) {
     return EMPTY_MOVIE
   }
@@ -47,7 +55,7 @@ function normalizeInitialMovie(movie) {
   }
 }
 
-function validatePosterFile(file) {
+function validatePosterFile(file: File | null): string {
   if (!file) {
     return ''
   }
@@ -63,8 +71,12 @@ function validatePosterFile(file) {
   return ''
 }
 
-function validate(values, posterFile, requiresPoster) {
-  const errors = {}
+function validate(
+  values: MovieFormValues,
+  posterFile: File | null,
+  requiresPoster: boolean
+): Record<string, string> {
+  const errors: Record<string, string> = {}
   if (!values.title.trim()) {
     errors.title = 'Vui lòng nhập tên phim'
   } else if (values.title.length > 150) {
@@ -93,13 +105,13 @@ function validate(values, posterFile, requiresPoster) {
   return errors
 }
 
-function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }) {
+function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormProps) {
   const [values, setValues] = useState(() => normalizeInitialMovie(initialMovie))
-  const [posterFile, setPosterFile] = useState(null)
-  const [posterPreviewUrl, setPosterPreviewUrl] = useState('')
-  const [genres, setGenres] = useState([])
+  const [posterFile, setPosterFile] = useState<File | null>(null)
+  const [posterPreviewUrl, setPosterPreviewUrl] = useState("")
+  const [genres, setGenres] = useState<Genre[]>([])
   const [genreError, setGenreError] = useState('')
-  const [errors, setErrors] = useState({})
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const requiresPoster = !initialMovie
@@ -142,18 +154,18 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }) {
     [posterPreviewUrl, values.posterUrl]
   )
 
-  function updateField(name, value) {
+  function updateField<K extends keyof MovieFormValues>(name: K, value: MovieFormValues[K]) {
     setValues((current) => ({ ...current, [name]: value }))
     setErrors((current) => ({ ...current, [name]: '' }))
   }
 
-  function updatePoster(event) {
+  function updatePoster(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] || null
     setPosterFile(file)
     setErrors((current) => ({ ...current, poster: validatePosterFile(file) }))
   }
 
-  function toggleGenre(genreId) {
+  function toggleGenre(genreId: number) {
     setValues((current) => {
       const selected = current.genreIds.includes(genreId)
       return {
@@ -165,7 +177,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }) {
     })
   }
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const validationErrors = validate(values, posterFile, requiresPoster)
     setErrors(validationErrors)
@@ -175,7 +187,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }) {
       return
     }
 
-    const payload = {
+    const payload: MoviePayload = {
       ...values,
       title: values.title.trim(),
       durationMinutes: Number(values.durationMinutes),
@@ -186,8 +198,9 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }) {
     try {
       await onSubmit(payload, posterFile)
     } catch (error) {
-      setSubmitError(error.message)
-      setErrors(error.fieldErrors || {})
+      const requestError = error as ApiRequestError
+      setSubmitError(requestError.message)
+      setErrors(requestError.fieldErrors || {})
     } finally {
       setSaving(false)
     }

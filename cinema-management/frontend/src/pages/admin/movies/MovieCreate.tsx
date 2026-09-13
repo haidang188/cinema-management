@@ -1,8 +1,13 @@
-import MovieForm from '../../../components/movie/MovieForm.jsx'
-import { createMovie } from '../../../services/movieService.js'
+import MovieForm from "../../../component/movie/MovieForm"
+import { createMovie } from "../../../service/movie/movieService"
+import type { MoviePayload, NavigateHandler } from "../../../types/admin"
 
-function MovieCreate({ onNavigate }) {
-  async function handleSubmit(payload, posterFile) {
+interface MovieCreateProps {
+  onNavigate: NavigateHandler
+}
+
+function MovieCreate({ onNavigate }: MovieCreateProps) {
+  async function handleSubmit(payload: MoviePayload, posterFile: File | null) {
     await createMovie(payload, posterFile)
     window.alert('Thêm phim thành công')
     onNavigate('/admin/movies')
