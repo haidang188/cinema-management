@@ -63,6 +63,17 @@ function MovieShowtimeCard({
         );
     };
 
+    const firstShowtime =
+        movie.showtimes[0];
+
+    const roomNames = Array.from(
+        new Set(
+            movie.showtimes
+                .map((showtime) => showtime.roomName)
+                .filter(Boolean)
+        )
+    );
+
     return (
         <div
             className="showtime-movie-card"
@@ -81,22 +92,44 @@ function MovieShowtimeCard({
 
             <div className="showtime-movie-content">
 
-                <h2>
-                    {movie.movieTitle}
-                </h2>
+                <div className="showtime-movie-info">
+                    <div>
+                        <h2>
+                            {movie.movieTitle}
+                        </h2>
 
-                <div className="movie-meta">
+                        <div className="showtime-movie-meta">
 
-                    <span>
-                        {movie.durationMinutes} phút
-                    </span>
+                            {firstShowtime?.format && (
+                                <span>
+                                    {firstShowtime.format}
+                                </span>
+                            )}
 
-                    {movie.ageRating && (
-                        <span>
-                            {movie.ageRating}
-                        </span>
+                            {movie.ageRating && (
+                                <span>
+                                    {movie.ageRating}
+                                </span>
+                            )}
+
+                            <span>
+                                {movie.durationMinutes} phút
+                            </span>
+
+                            {firstShowtime?.roomType && (
+                                <span>
+                                    {firstShowtime.roomType}
+                                </span>
+                            )}
+
+                        </div>
+                    </div>
+
+                    {roomNames.length > 0 && (
+                        <div className="showtime-room-summary">
+                            {roomNames.join(" · ")}
+                        </div>
                     )}
-
                 </div>
 
                 <div className="showtime-schedule">
@@ -110,6 +143,7 @@ function MovieShowtimeCard({
                             >
 
                                 <div className="format-info">
+                                    <span />
                                     {formatGroup.format}
                                 </div>
 

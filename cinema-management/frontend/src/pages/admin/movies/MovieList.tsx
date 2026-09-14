@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { getMovies } from "../../../service/movie/movieService"
 import type { AdminMovie, NavigateHandler } from "../../../types/admin"
 
@@ -13,8 +13,22 @@ interface MovieListProps {
   onNavigate: NavigateHandler
 }
 
+function getVisiblePages(currentPage: number, totalPages: number) {
+  if (totalPages <= 0) return []
+
+  const maxVisiblePages = 5
+  const startPage = Math.max(
+    0,
+    Math.min(currentPage - Math.floor(maxVisiblePages / 2), totalPages - maxVisiblePages),
+  )
+  const endPage = Math.min(totalPages, startPage + maxVisiblePages)
+
+  return Array.from({ length: endPage - startPage }, (_, index) => startPage + index)
+}
+
 function MovieList({ onNavigate }: MovieListProps) {
   const [movies, setMovies] = useState<AdminMovie[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
   const [keyword, setKeyword] = useState('')
   const [status, setStatus] = useState('')
   const [page, setPage] = useState(0)
@@ -24,6 +38,16 @@ function MovieList({ onNavigate }: MovieListProps) {
   const totalItems = movies.length
   const showingItems = movies.filter((movie) => movie.status === 'SHOWING').length
   const upcomingItems = movies.filter((movie) => movie.status === 'UPCOMING').length
+  const visiblePages = useMemo(() => getVisiblePages(page, totalPages), [page, totalPages])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setPage(0)
+      setKeyword(searchTerm.trim())
+    }, 300)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [searchTerm])
 
   useEffect(() => {
     let ignore = false
@@ -48,13 +72,6 @@ function MovieList({ onNavigate }: MovieListProps) {
       ignore = true
     }
   }, [keyword, page, status])
-
-  function handleSearch(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const form = event.currentTarget
-    setPage(0)
-    setKeyword((form.elements.namedItem("keyword") as HTMLInputElement).value)
-  }
 
   return (
     <main className="app-shell">
@@ -97,11 +114,14 @@ function MovieList({ onNavigate }: MovieListProps) {
       </section>
 
       <section className="toolbar">
-        <form className="search-box" onSubmit={handleSearch}>
-          <input name="keyword" type="search" placeholder="Tìm theo tên phim" defaultValue={keyword} />
-          <button type="submit" className="secondary-button">
-            Tìm kiếm
-          </button>
+        <form className="search-box" onSubmit={(event) => event.preventDefault()}>
+          <input
+            name="keyword"
+            type="search"
+            placeholder="Tìm kiếm tên phim, đạo diễn..."
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
         </form>
         <select
           aria-label="Lọc trạng thái"
@@ -191,24 +211,37 @@ function MovieList({ onNavigate }: MovieListProps) {
           </div>
 
           <nav className="pagination" aria-label="Phân trang">
-            <button
-              type="button"
-              className="secondary-button"
-              disabled={page === 0}
-              onClick={() => setPage((current) => Math.max(current - 1, 0))}
-            >
-              Trước
-            </button>
-            <span>
+            <span className="pagination-summary">
               Trang {totalPages === 0 ? 0 : page + 1} / {totalPages}
             </span>
             <button
               type="button"
-              className="secondary-button"
+              className="pagination-button"
+              aria-label="Trang trước"
+              disabled={page === 0}
+              onClick={() => setPage((current) => Math.max(current - 1, 0))}
+            >
+              ‹
+            </button>
+            {visiblePages.map((pageNumber) => (
+              <button
+                key={pageNumber}
+                type="button"
+                className={`pagination-button${pageNumber === page ? ' is-active' : ''}`}
+                aria-current={pageNumber === page ? 'page' : undefined}
+                onClick={() => setPage(pageNumber)}
+              >
+                {pageNumber + 1}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="pagination-button"
+              aria-label="Trang sau"
               disabled={page + 1 >= totalPages}
               onClick={() => setPage((current) => current + 1)}
             >
-              Sau
+              ›
             </button>
           </nav>
         </>
