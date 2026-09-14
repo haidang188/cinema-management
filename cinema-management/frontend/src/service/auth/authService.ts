@@ -1,6 +1,6 @@
 import type { AuthFieldErrors, AuthResponse, LoginPayload, RegisterPayload } from '../../types/auth'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL + "/auth";
 interface AuthErrorData {
   message?: string
   fieldErrors?: AuthFieldErrors
