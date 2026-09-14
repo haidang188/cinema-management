@@ -15,6 +15,8 @@ export interface RegisterPayload {
   accountType: AccountType
 }
 
+export type AuthFieldErrors = Partial<Record<keyof LoginPayload | keyof RegisterPayload | 'system', string>>
+
 export interface AuthResponse {
   userId: number
   profileId: number | null

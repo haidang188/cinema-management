@@ -216,7 +216,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
         </div>
 
         <div className="form-grid">
-          <label>
+          <label className="poster-upload-field">
             <span>Ảnh poster</span>
             <input
               type="file"
@@ -344,7 +344,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
       </section>
 
       <section className="form-panel form-section preview-section">
-        <div>
+        <div className="description-field">
           <span className="field-title">Nội dung</span>
           <textarea
             value={values.description}

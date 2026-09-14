@@ -1,6 +1,6 @@
 package com.cinemamanagement.controller;
 
-import com.cinemamanagement.dto.TicketPriceDTO;
+import com.cinemamanagement.response.TicketPriceResponse;
 import com.cinemamanagement.service.TicketPriceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +17,7 @@ public class TicketPriceController {
     private final TicketPriceService ticketPriceService;
 
     @GetMapping
-    public List<TicketPriceDTO> getTicketPrices() {
+    public List<TicketPriceResponse> getTicketPrices() {
 
         return ticketPriceService.getActiveTicketPrices();
     }

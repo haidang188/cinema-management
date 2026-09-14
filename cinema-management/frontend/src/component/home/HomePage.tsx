@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getNowShowingMovies } from '../../services/movieApi'
+import { getNowShowingMovies } from '../../service/movie/movieService'
 import type { AuthResponse } from '../../types/auth'
 import type { Movie } from '../../types/movie'
 import HomeFooter from './HomeFooter'
@@ -16,8 +16,25 @@ interface HomePageProps {
 
 function HomePage({ currentUser, onLogout, onLoginClick, onRegisterClick }: HomePageProps) {
   const [movies, setMovies] = useState<Movie[]>([])
+  const [searchKeyword, setSearchKeyword] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const normalizedKeyword = searchKeyword.trim().toLowerCase()
+  const filteredMovies = normalizedKeyword
+    ? movies.filter((movie) =>
+        [
+          movie.title,
+          movie.description,
+          movie.director,
+          movie.cast,
+          movie.language,
+          movie.ageRating,
+          movie.status,
+        ]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(normalizedKeyword)),
+      )
+    : movies
 
   useEffect(() => {
     getNowShowingMovies()
@@ -33,11 +50,22 @@ function HomePage({ currentUser, onLogout, onLoginClick, onRegisterClick }: Home
 
   return (
     <main className="home-page">
-      <HomeHeader currentUser={currentUser} onLoginClick={onLoginClick} onLogout={onLogout} />
+      <HomeHeader
+        currentUser={currentUser}
+        onLoginClick={onLoginClick}
+        onLogout={onLogout}
+        searchValue={searchKeyword}
+        onSearchChange={setSearchKeyword}
+      />
       <div className="home-content">
         <p className="breadcrumb">Trang chủ - Premiere Cinemas</p>
         <HomeHero movies={movies} isLoading={isLoading} onBookingClick={onRegisterClick} />
-        <MovieSection movies={movies} isLoading={isLoading} errorMessage={errorMessage} />
+        <MovieSection
+          movies={filteredMovies}
+          isLoading={isLoading}
+          errorMessage={errorMessage}
+          searchKeyword={searchKeyword}
+        />
       </div>
       <HomeFooter />
     </main>

@@ -1,6 +1,5 @@
 package com.cinemamanagement.response;
 
-import com.cinemamanagement.dto.GenreDto;
 import com.cinemamanagement.entity.Movie;
 
 import java.time.LocalDate;
@@ -20,7 +19,7 @@ public record MovieDetailResponse(
         String posterUrl,
         String trailerUrl,
         String status,
-        List<GenreDto> genres
+        List<GenreResponse> genres
 ) {
     public static MovieDetailResponse fromEntity(Movie movie) {
         return new MovieDetailResponse(
@@ -37,8 +36,8 @@ public record MovieDetailResponse(
                 movie.getTrailerUrl(),
                 movie.getStatus(),
                 movie.getGenres().stream()
-                        .map(GenreDto::fromEntity)
-                        .sorted(Comparator.comparing(GenreDto::name))
+                        .map(GenreResponse::fromEntity)
+                        .sorted(Comparator.comparing(GenreResponse::name))
                         .toList()
         );
     }

@@ -1,5 +1,8 @@
 import { request } from "../httpClient"
 import type { AdminMovie, Genre, MoviePayload, PageResponse } from "../../types/admin"
+import type { Movie } from "../../types/movie"
+
+const MOVIE_API_BASE_URL = "http://localhost:8080/api/movies"
 
 interface MovieSearchParams {
   page?: number
@@ -18,6 +21,16 @@ function buildMovieFormData(payload: MoviePayload, posterFile: File | null): For
   }
 
   return formData
+}
+
+export async function getNowShowingMovies(): Promise<Movie[]> {
+  const response = await fetch(`${MOVIE_API_BASE_URL}/now-showing`)
+
+  if (!response.ok) {
+    throw new Error("Không thể tải danh sách phim")
+  }
+
+  return response.json()
 }
 
 export function getMovies({

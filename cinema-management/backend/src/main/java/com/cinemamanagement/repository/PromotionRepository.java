@@ -1,4 +1,4 @@
-package com.cinemamanagement.repositoty;
+package com.cinemamanagement.repository;
 
 import com.cinemamanagement.entity.Promotion;
 import org.springframework.data.domain.Page;
