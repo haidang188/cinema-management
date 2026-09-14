@@ -7,7 +7,7 @@ import com.cinemamanagement.repository.PromotionRepository;
 import com.cinemamanagement.request.PromotionCreateRequest;
 import com.cinemamanagement.response.PromotionResponse;
 import com.cinemamanagement.response.PromotionStatisticsResponse;
-import com.cinemamanagement.service.PromotionImageStorageService;
+import com.cinemamanagement.service.CloudinaryService;
 import com.cinemamanagement.service.PromotionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,20 +24,23 @@ import java.util.TreeMap;
 @Service
 public class PromotionServiceImpl implements PromotionService {
 
+    private static final String PROMOTION_IMAGE_FOLDER = "cinema/promotions";
+    private static final long MAX_IMAGE_SIZE = 5L * 1024L * 1024L;
     private static final Set<String> DISCOUNT_TYPES = Set.of("FIXED", "PERCENTAGE");
     private static final Set<String> FILTER_STATUSES = Set.of("ACTIVE", "UPCOMING", "EXPIRED", "INACTIVE");
+    private static final Set<String> IMAGE_CONTENT_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
     private static final BigDecimal MAX_FIXED_DISCOUNT = new BigDecimal("5000000");
     private static final BigDecimal MAX_PERCENTAGE = new BigDecimal("100");
     private static final int MAX_DESCRIPTION_LENGTH = 2000;
 
     private final PromotionRepository promotionRepository;
-    private final PromotionImageStorageService imageStorageService;
+    private final CloudinaryService cloudinaryService;
 
     public PromotionServiceImpl(
             PromotionRepository promotionRepository,
-            PromotionImageStorageService imageStorageService) {
+            CloudinaryService cloudinaryService) {
         this.promotionRepository = promotionRepository;
-        this.imageStorageService = imageStorageService;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @Override
@@ -103,34 +106,27 @@ public class PromotionServiceImpl implements PromotionService {
     public PromotionResponse createPromotion(PromotionCreateRequest request) {
         validate(request);
 
-        String imageUrl = imageStorageService.save(request.getImage());
+        String imageUrl = cloudinaryService.uploadImage(request.getImage(), PROMOTION_IMAGE_FOLDER);
+        Promotion promotion = new Promotion();
 
-        try {
-            Promotion promotion = new Promotion();
+        promotion.setTitle(request.getTitle().trim());
+        promotion.setDescription(request.getDescription().trim());
+        promotion.setImageUrl(imageUrl);
+        promotion.setCode(request.getCode().trim().toUpperCase(Locale.ROOT));
+        promotion.setStartDate(request.getStartDate());
+        promotion.setEndDate(request.getEndDate());
+        promotion.setDiscountType(request.getDiscountType().trim().toUpperCase(Locale.ROOT));
+        promotion.setDiscountValue(request.getDiscountValue());
+        promotion.setMinOrderAmount(defaultZero(request.getMinOrderAmount()));
+        promotion.setMaxDiscountAmount(request.getMaxDiscountAmount());
+        promotion.setUsageLimit(request.getUsageLimit());
+        promotion.setUsedCount(0);
 
-            promotion.setTitle(request.getTitle().trim());
-            promotion.setDescription(request.getDescription().trim());
-            promotion.setImageUrl(imageUrl);
-            promotion.setCode(request.getCode().trim().toUpperCase(Locale.ROOT));
-            promotion.setStartDate(request.getStartDate());
-            promotion.setEndDate(request.getEndDate());
-            promotion.setDiscountType(request.getDiscountType().trim().toUpperCase(Locale.ROOT));
-            promotion.setDiscountValue(request.getDiscountValue());
-            promotion.setMinOrderAmount(defaultZero(request.getMinOrderAmount()));
-            promotion.setMaxDiscountAmount(request.getMaxDiscountAmount());
-            promotion.setUsageLimit(request.getUsageLimit());
-            promotion.setUsedCount(0);
+        // Status được suy ra động từ thời gian và giới hạn sử dụng.
+        // Chỉ giá trị INACTIVE trong DB mới được xem là trạng thái tắt thủ công.
+        promotion.setStatus(null);
 
-            // Status được suy ra động từ thời gian và giới hạn sử dụng.
-            // Chỉ giá trị INACTIVE trong DB mới được xem là trạng thái tắt thủ công.
-            promotion.setStatus(null);
-
-            return toResponse(promotionRepository.save(promotion));
-
-        } catch (RuntimeException ex) {
-            imageStorageService.deleteQuietly(imageUrl);
-            throw ex;
-        }
+        return toResponse(promotionRepository.save(promotion));
     }
 
     private void validate(PromotionCreateRequest request) {
@@ -215,6 +211,10 @@ public class PromotionServiceImpl implements PromotionService {
 
             if (request.getImage() == null || request.getImage().isEmpty()) {
                 errors.put("image", "Vui long chon anh khuyen mai");
+            } else if (request.getImage().getSize() > MAX_IMAGE_SIZE) {
+                errors.put("image", "Anh khuyen mai khong duoc vuot qua 5MB");
+            } else if (!IMAGE_CONTENT_TYPES.contains(request.getImage().getContentType())) {
+                errors.put("image", "Chi chap nhan anh JPG, PNG hoac WEBP");
             }
         }
 
