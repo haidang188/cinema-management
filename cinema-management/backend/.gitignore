@@ -36,3 +36,5 @@ out/
 
 ### VS Code ###
 .vscode/
+README_tong_hop_cuoc_tro_chuyen.md
+backend/src/main/resources/application.properties

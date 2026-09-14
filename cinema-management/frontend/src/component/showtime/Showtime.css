@@ -1,368 +1,392 @@
 .showtime-page {
-    width: 100%;
-    max-width: 820px;
+    color: #f8fafc;
     margin: 0 auto;
-
-    padding: 20px 16px 35px;
-
-    box-sizing: border-box;
+    max-width: 1180px;
+    padding: 16px 0 42px;
+    width: 100%;
 }
 
 .showtime-header {
-    text-align: center;
-    margin-bottom: 17px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    display: grid;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+}
+
+.showtime-header::before {
+    color: #ef4444;
+    content: "PREMIERE / LỊCH CHIẾU TOÀN HỆ THỐNG";
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .showtime-header h1 {
+    color: #ffffff;
+    font-size: clamp(34px, 5vw, 56px);
+    font-weight: 950;
+    letter-spacing: 0.02em;
+    line-height: 0.95;
     margin: 0;
-
-    font-size: 24px;
-    font-weight: 600;
+    text-transform: uppercase;
 }
 
 .showtime-header p {
-    margin: 4px 0 0;
-
-    font-size: 11px;
-    color: #aaa;
+    color: #aab6c3;
+    font-size: 14px;
+    max-width: 620px;
 }
 
 .date-selector {
-    display: flex;
     align-items: stretch;
-
-    gap: 5px;
-
-    margin-bottom: 10px;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 34px minmax(0, 1fr) 34px 42px;
+    margin-bottom: 14px;
 }
 
+.week-arrow,
+.calendar-button,
+.date-item {
+    background: #171d1d;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    color: #dbe4ef;
+}
 
 .week-arrow {
-    width: 28px;
-
-    flex-shrink: 0;
-
-    border: 1px solid #333;
-    border-radius: 5px;
-
-    background: #171717;
-    color: #ddd;
-
-    font-size: 21px;
-
-    cursor: pointer;
-
-    transition: 0.2s;
+    border-radius: 2px;
+    font-size: 24px;
+    font-weight: 700;
 }
 
-.week-arrow:hover {
-    background: #292929;
+.week-arrow:not(:disabled):hover,
+.calendar-button:hover,
+.date-item:hover {
+    background: #202828;
+    border-color: rgba(239, 68, 68, 0.34);
 }
 
 .week-arrow:disabled {
-    opacity: 0.25;
     cursor: not-allowed;
-}
-
-.week-arrow:disabled:hover {
-    background: #171717;
+    opacity: 0.35;
 }
 
 .date-list {
-    display: flex;
-    flex: 1;
-
-    overflow: hidden;
-
-    border-radius: 5px;
+    display: grid;
+    gap: 7px;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 .date-item {
-    flex: 1;
-
-    min-width: 0;
-
-    padding: 7px 3px;
-
-    border: 1px solid #333;
-    border-right: none;
-
-    background: #171717;
-    color: #aaa;
-
-    cursor: pointer;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    transition: 0.2s;
-}
-
-.date-item:first-child {
-    border-radius: 5px 0 0 5px;
-}
-
-.date-item:last-child {
-    border-right: 1px solid #333;
-    border-radius: 0 5px 5px 0;
-}
-
-.date-item:hover {
-    background: #242424;
+    border-radius: 2px;
+    display: grid;
+    gap: 3px;
+    min-height: 68px;
+    padding: 9px 8px;
+    text-align: center;
 }
 
 .date-item.active {
-    background: #e5e5e5;
-    color: #111;
-    border-color: #e5e5e5;
+    background: #ef1b2d;
+    border-color: #ef1b2d;
+    color: #ffffff;
 }
 
 .date-number {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 950;
+    line-height: 1;
 }
 
 .date-weekday {
-    margin-top: 2px;
-
-    font-size: 10px;
+    color: currentColor;
+    font-size: 11px;
+    opacity: 0.78;
+    text-transform: capitalize;
 }
-
 
 .calendar-wrapper {
     position: relative;
-
-    flex-shrink: 0;
 }
 
 .calendar-button {
-    width: 34px;
-    height: 100%;
-
-    min-height: 46px;
-
-    display: flex;
     align-items: center;
+    border-radius: 2px;
+    display: flex;
+    height: 100%;
     justify-content: center;
-
-    border: 1px solid #333;
-    border-radius: 5px;
-
-    background: #171717;
-
-    font-size: 15px;
-
-    cursor: pointer;
+    min-height: 68px;
 }
 
 .calendar-wrapper input {
-    position: absolute;
-
-    width: 1px;
     height: 1px;
-
     opacity: 0;
+    position: absolute;
+    width: 1px;
 }
 
-
 .selected-date {
-    padding: 8px 11px;
+    align-items: center;
+    background: #121818;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    color: #b8c4d1;
+    display: flex;
+    font-size: 13px;
+    gap: 6px;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding: 11px 13px;
+}
 
-    margin-bottom: 10px;
-
-    border-left: 2px solid #fff;
-
-    background: #171717;
-
+.selected-date::after {
+    color: #ef4444;
+    content: "Cập nhật suất chiếu trực tiếp";
     font-size: 11px;
+    font-weight: 850;
+    text-transform: uppercase;
 }
 
 .selected-date strong {
-    margin-left: 3px;
+    color: #ffffff;
 }
 
+.showtime-search-panel {
+    background: #121818;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    margin-bottom: 12px;
+    padding: 12px;
+}
 
-.showtime-list {
-    display: flex;
-    flex-direction: column;
-
+.showtime-search-panel label {
+    display: grid;
     gap: 8px;
 }
 
-
-.showtime-movie-card {
-    display: flex;
-
-    padding: 10px;
-
-    gap: 13px;
-
-    background: #151515;
-
-    border: 1px solid #2b2b2b;
-    border-radius: 6px;
+.showtime-search-panel span {
+    color: #ef4444;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
+.showtime-search-panel input {
+    background: #0d1212;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #f8fafc;
+    min-height: 42px;
+    outline: none;
+    padding: 10px 12px;
+}
+
+.showtime-search-panel input:focus {
+    border-color: rgba(239, 68, 68, 0.55);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.14);
+}
+
+.showtime-list {
+    display: grid;
+    gap: 18px;
+}
+
+.showtime-movie-card {
+    background: #181e1e;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    display: grid;
+    gap: 18px;
+    grid-template-columns: 170px minmax(0, 1fr);
+    min-height: 260px;
+    padding: 18px;
+}
 
 .movie-poster-wrapper {
-    flex-shrink: 0;
+    align-self: start;
+    background: #0c1111;
+    border: 1px solid rgba(148, 163, 184, 0.13);
+    min-height: 238px;
+    overflow: hidden;
+    position: relative;
 }
 
 .showtime-movie-poster {
-    width: 75px;
-    height: 110px;
-
+    display: block;
+    height: 238px;
     object-fit: cover;
-
-    border-radius: 4px;
+    width: 100%;
 }
 
+.movie-poster-wrapper::before {
+    background: #ef1b2d;
+    color: #ffffff;
+    content: "T" attr(data-age);
+    display: none;
+}
 
 .showtime-movie-content {
-    flex: 1;
-
+    display: grid;
+    gap: 18px;
     min-width: 0;
 }
 
-.showtime-movie-content h2 {
-    margin: 0 0 4px;
-
-    font-size: 16px;
-    font-weight: 600;
-}
-
-
-.movie-meta {
+.showtime-movie-info {
+    align-items: start;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.13);
     display: flex;
-
-    gap: 8px;
-
-    margin-bottom: 7px;
-
-    font-size: 10px;
-
-    color: #999;
+    gap: 18px;
+    justify-content: space-between;
+    padding-bottom: 14px;
 }
 
+.showtime-movie-info h2 {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1.08;
+    margin: 0 0 8px;
+    text-transform: uppercase;
+}
+
+.showtime-movie-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.showtime-movie-meta span {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    color: #c6d0dc;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 5px 8px;
+}
+
+.showtime-room-summary {
+    color: #8f9aa7;
+    font-size: 12px;
+    max-width: 240px;
+    text-align: right;
+}
+
+.showtime-schedule {
+    display: grid;
+    gap: 14px;
+}
 
 .showtime-room {
-    padding: 6px 0;
-
-    border-top: 1px solid #292929;
-}
-
-.room-info {
-    display: flex;
-    align-items: center;
-
-    gap: 6px;
-
-    margin-bottom: 5px;
-}
-
-.room-name {
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.room-type {
-    padding: 1px 5px;
-
-    border: 1px solid #4d4d4d;
-    border-radius: 3px;
-
-    font-size: 8px;
-
-    color: #aaa;
-}
-
-
-.showtime-times {
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 4px;
-}
-
-.showtime-time {
-    min-width: 55px;
-
-    padding: 5px 7px;
-
-    border: 1px solid #555;
-    border-radius: 4px;
-
-    background: transparent;
-
-    color: #fff;
-
-    font-size: 10px;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-}
-
-.showtime-time:hover {
-    background: #fff;
-    color: #111;
-    border-color: #fff;
-}
-
-.no-showtime {
-    padding: 25px 15px;
-
-    text-align: center;
-
-    background: #151515;
-
-    border: 1px solid #2b2b2b;
-    border-radius: 6px;
-
-    color: #999;
-
-    font-size: 12px;
+    display: grid;
+    gap: 10px;
 }
 
 .format-info {
-    text-align: left;
-    font-size: 18px;
-    margin-bottom: 8px;
+    align-items: center;
+    color: #ffffff;
+    display: flex;
+    font-size: 13px;
+    font-weight: 900;
+    gap: 8px;
+    text-transform: uppercase;
 }
 
+.format-info span {
+    background: #ef1b2d;
+    display: inline-block;
+    height: 8px;
+    width: 8px;
+}
 
-@media (max-width: 768px) {
+.showtime-times {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+}
 
-    .showtime-page {
-        padding: 18px 10px 30px;
+.showtime-time {
+    background: #141a1a;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 850;
+    min-height: 54px;
+    padding: 9px 10px;
+    transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+
+.showtime-time:hover {
+    background: #ef1b2d;
+    border-color: #ef1b2d;
+    transform: translateY(-1px);
+}
+
+.showtime-time::after {
+    color: #93a1ae;
+    content: "Chọn suất";
+    display: block;
+    font-size: 10px;
+    font-weight: 650;
+    line-height: 1.2;
+    margin-top: 2px;
+}
+
+.showtime-time:hover::after {
+    color: #ffe4e8;
+}
+
+.no-showtime {
+    background: #181e1e;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    color: #aab6c3;
+    padding: 32px;
+    text-align: center;
+}
+
+@media (max-width: 860px) {
+    .date-selector {
+        grid-template-columns: 32px minmax(0, 1fr) 32px;
     }
 
-    .week-arrow {
-        width: 25px;
+    .calendar-wrapper {
+        display: none;
     }
 
-    .calendar-button {
-        width: 32px;
-    }
-
-    .date-number {
-        font-size: 12px;
-    }
-
-    .date-weekday {
-        font-size: 9px;
-    }
-
-    .showtime-movie-poster {
-        width: 70px;
-        height: 102px;
+    .date-list {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     .showtime-movie-card {
-        gap: 10px;
-        padding: 9px;
+        grid-template-columns: 110px minmax(0, 1fr);
+        padding: 12px;
     }
 
+    .movie-poster-wrapper,
+    .showtime-movie-poster {
+        min-height: 164px;
+        height: 164px;
+    }
+
+    .showtime-movie-info {
+        display: grid;
+    }
+
+    .showtime-room-summary {
+        max-width: none;
+        text-align: left;
+    }
+}
+
+@media (max-width: 560px) {
+    .date-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .showtime-movie-card {
+        grid-template-columns: 1fr;
+    }
+
+    .movie-poster-wrapper,
+    .showtime-movie-poster {
+        height: 320px;
+    }
 }

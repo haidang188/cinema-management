@@ -1,16 +1,18 @@
 package com.cinemamanagement.service.impl;
 
-import com.cinemamanagement.dto.auth.AuthResponse;
-import com.cinemamanagement.dto.auth.LoginRequest;
-import com.cinemamanagement.dto.auth.RegisterRequest;
 import com.cinemamanagement.entity.Employee;
 import com.cinemamanagement.entity.Member;
 import com.cinemamanagement.entity.Role;
 import com.cinemamanagement.entity.User;
+import com.cinemamanagement.exception.AuthValidationException;
+import com.cinemamanagement.repository.AdminRepository;
 import com.cinemamanagement.repository.EmployeeRepository;
 import com.cinemamanagement.repository.MemberRepository;
 import com.cinemamanagement.repository.RoleRepository;
 import com.cinemamanagement.repository.UserRepository;
+import com.cinemamanagement.request.LoginRequest;
+import com.cinemamanagement.request.RegisterRequest;
+import com.cinemamanagement.response.AuthResponse;
 import com.cinemamanagement.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,16 +20,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+    private static final String ROLE_ADMIN = "ADMIN";
     private static final String ROLE_MEMBER = "MEMBER";
     private static final String ROLE_EMPLOYEE = "EMPLOYEE";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final AdminRepository adminRepository;
     private final MemberRepository memberRepository;
     private final EmployeeRepository employeeRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -35,12 +41,12 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
-        String email = normalizeEmail(request.email());
+        String email = normalizeEmail(request.getEmail());
         User user = userRepository.findByUsername(email)
-                .orElseThrow(() -> new IllegalArgumentException("Email hoặc mật khẩu không đúng"));
+                .orElseThrow(this::invalidCredentials);
 
-        if (!passwordEncoder.matches(nullToEmpty(request.password()), user.getPassword())) {
-            throw new IllegalArgumentException("Email hoặc mật khẩu không đúng");
+        if (!passwordEncoder.matches(nullToEmpty(request.getPassword()), user.getPassword())) {
+            throw invalidCredentials();
         }
 
         String role = user.getRole().getName();
@@ -52,14 +58,17 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse register(RegisterRequest request) {
         validateRegisterRequest(request);
 
-        String email = normalizeEmail(request.email());
-        String accountType = normalizeRole(request.accountType());
+        String email = normalizeEmail(request.getEmail());
+        String accountType = normalizeRole(request.getAccountType());
         Role role = roleRepository.findByName(accountType)
-                .orElseThrow(() -> new IllegalArgumentException("Role không tồn tại: " + accountType));
+                .orElseThrow(() -> new AuthValidationException(
+                        "Thông tin đăng ký không hợp lệ",
+                        Map.of("accountType", "Loại tài khoản không tồn tại")
+                ));
 
         User user = new User();
         user.setUsername(email);
-        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(role);
         User savedUser = userRepository.save(user);
 
@@ -68,9 +77,9 @@ public class AuthServiceImpl implements AuthService {
             Employee employee = new Employee();
             employee.setUser(savedUser);
             employee.setEmployeeCode(generateEmployeeCode());
-            employee.setFullName(request.fullName().trim());
+            employee.setFullName(request.getFullName().trim());
             employee.setEmail(email);
-            employee.setPhone(request.phone().trim());
+            employee.setPhone(request.getPhone().trim());
             employee.setStatus("ACTIVE");
             employee.setCreatedAt(now);
             employee.setUpdatedAt(now);
@@ -78,9 +87,9 @@ public class AuthServiceImpl implements AuthService {
         } else {
             Member member = new Member();
             member.setUser(savedUser);
-            member.setFullName(request.fullName().trim());
+            member.setFullName(request.getFullName().trim());
             member.setEmail(email);
-            member.setPhone(request.phone().trim());
+            member.setPhone(request.getPhone().trim());
             member.setPointBalance(0);
             member.setMembershipLevel("BASIC");
             member.setStatus("ACTIVE");
@@ -93,31 +102,59 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private void validateRegisterRequest(RegisterRequest request) {
-        if (isBlank(request.fullName())) {
-            throw new IllegalArgumentException("Họ và tên không được để trống");
+        Map<String, String> errors = new LinkedHashMap<>();
+
+        if (isBlank(request.getFullName())) {
+            errors.put("fullName", "Họ và tên không được để trống");
         }
-        if (isBlank(request.email())) {
-            throw new IllegalArgumentException("Email không được để trống");
+        if (isBlank(request.getEmail())) {
+            errors.put("email", "Email không được để trống");
         }
-        if (isBlank(request.phone())) {
-            throw new IllegalArgumentException("Số điện thoại không được để trống");
+        if (isBlank(request.getPhone())) {
+            errors.put("phone", "Số điện thoại không được để trống");
         }
-        if (isBlank(request.password()) || request.password().length() < 6) {
-            throw new IllegalArgumentException("Mật khẩu phải có ít nhất 6 ký tự");
+        if (isBlank(request.getPassword()) || request.getPassword().length() < 6) {
+            errors.put("password", "Mật khẩu phải có ít nhất 6 ký tự");
         }
-        if (!request.password().equals(request.confirmPassword())) {
-            throw new IllegalArgumentException("Xác nhận mật khẩu không khớp");
+        if (!nullToEmpty(request.getPassword()).equals(nullToEmpty(request.getConfirmPassword()))) {
+            errors.put("confirmPassword", "Xác nhận mật khẩu không khớp");
         }
 
-        String email = normalizeEmail(request.email());
-        if (userRepository.existsByUsername(email)
+        String email = normalizeEmail(request.getEmail());
+        if (!isBlank(email)
+                && (userRepository.existsByUsername(email)
                 || memberRepository.existsByEmail(email)
-                || employeeRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email đã được sử dụng");
+                || employeeRepository.existsByEmail(email))) {
+            errors.put("email", "Email đã được sử dụng");
+        }
+
+        if (!errors.isEmpty()) {
+            throw new AuthValidationException("Thông tin đăng ký không hợp lệ", errors);
         }
     }
 
+    private AuthValidationException invalidCredentials() {
+        return new AuthValidationException(
+                "Email hoặc mật khẩu không đúng",
+                Map.of("password", "Email hoặc mật khẩu không đúng")
+        );
+    }
+
     private AuthResponse buildResponse(User user, String role, String message) {
+        if (ROLE_ADMIN.equals(role)) {
+            return adminRepository.findByUserId(user.getId())
+                    .map(admin -> new AuthResponse(
+                            user.getId(),
+                            admin.getId(),
+                            admin.getFullName(),
+                            admin.getEmail(),
+                            admin.getPhone(),
+                            role,
+                            message
+                    ))
+                    .orElse(new AuthResponse(user.getId(), null, null, user.getUsername(), null, role, message));
+        }
+
         if (ROLE_EMPLOYEE.equals(role)) {
             return employeeRepository.findByUserId(user.getId())
                     .map(employee -> new AuthResponse(

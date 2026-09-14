@@ -1,11 +1,36 @@
 import { request } from "../httpClient"
 import type { AdminMovie, Genre, MoviePayload, PageResponse } from "../../types/admin"
+import type { Movie } from "../../types/movie"
+
+const MOVIE_API_BASE_URL = "http://localhost:8080/api/movies"
 
 interface MovieSearchParams {
   page?: number
   size?: number
   keyword?: string
   status?: string
+}
+
+function buildMovieFormData(payload: MoviePayload, posterFile: File | null): FormData {
+  const formData = new FormData()
+  const { posterUrl: _posterUrl, ...moviePayload } = payload
+
+  formData.append("movie", new Blob([JSON.stringify(moviePayload)], { type: "application/json" }))
+  if (posterFile) {
+    formData.append("poster", posterFile)
+  }
+
+  return formData
+}
+
+export async function getNowShowingMovies(): Promise<Movie[]> {
+  const response = await fetch(`${MOVIE_API_BASE_URL}/now-showing`)
+
+  if (!response.ok) {
+    throw new Error("Không thể tải danh sách phim")
+  }
+
+  return response.json()
 }
 
 export function getMovies({
@@ -33,17 +58,17 @@ export function getMovie(id: string): Promise<AdminMovie> {
   return request<AdminMovie>(`/api/movies/admin/${id}`)
 }
 
-export function createMovie(payload: MoviePayload): Promise<AdminMovie> {
+export function createMovie(payload: MoviePayload, posterFile: File | null): Promise<AdminMovie> {
   return request<AdminMovie>("/api/movies/admin", {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: buildMovieFormData(payload, posterFile),
   })
 }
 
-export function updateMovie(id: string, payload: MoviePayload): Promise<AdminMovie> {
+export function updateMovie(id: string, payload: MoviePayload, posterFile: File | null): Promise<AdminMovie> {
   return request<AdminMovie>(`/api/movies/admin/${id}`, {
     method: "PUT",
-    body: JSON.stringify(payload),
+    body: buildMovieFormData(payload, posterFile),
   })
 }
 

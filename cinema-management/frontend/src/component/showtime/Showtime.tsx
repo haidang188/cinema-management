@@ -46,6 +46,9 @@ function Showtime() {
     const [showtimes, setShowtimes] =
         useState<ShowtimeData[]>([]);
 
+    const [searchKeyword, setSearchKeyword] =
+        useState("");
+
     const formatDateValue = (date: Date): string => {
 
         const year = date.getFullYear();
@@ -221,8 +224,30 @@ function Showtime() {
         setSelectedDate(value);
     };
 
+    const normalizedKeyword =
+        searchKeyword.trim().toLowerCase();
+
+    const filteredShowtimes =
+        normalizedKeyword
+            ? showtimes.filter((showtime) =>
+                [
+                    showtime.movieTitle,
+                    showtime.roomName,
+                    showtime.roomType,
+                    showtime.format,
+                    showtime.ageRating
+                ]
+                    .filter(Boolean)
+                    .some((value) =>
+                        String(value)
+                            .toLowerCase()
+                            .includes(normalizedKeyword)
+                    )
+            )
+            : showtimes;
+
     const groupedMovies =
-        showtimes.reduce<
+        filteredShowtimes.reduce<
             Record<number, MovieGroup>
         >(
             (groups, showtime) => {
@@ -299,6 +324,22 @@ function Showtime() {
                 }
             />
 
+            <div className="showtime-search-panel">
+                <label>
+                    <span>Tìm kiếm lịch chiếu</span>
+                    <input
+                        type="search"
+                        placeholder="Tìm theo phim, phòng, format..."
+                        value={searchKeyword}
+                        onChange={(event) =>
+                            setSearchKeyword(
+                                event.target.value
+                            )
+                        }
+                    />
+                </label>
+            </div>
+
             <div className="selected-date">
 
                 Lịch chiếu ngày{" "}
@@ -321,8 +362,9 @@ function Showtime() {
                 {movies.length === 0 ? (
 
                     <div className="no-showtime">
-                        Không có lịch chiếu
-                        trong ngày này.
+                        {searchKeyword.trim()
+                            ? "Không tìm thấy lịch chiếu phù hợp."
+                            : "Không có lịch chiếu trong ngày này."}
                     </div>
 
                 ) : (

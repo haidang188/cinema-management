@@ -36,10 +36,6 @@ function CinemaRoomDetailRoute() {
 
 export const adminRoutes = [
   {
-    path: "/",
-    element: <MovieListRoute />,
-  },
-  {
     path: "/admin",
     element: <MovieListRoute />,
   },

@@ -5,6 +5,11 @@ export interface ShowtimeData {
     posterUrl: string;
     durationMinutes: number;
     ageRating?: string | null;
+    roomId?: number;
+    roomName?: string | null;
+    roomType?: string | null;
     startTime: string;
+    endTime?: string;
     format?: string | null;
+    status?: string | null;
 }

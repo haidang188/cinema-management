@@ -62,11 +62,7 @@ public class Movie {
     private LocalDateTime updatedAt;
 
     @ManyToMany
-    @JoinTable(
-            name = "movie_genres",
-            joinColumns = @JoinColumn(name = "movie_id"),
-            inverseJoinColumns = @JoinColumn(name = "genre_id")
-    )
+    @JoinTable(name = "movie_genres", joinColumns = @JoinColumn(name = "movie_id"), inverseJoinColumns = @JoinColumn(name = "genre_id"))
     private Set<Genre> genres = new HashSet<>();
 
     @PrePersist

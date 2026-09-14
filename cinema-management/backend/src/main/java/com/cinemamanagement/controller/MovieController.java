@@ -1,9 +1,9 @@
 package com.cinemamanagement.controller;
 
-import com.cinemamanagement.dto.movie.MovieResponse;
 import com.cinemamanagement.request.MovieRequest;
 import com.cinemamanagement.response.MovieDetailResponse;
 import com.cinemamanagement.response.MovieListResponse;
+import com.cinemamanagement.response.MovieResponse;
 import com.cinemamanagement.service.MovieService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;

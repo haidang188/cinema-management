@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/cinema-management.iml" filepath="$PROJECT_DIR$/.idea/cinema-management.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.cinema-management.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.cinema-management.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.cinema-management.test.iml" filepath="$PROJECT_DIR$/.idea/modules/com.cinema-management.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cinema-management.main.iml" filepath="$PROJECT_DIR$/.idea/modules/cinema-management.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cinema-management.test.iml" filepath="$PROJECT_DIR$/.idea/modules/cinema-management.test.iml" />
     </modules>
   </component>
 </project>

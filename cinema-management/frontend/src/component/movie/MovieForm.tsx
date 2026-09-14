@@ -2,32 +2,35 @@ import { useEffect, useMemo, useState } from "react"
 import { getGenres } from "../../service/movie/movieService"
 import type { AdminMovie, ApiRequestError, Genre, MovieFormValues, MoviePayload } from "../../types/admin"
 
+const MAX_POSTER_SIZE = 5 * 1024 * 1024
+const ALLOWED_POSTER_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+
 const STATUSES = [
-  { value: "UPCOMING", label: "Sắp chiếu" },
-  { value: "SHOWING", label: "Đang chiếu" },
-  { value: "ENDED", label: "Đã kết thúc" },
-  { value: "INACTIVE", label: "Ngừng hoạt động" },
+  { value: 'UPCOMING', label: 'Sắp chiếu' },
+  { value: 'SHOWING', label: 'Đang chiếu' },
+  { value: 'ENDED', label: 'Đã kết thúc' },
+  { value: 'INACTIVE', label: 'Ngừng hoạt động' },
 ]
 
 const EMPTY_MOVIE: MovieFormValues = {
-  title: "",
-  description: "",
-  durationMinutes: "",
-  releaseDate: "",
-  ageRating: "",
-  director: "",
-  cast: "",
-  language: "",
-  posterUrl: "",
-  trailerUrl: "",
-  status: "UPCOMING",
+  title: '',
+  description: '',
+  durationMinutes: '',
+  releaseDate: '',
+  ageRating: '',
+  director: '',
+  cast: '',
+  language: '',
+  posterUrl: '',
+  trailerUrl: '',
+  status: 'UPCOMING',
   genreIds: [],
 }
 
 interface MovieFormProps {
   initialMovie?: AdminMovie | null
   submitLabel: string
-  onSubmit: (payload: MoviePayload) => Promise<void>
+  onSubmit: (payload: MoviePayload, posterFile: File | null) => Promise<void>
   onCancel: () => void
 }
 
@@ -37,70 +40,66 @@ function normalizeInitialMovie(movie?: AdminMovie | null): MovieFormValues {
   }
 
   return {
-    title: movie.title || "",
-    description: movie.description || "",
-    durationMinutes: movie.durationMinutes || "",
-    releaseDate: movie.releaseDate || "",
-    ageRating: movie.ageRating || "",
-    director: movie.director || "",
-    cast: movie.cast || "",
-    language: movie.language || "",
-    posterUrl: movie.posterUrl || "",
-    trailerUrl: movie.trailerUrl || "",
-    status: movie.status || "UPCOMING",
+    title: movie.title || '',
+    description: movie.description || '',
+    durationMinutes: movie.durationMinutes || '',
+    releaseDate: movie.releaseDate || '',
+    ageRating: movie.ageRating || '',
+    director: movie.director || '',
+    cast: movie.cast || '',
+    language: movie.language || '',
+    posterUrl: movie.posterUrl || '',
+    trailerUrl: movie.trailerUrl || '',
+    status: movie.status || 'UPCOMING',
     genreIds: movie.genres?.map((genre) => genre.id) || [],
   }
 }
 
-function validatePosterUrl(value: string, requiresPoster: boolean): string {
-  const posterUrl = value.trim()
-  if (!posterUrl) {
-    return requiresPoster ? "Vui lòng nhập link ảnh poster trên Cloudinary" : ""
+function validatePosterFile(file: File | null): string {
+  if (!file) {
+    return ''
   }
 
-  if (posterUrl.length > 255) {
-    return "Link ảnh poster tối đa 255 ký tự"
+  if (!ALLOWED_POSTER_TYPES.includes(file.type)) {
+    return 'Ảnh poster chỉ hỗ trợ JPG, PNG hoặc WebP'
   }
 
-  try {
-    const url = new URL(posterUrl)
-    if (!["http:", "https:"].includes(url.protocol)) {
-      return "Link ảnh poster phải bắt đầu bằng http hoặc https"
-    }
-
-    if (!url.hostname.includes("cloudinary.com")) {
-      return "Vui lòng dùng link ảnh từ Cloudinary"
-    }
-  } catch {
-    return "Link ảnh poster không hợp lệ"
+  if (file.size > MAX_POSTER_SIZE) {
+    return 'Ảnh poster không được vượt quá 5MB'
   }
 
-  return ""
+  return ''
 }
 
-function validate(values: MovieFormValues, requiresPoster: boolean): Record<string, string> {
+function validate(
+  values: MovieFormValues,
+  posterFile: File | null,
+  requiresPoster: boolean
+): Record<string, string> {
   const errors: Record<string, string> = {}
   if (!values.title.trim()) {
-    errors.title = "Vui lòng nhập tên phim"
+    errors.title = 'Vui lòng nhập tên phim'
   } else if (values.title.length > 150) {
-    errors.title = "Tên phim tối đa 150 ký tự"
+    errors.title = 'Tên phim tối đa 150 ký tự'
   }
 
   const duration = Number(values.durationMinutes)
   if (!values.durationMinutes) {
-    errors.durationMinutes = "Vui lòng nhập thời lượng"
+    errors.durationMinutes = 'Vui lòng nhập thời lượng'
   } else if (!Number.isInteger(duration) || duration <= 0) {
-    errors.durationMinutes = "Thời lượng phải lớn hơn 0"
+    errors.durationMinutes = 'Thời lượng phải lớn hơn 0'
   }
 
-  if (values.ageRating.length > 10) errors.ageRating = "Tối đa 10 ký tự"
-  if (values.director.length > 100) errors.director = "Tối đa 100 ký tự"
-  if (values.language.length > 50) errors.language = "Tối đa 50 ký tự"
-  if (values.trailerUrl.length > 255) errors.trailerUrl = "Tối đa 255 ký tự"
+  if (values.ageRating.length > 10) errors.ageRating = 'Tối đa 10 ký tự'
+  if (values.director.length > 100) errors.director = 'Tối đa 100 ký tự'
+  if (values.language.length > 50) errors.language = 'Tối đa 50 ký tự'
+  if (values.trailerUrl.length > 255) errors.trailerUrl = 'Tối đa 255 ký tự'
 
-  const posterError = validatePosterUrl(values.posterUrl, requiresPoster)
+  const posterError = validatePosterFile(posterFile)
   if (posterError) {
-    errors.posterUrl = posterError
+    errors.poster = posterError
+  } else if (requiresPoster && !posterFile) {
+    errors.poster = 'Vui lòng chọn ảnh poster'
   }
 
   return errors
@@ -108,16 +107,33 @@ function validate(values: MovieFormValues, requiresPoster: boolean): Record<stri
 
 function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormProps) {
   const [values, setValues] = useState(() => normalizeInitialMovie(initialMovie))
+  const [posterFile, setPosterFile] = useState<File | null>(null)
+  const [posterPreviewUrl, setPosterPreviewUrl] = useState("")
   const [genres, setGenres] = useState<Genre[]>([])
-  const [genreError, setGenreError] = useState("")
+  const [genreError, setGenreError] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
-  const [submitError, setSubmitError] = useState("")
+  const [submitError, setSubmitError] = useState('')
   const requiresPoster = !initialMovie
 
   useEffect(() => {
     setValues(normalizeInitialMovie(initialMovie))
+    setPosterFile(null)
+    setPosterPreviewUrl('')
   }, [initialMovie])
+
+  useEffect(() => {
+    if (!posterFile) {
+      return undefined
+    }
+
+    const objectUrl = URL.createObjectURL(posterFile)
+    setPosterPreviewUrl(objectUrl)
+
+    return () => {
+      URL.revokeObjectURL(objectUrl)
+    }
+  }, [posterFile])
 
   useEffect(() => {
     let ignore = false
@@ -133,11 +149,20 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
     }
   }, [])
 
-  const posterPreview = useMemo(() => values.posterUrl.trim(), [values.posterUrl])
+  const posterPreview = useMemo(
+    () => posterPreviewUrl || values.posterUrl,
+    [posterPreviewUrl, values.posterUrl]
+  )
 
   function updateField<K extends keyof MovieFormValues>(name: K, value: MovieFormValues[K]) {
     setValues((current) => ({ ...current, [name]: value }))
-    setErrors((current) => ({ ...current, [name]: "" }))
+    setErrors((current) => ({ ...current, [name]: '' }))
+  }
+
+  function updatePoster(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] || null
+    setPosterFile(file)
+    setErrors((current) => ({ ...current, poster: validatePosterFile(file) }))
   }
 
   function toggleGenre(genreId: number) {
@@ -154,9 +179,9 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const validationErrors = validate(values, requiresPoster)
+    const validationErrors = validate(values, posterFile, requiresPoster)
     setErrors(validationErrors)
-    setSubmitError("")
+    setSubmitError('')
 
     if (Object.keys(validationErrors).length > 0) {
       return
@@ -165,14 +190,13 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
     const payload: MoviePayload = {
       ...values,
       title: values.title.trim(),
-      posterUrl: values.posterUrl.trim(),
       durationMinutes: Number(values.durationMinutes),
       genreIds: values.genreIds,
     }
 
     setSaving(true)
     try {
-      await onSubmit(payload)
+      await onSubmit(payload, posterFile)
     } catch (error) {
       const requestError = error as ApiRequestError
       setSubmitError(requestError.message)
@@ -192,17 +216,15 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
         </div>
 
         <div className="form-grid">
-          <label>
-            <span>Link ảnh poster Cloudinary</span>
+          <label className="poster-upload-field">
+            <span>Ảnh poster</span>
             <input
-              type="url"
-              value={values.posterUrl}
-              onChange={(event) => updateField("posterUrl", event.target.value)}
-              placeholder="https://res.cloudinary.com/..."
-              maxLength={255}
-              required={requiresPoster}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={updatePoster}
             />
-            {errors.posterUrl && <small>{errors.posterUrl}</small>}
+            {posterFile && <em className="file-name">{posterFile.name}</em>}
+            {errors.poster && <small>{errors.poster}</small>}
           </label>
 
           <label>
@@ -210,7 +232,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
             <input
               type="text"
               value={values.title}
-              onChange={(event) => updateField("title", event.target.value)}
+              onChange={(event) => updateField('title', event.target.value)}
               maxLength={150}
               required
             />
@@ -222,7 +244,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
             <input
               type="date"
               value={values.releaseDate}
-              onChange={(event) => updateField("releaseDate", event.target.value)}
+              onChange={(event) => updateField('releaseDate', event.target.value)}
             />
           </label>
 
@@ -232,7 +254,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
               type="number"
               min="1"
               value={values.durationMinutes}
-              onChange={(event) => updateField("durationMinutes", event.target.value)}
+              onChange={(event) => updateField('durationMinutes', event.target.value)}
               required
             />
             {errors.durationMinutes && <small>{errors.durationMinutes}</small>}
@@ -243,7 +265,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
             <input
               type="text"
               value={values.ageRating}
-              onChange={(event) => updateField("ageRating", event.target.value)}
+              onChange={(event) => updateField('ageRating', event.target.value)}
               maxLength={10}
             />
             {errors.ageRating && <small>{errors.ageRating}</small>}
@@ -254,7 +276,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
             <input
               type="text"
               value={values.director}
-              onChange={(event) => updateField("director", event.target.value)}
+              onChange={(event) => updateField('director', event.target.value)}
               maxLength={100}
             />
             {errors.director && <small>{errors.director}</small>}
@@ -265,7 +287,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
             <input
               type="text"
               value={values.cast}
-              onChange={(event) => updateField("cast", event.target.value)}
+              onChange={(event) => updateField('cast', event.target.value)}
             />
           </label>
 
@@ -274,7 +296,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
             <input
               type="text"
               value={values.language}
-              onChange={(event) => updateField("language", event.target.value)}
+              onChange={(event) => updateField('language', event.target.value)}
               maxLength={50}
             />
             {errors.language && <small>{errors.language}</small>}
@@ -285,7 +307,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
             <input
               type="url"
               value={values.trailerUrl}
-              onChange={(event) => updateField("trailerUrl", event.target.value)}
+              onChange={(event) => updateField('trailerUrl', event.target.value)}
               placeholder="https://..."
             />
             {errors.trailerUrl && <small>{errors.trailerUrl}</small>}
@@ -293,7 +315,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
 
           <label>
             <span>Trạng thái</span>
-            <select value={values.status} onChange={(event) => updateField("status", event.target.value)}>
+            <select value={values.status} onChange={(event) => updateField('status', event.target.value)}>
               {STATUSES.map((status) => (
                 <option key={status.value} value={status.value}>
                   {status.label}
@@ -322,11 +344,11 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
       </section>
 
       <section className="form-panel form-section preview-section">
-        <div>
+        <div className="description-field">
           <span className="field-title">Nội dung</span>
           <textarea
             value={values.description}
-            onChange={(event) => updateField("description", event.target.value)}
+            onChange={(event) => updateField('description', event.target.value)}
             rows={8}
           />
         </div>
@@ -342,7 +364,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
           Hủy
         </button>
         <button type="submit" className="primary-button" disabled={saving}>
-          {saving ? "Đang lưu..." : submitLabel}
+          {saving ? 'Đang lưu...' : submitLabel}
         </button>
       </div>
     </form>

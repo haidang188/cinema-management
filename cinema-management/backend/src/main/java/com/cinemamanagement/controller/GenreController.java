@@ -1,6 +1,6 @@
 package com.cinemamanagement.controller;
 
-import com.cinemamanagement.dto.GenreDto;
+import com.cinemamanagement.response.GenreResponse;
 import com.cinemamanagement.service.GenreService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +20,7 @@ public class GenreController {
     }
 
     @GetMapping
-    public List<GenreDto> getAllGenres() {
+    public List<GenreResponse> getAllGenres() {
         return genreService.getAllGenres();
     }
 }
