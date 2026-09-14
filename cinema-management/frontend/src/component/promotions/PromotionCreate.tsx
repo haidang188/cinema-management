@@ -343,6 +343,7 @@ export function PromotionCreate() {
 
       <form
         className="promotion-create-layout premium-create-layout"
+        noValidate
         onSubmit={
           handleSubmit
         }
@@ -581,7 +582,7 @@ export function PromotionCreate() {
                       form.discountType ===
                         'PERCENTAGE'
                         ? '0.01'
-                        : '1000'
+                        : '1'
                     }
                     max={
                       form.discountType ===
@@ -636,7 +637,7 @@ export function PromotionCreate() {
                   <input
                     type="number"
                     min="0"
-                    step="1000"
+                    step="1"
                     placeholder="VD: 200000"
                     value={
                       form.minOrderAmount
@@ -676,8 +677,8 @@ export function PromotionCreate() {
                     <div className="money-input">
                       <input
                         type="number"
-                        min="1"
-                        step="1000"
+                        min="0"
+                        step="1"
                         placeholder="VD: 50000"
                         value={
                           form.maxDiscountAmount
