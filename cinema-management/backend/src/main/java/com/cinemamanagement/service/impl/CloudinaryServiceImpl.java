@@ -40,28 +40,28 @@ public class CloudinaryServiceImpl implements com.cinemamanagement.service.Cloud
             }
             return secureUrl.toString();
         } catch (IOException exception) {
-            throw new BadRequestException("Không đọc được file ảnh poster");
+            throw new BadRequestException("Không đọc được file ảnh");
         } catch (RuntimeException exception) {
-            throw new BadRequestException("Upload ảnh poster lên Cloudinary thất bại");
+            throw new BadRequestException("Upload ảnh lên Cloudinary thất bại");
         }
     }
 
     private void validateImage(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new BadRequestException("Vui lòng chọn ảnh poster");
+            throw new BadRequestException("Vui lòng chọn ảnh");
         }
 
         if (file.getSize() > MAX_IMAGE_SIZE) {
-            throw new BadRequestException("Ảnh poster không được vượt quá 5MB");
+            throw new BadRequestException("Ảnh không được vượt quá 5MB");
         }
 
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
-            throw new BadRequestException("Ảnh poster chỉ hỗ trợ JPG, PNG hoặc WebP");
+            throw new BadRequestException("Ảnh chỉ hỗ trợ JPG, PNG hoặc WebP");
         }
 
         if (!hasAllowedImageSignature(file, contentType)) {
-            throw new BadRequestException("File poster không phải ảnh hợp lệ");
+            throw new BadRequestException("File không phải ảnh hợp lệ");
         }
     }
 
@@ -73,7 +73,7 @@ public class CloudinaryServiceImpl implements com.cinemamanagement.service.Cloud
                 return false;
             }
         } catch (IOException exception) {
-            throw new BadRequestException("Không đọc được file ảnh poster");
+            throw new BadRequestException("Không đọc được file ảnh");
         }
 
         if ("image/jpeg".equals(contentType)) {
