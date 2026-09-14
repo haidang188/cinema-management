@@ -1,4 +1,4 @@
-package com.cinemamanagement.dto;
+package com.cinemamanagement.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,15 +11,10 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TicketPriceDTO {
-
+public class TicketPriceResponse {
     private Long id;
-
     private String roomType;
-
     private String seatType;
-
     private String dayType;
-
     private BigDecimal price;
 }

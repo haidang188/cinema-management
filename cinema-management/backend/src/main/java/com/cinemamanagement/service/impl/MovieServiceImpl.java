@@ -1,5 +1,4 @@
 package com.cinemamanagement.service.impl;
-import com.cinemamanagement.dto.movie.MovieResponse;
 import com.cinemamanagement.entity.Genre;
 import com.cinemamanagement.entity.Movie;
 import com.cinemamanagement.exception.BadRequestException;
@@ -9,6 +8,7 @@ import com.cinemamanagement.repository.MovieRepository;
 import com.cinemamanagement.request.MovieRequest;
 import com.cinemamanagement.response.MovieDetailResponse;
 import com.cinemamanagement.response.MovieListResponse;
+import com.cinemamanagement.response.MovieResponse;
 import com.cinemamanagement.service.CloudinaryService;
 import com.cinemamanagement.service.MovieService;
 import org.springframework.data.domain.Page;

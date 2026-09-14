@@ -1,4 +1,4 @@
-package com.cinemamanagement.dto.movie;
+package com.cinemamanagement.response;
 
 import java.time.LocalDate;
 

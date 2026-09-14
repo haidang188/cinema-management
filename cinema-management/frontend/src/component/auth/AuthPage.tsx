@@ -1,4 +1,4 @@
-import type { AuthMode, LoginPayload, RegisterPayload } from '../../types/auth'
+import type { AuthFieldErrors, AuthMode, LoginPayload, RegisterPayload } from '../../types/auth'
 import AuthHero from './AuthHero'
 import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
@@ -6,6 +6,7 @@ import RegisterForm from './RegisterForm'
 interface AuthPageProps {
   mode: AuthMode
   message: string
+  fieldErrors: AuthFieldErrors
   isLoading: boolean
   onModeChange: (mode: AuthMode) => void
   onLogin: (payload: LoginPayload) => Promise<void>
@@ -15,6 +16,7 @@ interface AuthPageProps {
 function AuthPage({
   mode,
   message,
+  fieldErrors,
   isLoading,
   onModeChange,
   onLogin,
@@ -27,6 +29,7 @@ function AuthPage({
         {mode === 'login' ? (
           <LoginForm
             message={message}
+            fieldErrors={fieldErrors}
             isLoading={isLoading}
             onSubmit={onLogin}
             onRegisterClick={() => onModeChange('register')}
@@ -34,6 +37,7 @@ function AuthPage({
         ) : (
           <RegisterForm
             message={message}
+            fieldErrors={fieldErrors}
             isLoading={isLoading}
             onSubmit={onRegister}
             onLoginClick={() => onModeChange('login')}

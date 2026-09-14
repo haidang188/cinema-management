@@ -1,9 +1,9 @@
 package com.cinemamanagement.service;
 
-import com.cinemamanagement.dto.GenreDto;
+import com.cinemamanagement.response.GenreResponse;
 
 import java.util.List;
 
 public interface GenreService {
-    List<GenreDto> getAllGenres();
+    List<GenreResponse> getAllGenres();
 }

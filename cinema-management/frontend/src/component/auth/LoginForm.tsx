@@ -1,16 +1,17 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import type { LoginPayload } from '../../types/auth'
+import type { AuthFieldErrors, LoginPayload } from '../../types/auth'
 import FormInput from './FormInput'
 
 interface LoginFormProps {
   message: string
+  fieldErrors: AuthFieldErrors
   isLoading: boolean
   onSubmit: (payload: LoginPayload) => Promise<void>
   onRegisterClick: () => void
 }
 
-function LoginForm({ message, isLoading, onSubmit, onRegisterClick }: LoginFormProps) {
+function LoginForm({ message, fieldErrors, isLoading, onSubmit, onRegisterClick }: LoginFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -20,7 +21,7 @@ function LoginForm({ message, isLoading, onSubmit, onRegisterClick }: LoginFormP
   }
 
   return (
-    <form className="auth-card auth-card--login" onSubmit={handleSubmit}>
+    <form className="auth-card auth-card--login" onSubmit={handleSubmit} noValidate>
       <div className="auth-card__brand">
         <strong>PREMIERE</strong>
         <span>Cinemas Management</span>
@@ -34,13 +35,19 @@ function LoginForm({ message, isLoading, onSubmit, onRegisterClick }: LoginFormP
       <FormInput
         id="login-email"
         label="Email"
-        type="email"
+        type="text"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
         placeholder="Nhập email"
         autoComplete="email"
-        required
+        aria-invalid={Boolean(fieldErrors.email)}
+        aria-describedby={fieldErrors.email ? 'login-email-error' : undefined}
       />
+      {fieldErrors.email && (
+        <small className="auth-field-error" id="login-email-error">
+          {fieldErrors.email}
+        </small>
+      )}
 
       <FormInput
         id="login-password"
@@ -50,8 +57,14 @@ function LoginForm({ message, isLoading, onSubmit, onRegisterClick }: LoginFormP
         onChange={(event) => setPassword(event.target.value)}
         placeholder="Nhập mật khẩu"
         autoComplete="current-password"
-        required
+        aria-invalid={Boolean(fieldErrors.password)}
+        aria-describedby={fieldErrors.password ? 'login-password-error' : undefined}
       />
+      {fieldErrors.password && (
+        <small className="auth-field-error" id="login-password-error">
+          {fieldErrors.password}
+        </small>
+      )}
 
       {message && <p className="form-message">{message}</p>}
 

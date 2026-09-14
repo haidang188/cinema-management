@@ -14,6 +14,17 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(AuthValidationException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthValidation(AuthValidationException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiErrorResponse.withFieldErrors(
+                        400,
+                        "Bad Request",
+                        exception.getMessage(),
+                        exception.getFieldErrors()
+                ));
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
