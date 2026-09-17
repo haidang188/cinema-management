@@ -9,13 +9,11 @@ import com.cinemamanagement.request.MovieRequest;
 import com.cinemamanagement.response.MovieDetailResponse;
 import com.cinemamanagement.response.MovieListResponse;
 import com.cinemamanagement.response.MovieResponse;
-import com.cinemamanagement.service.CloudinaryService;
 import com.cinemamanagement.service.MovieService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.LinkedHashSet;
@@ -24,21 +22,17 @@ import java.util.Set;
 
 @Service
 public class MovieServiceImpl implements MovieService {
-    private static final String POSTER_FOLDER = "cinema/posters";
     private static final String SHOWING = "SHOWING";
 
     private final MovieRepository movieRepository;
     private final GenreRepository genreRepository;
-    private final CloudinaryService cloudinaryService;
 
     public MovieServiceImpl(
             MovieRepository movieRepository,
-            GenreRepository genreRepository,
-            CloudinaryService cloudinaryService
+            GenreRepository genreRepository
     ) {
         this.movieRepository = movieRepository;
         this.genreRepository = genreRepository;
-        this.cloudinaryService = cloudinaryService;
     }
 
     @Override
@@ -65,24 +59,18 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     @Transactional
-    public MovieDetailResponse createMovie(MovieRequest request, MultipartFile poster) {
+    public MovieDetailResponse createMovie(MovieRequest request) {
         Movie movie = new Movie();
         applyRequest(movie, request);
-        movie.setPosterUrl(cloudinaryService.uploadImage(poster, POSTER_FOLDER));
         Movie savedMovie = movieRepository.save(movie);
         return MovieDetailResponse.fromEntity(savedMovie);
     }
 
     @Override
     @Transactional
-    public MovieDetailResponse updateMovie(Long id, MovieRequest request, MultipartFile poster) {
+    public MovieDetailResponse updateMovie(Long id, MovieRequest request) {
         Movie movie = getMovieWithGenres(id);
-        String currentPosterUrl = movie.getPosterUrl();
         applyRequest(movie, request);
-        movie.setPosterUrl(currentPosterUrl);
-        if (poster != null && !poster.isEmpty()) {
-            movie.setPosterUrl(cloudinaryService.uploadImage(poster, POSTER_FOLDER));
-        }
         return MovieDetailResponse.fromEntity(movieRepository.save(movie));
     }
 
@@ -100,6 +88,7 @@ public class MovieServiceImpl implements MovieService {
         movie.setDirector(request.getDirector());
         movie.setCast(request.getCast());
         movie.setLanguage(request.getLanguage());
+        movie.setPosterUrl(request.getPosterUrl());
         movie.setTrailerUrl(request.getTrailerUrl());
         movie.setStatus(request.getStatus());
         movie.setGenres(resolveGenres(request.getGenreIds()));

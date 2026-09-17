@@ -42,7 +42,7 @@ function MovieEdit({ movieId, onNavigate }: MovieEditProps) {
   }
 
   return (
-    <main className="app-shell">
+    <main className="app-shell movie-admin-page movie-form-page">
       <div className="admin-topbar">
         <div className="brand-mark">CB</div>
         <div>
@@ -62,20 +62,18 @@ function MovieEdit({ movieId, onNavigate }: MovieEditProps) {
       <header className="page-header">
         <div>
           <p className="eyebrow">Quản lý phim</p>
-          <h1>Chỉnh sửa thông tin phim</h1>
-          <p className="page-subtitle">
-            Cập nhật nội dung, phân loại và trạng thái trình chiếu của phim.
-          </p>
+          <h1>Chỉnh sửa phim</h1>
+          <p className="page-subtitle">Cập nhật thông tin phim.</p>
         </div>
       </header>
 
-      {loading && <div className="alert">Đang tải thông tin phim...</div>}
+      {loading && <div className="movie-alert">Đang tải thông tin phim...</div>}
       {error && (
-        <section className="notice-panel">
+        <section className="movie-empty-state">
           <h2>Không tải được phim</h2>
           <p>{error}</p>
           <button type="button" className="secondary-button" onClick={() => onNavigate("/admin/movies")}>
-            Quay về danh sách
+            Quay lại danh sách
           </button>
         </section>
       )}

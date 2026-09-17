@@ -13,7 +13,9 @@ import java.util.Optional;
 public interface MovieRepository extends JpaRepository<Movie, Long> {
     @Query("""
             select movie from Movie movie
-            where (:keyword is null or lower(movie.title) like lower(concat('%', :keyword, '%')))
+            where (:keyword is null
+                or lower(movie.title) like lower(concat('%', :keyword, '%'))
+                or lower(movie.director) like lower(concat('%', :keyword, '%')))
               and (:status is null or movie.status = :status)
             """)
     Page<Movie> searchMovies(@Param("keyword") String keyword, @Param("status") String status, Pageable pageable);

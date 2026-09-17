@@ -17,7 +17,7 @@ function MovieCreate({ onNavigate }: MovieCreateProps) {
   }
 
   return (
-    <main className="app-shell">
+    <main className="app-shell movie-admin-page movie-form-page">
       <div className="admin-topbar">
         <div className="brand-mark">CB</div>
         <div>
