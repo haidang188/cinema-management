@@ -65,6 +65,12 @@ public class GlobalExceptionHandler {
                 .body(ApiErrorResponse.of(400, "Bad Request", "Dữ liệu multipart không hợp lệ"));
     }
 
+    @ExceptionHandler(AiServiceException.class)
+    public ResponseEntity<ApiErrorResponse> handleAiServiceException(AiServiceException exception) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiErrorResponse.of(500, "Internal Server Error", "Trợ lý AI hiện không thể phản hồi. Vui lòng thử lại sau."));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleUnexpected(Exception exception) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
