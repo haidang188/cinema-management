@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-route
 import AuthPage from "../component/auth/AuthPage"
 import HomePage from "../component/home/HomePage"
 import { getHomePath, useAuth } from "../hooks/useAuth"
+import MovieDetailPage from "../pages/movies/MovieDetailPage"
 import type { AuthMode } from "../types/auth"
 import { adminRoutes } from "./adminRoutes"
 import { promotionRoutes } from "./PromotionRoutes"
@@ -58,6 +59,11 @@ function AppRouteContent() {
             onRegisterClick={goToRegister}
           />
         }
+      />
+
+      <Route
+        path="/movies/:movieId"
+        element={<MovieDetailPage currentUser={currentUser} onLoginClick={goToLogin} />}
       />
 
       <Route path="/login" element={renderAuthPage("login")} />

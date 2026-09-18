@@ -1,6 +1,7 @@
 package com.cinemamanagement.response;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record MovieResponse(
         Long id,
@@ -14,6 +15,7 @@ public record MovieResponse(
         String language,
         String posterUrl,
         String trailerUrl,
-        String status
+        String status,
+        List<GenreResponse> genres
 ) {
 }

@@ -1,3 +1,7 @@
+export interface MovieGenre{
+  id: number
+  name: string
+}
 export interface Movie {
   id: number
   title: string
@@ -11,4 +15,5 @@ export interface Movie {
   posterUrl: string
   trailerUrl: string
   status: string
+  genres?: MovieGenre[]
 }

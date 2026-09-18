@@ -347,16 +347,15 @@ button {
   margin-bottom: 18px;
 }
 
-.movie-tabs,
 .movie-filters {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.movie-tabs button,
-.movie-filters select {
-  background: rgba(255, 255, 255, 0.08);
+.movie-filters select,
+.movie-filter-button {
+  background: #151b24;
   border: 1px solid var(--cinema-line);
   border-radius: 8px;
   color: #ffffff;
@@ -364,9 +363,25 @@ button {
   padding: 8px 12px;
 }
 
-.movie-tabs .is-active {
+.movie-filters select {
+  color-scheme: dark;
+}
+
+.movie-filters select option {
+  background: #151b24;
+  color: #f8fafc;
+}
+
+.movie-filter-button {
   background: var(--cinema-red);
   border-color: var(--cinema-red);
+  font-weight: 850;
+  min-width: 86px;
+}
+
+.movie-filter-button:hover {
+  background: var(--cinema-red-dark);
+  border-color: var(--cinema-red-dark);
 }
 
 .movie-state {
@@ -403,6 +418,15 @@ button {
   position: relative;
 }
 
+.movie-poster--button {
+  border: 0;
+  border-radius: 0;
+  display: block;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}
+
 .movie-poster span {
   background: var(--cinema-red);
   border-radius: 999px;
@@ -426,6 +450,18 @@ button {
   color: #ffffff;
   font-size: 20px;
   margin: 0 0 8px;
+}
+
+.movie-card__title-button {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  padding: 0;
+  text-align: left;
+}
+
+.movie-card__title-button:hover h3 {
+  color: var(--cinema-gold);
 }
 
 .movie-card p {
@@ -1405,6 +1441,503 @@ button {
 .home-footer nav a {
   color: #e2e8f0;
   text-decoration: none;
+}
+
+.movie-detail-page {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(225, 29, 72, 0.16), transparent 22rem),
+    linear-gradient(180deg, #080d0e 0%, #101616 48%, #080d0e 100%);
+  color: #f8fafc;
+  min-height: 100svh;
+  padding: 24px 18px 46px;
+}
+
+.movie-detail-shell {
+  margin: 0 auto;
+  max-width: 1160px;
+}
+
+.detail-back-button {
+  background: transparent;
+  border: 0;
+  color: #d8e1e9;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 0;
+}
+
+.detail-back-button::before {
+  content: "< ";
+}
+
+.movie-detail-hero {
+  align-items: center;
+  display: grid;
+  gap: 38px;
+  grid-template-columns: 310px minmax(0, 1fr);
+  min-height: 520px;
+  padding: 34px 0 40px;
+}
+
+.movie-detail-poster-panel {
+  background: rgba(16, 19, 20, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  display: grid;
+  gap: 12px;
+  padding: 15px;
+}
+
+.movie-detail-poster-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.movie-detail-poster-head span {
+  background: #e11d48;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 950;
+  padding: 4px 8px;
+}
+
+.movie-detail-poster {
+  aspect-ratio: 2 / 3;
+  background: #151b1d;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.movie-detail-poster img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.movie-detail-info {
+  align-self: center;
+  max-width: 720px;
+  padding-top: 10px;
+}
+
+.movie-detail-info h1 {
+  color: #ffffff;
+  font-family: "Times New Roman";
+  font-size: clamp(20px, 5vw, 35px);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 0.94;
+  margin: 12px 0 22px;
+  text-transform: uppercase;
+}
+
+.movie-detail-info h2,
+.movie-detail-showtimes h2,
+.movie-review-panel h2 {
+  color: #ffffff;
+}
+
+.movie-detail-genres {
+  color: #ff5c65;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.movie-detail-meta,
+.movie-detail-actions,
+.movie-detail-extra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.movie-detail-meta span {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 950;
+  padding: 0;
+}
+
+.movie-detail-actions {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  gap: 12px;
+  margin: 20px 0 26px;
+  padding-bottom: 24px;
+}
+
+.movie-detail-actions a,
+.movie-detail-actions button,
+.review-form button {
+  align-items: center;
+  background: #e11d48;
+  border: 0;
+  border-radius: 0;
+  color: #ffffff;
+  display: inline-flex;
+  font-weight: 900;
+  justify-content: center;
+  font-size: 13px;
+  min-height: 40px;
+  min-width: 130px;
+  padding: 10px 24px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.movie-detail-actions a {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+}
+
+.movie-detail-info > p:not(.movie-detail-genres) {
+  color: #ffe5e5;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.55;
+  max-width: 760px;
+}
+
+.movie-detail-extra {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 150px minmax(0, 1fr) 150px;
+  margin-top: 22px;
+  max-width: 720px;
+}
+
+.movie-detail-extra div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.movie-detail-extra strong {
+  color: #ff929c;
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.movie-detail-extra span {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.movie-detail-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  margin-top: 28px;
+}
+
+.movie-detail-showtimes,
+.movie-review-panel {
+  background: #171c1c;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0;
+  padding: 16px;
+}
+
+.movie-detail-section-head,
+.movie-review-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.movie-detail-section-head h2,
+.movie-review-head h2 {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.movie-detail-section-head h2::before {
+  background: #e11d48;
+  content: "";
+  display: inline-block;
+  height: 18px;
+  margin-right: 9px;
+  vertical-align: -2px;
+  width: 5px;
+}
+
+.movie-detail-section-head span,
+.movie-review-head span {
+  border: 1px solid #e11d48;
+  color: #ffd7d7;
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1.05;
+  min-width: 50px;
+  padding: 6px 8px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.rating-summary {
+  background: #222727;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0;
+  margin-bottom: 14px;
+  padding: 18px 16px 16px;
+  text-align: center;
+}
+
+.rating-score {
+  align-items: baseline;
+  display: flex;
+  justify-content: center;
+}
+
+.rating-score strong {
+  color: #ffffff;
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.rating-score span {
+  color: #dbe4ef;
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.rating-stars {
+  color: #facc15;
+  font-size: 15px;
+  letter-spacing: 1px;
+  margin-top: 6px;
+}
+
+.rating-summary p {
+  color: #ffb4bc;
+  font-size: 12px;
+  margin: 7px 0 10px;
+}
+
+.rating-bars {
+  display: grid;
+  gap: 5px;
+}
+
+.rating-bar-row {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 12px minmax(0, 1fr) 34px;
+}
+
+.rating-bar-row span,
+.rating-bar-row small {
+  color: #ffd7d7;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.rating-bar-row div {
+  background: #111717;
+  height: 5px;
+}
+
+.rating-bar-row i {
+  background: #e11d48;
+  display: block;
+  height: 100%;
+}
+
+.movie-detail-date-tabs {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(auto-fit, minmax(126px, 1fr));
+  margin-bottom: 14px;
+}
+
+.movie-detail-date-tabs button {
+  background: #222828;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0;
+  color: #dbe4ef;
+  display: grid;
+  font-family: "Times New Roman", Times, serif;
+  gap: 3px;
+  min-height: 64px;
+  padding: 7px;
+}
+
+.movie-detail-date-tabs button span {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.movie-detail-date-tabs button strong {
+  color: #ffffff;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.movie-detail-date-tabs button.is-active {
+  background: #241f20;
+  border-color: #e11d48;
+  color: #ffffff;
+}
+
+.movie-detail-showtime-list {
+  display: grid;
+  gap: 10px;
+}
+
+.movie-detail-showtime-group {
+  background: #202525;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  padding: 14px;
+}
+
+.movie-detail-showtime-group-head {
+  align-items: center;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.18);
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+}
+
+.movie-detail-showtime-group-head div {
+  display: grid;
+  gap: 4px;
+}
+
+.movie-detail-showtime-group-head strong {
+  color: #ffffff;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 14px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.movie-detail-showtime-group-head span {
+  color: #ff7b7b;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.movie-detail-showtime-times {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+}
+
+.movie-detail-showtime-times button {
+  background: #111717;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0;
+  color: #ffffff;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 16px;
+  font-weight: 950;
+  min-height: 46px;
+}
+
+.review-form {
+  display: grid;
+  gap: 10px;
+}
+
+.review-form select,
+.review-form textarea {
+  background: #111717;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 0;
+  color: #ffffff;
+  min-height: 42px;
+  padding: 10px;
+}
+
+.review-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.review-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+.review-list {
+  margin-top: 14px;
+}
+
+.review-empty {
+  color: #94a3b8;
+  font-size: 13px;
+  margin: 0;
+  padding: 10px 0 0;
+}
+
+.review-item {
+  background: #111717;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  margin-top: 10px;
+  padding: 12px;
+}
+
+.review-item div {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.review-item span {
+  color: #facc15;
+}
+
+.review-item p {
+  color: #dbe4ef;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .movie-detail-hero,
+  .movie-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .movie-detail-date-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .movie-detail-extra {
+    grid-template-columns: 1fr;
+  }
+
+  .movie-detail-hero {
+    min-height: auto;
+  }
+
+  .movie-detail-poster-panel {
+    max-width: 340px;
+  }
 }
 
 /* Softer admin movie form */
