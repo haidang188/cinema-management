@@ -1,36 +1,78 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { getRooms } from "../../../service/cinema-room/cinemaRoomService"
 import type { CinemaRoom, NavigateHandler } from "../../../types/admin"
 
+const PAGE_SIZE = 10
+
 const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: 'Hoạt động',
-  INACTIVE: 'Ngừng hoạt động',
-  MAINTENANCE: 'Bảo trì',
+  ACTIVE: "Hoạt động",
+  MAINTENANCE: "Bảo trì",
+  INACTIVE: "Ngừng hoạt động",
 }
+
+const STATUS_FILTERS = [
+  { value: "", label: "Tất cả" },
+  { value: "ACTIVE", label: "Hoạt động" },
+  { value: "MAINTENANCE", label: "Bảo trì" },
+  { value: "INACTIVE", label: "Ngừng hoạt động" },
+]
 
 interface CinemaRoomListProps {
   onNavigate: NavigateHandler
 }
 
+function getVisiblePages(currentPage: number, totalPages: number) {
+  if (totalPages <= 0) return []
+
+  const maxVisiblePages = 5
+  const startPage = Math.max(
+    0,
+    Math.min(currentPage - Math.floor(maxVisiblePages / 2), totalPages - maxVisiblePages),
+  )
+  const endPage = Math.min(totalPages, startPage + maxVisiblePages)
+
+  return Array.from({ length: endPage - startPage }, (_, index) => startPage + index)
+}
+
 function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
   const [rooms, setRooms] = useState<CinemaRoom[]>([])
-  const [keyword, setKeyword] = useState('')
-  const [status, setStatus] = useState('')
+  const [searchTerm, setSearchTerm] = useState("")
+  const [keyword, setKeyword] = useState("")
+  const [status, setStatus] = useState("")
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
+  const [totalElements, setTotalElements] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState("")
+  const visiblePages = useMemo(() => getVisiblePages(page, totalPages), [page, totalPages])
+  const firstItemIndex = totalElements === 0 ? 0 : page * PAGE_SIZE + 1
+  const lastItemIndex = Math.min(page * PAGE_SIZE + rooms.length, totalElements)
+  const hasActiveFilter = Boolean(keyword || status)
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setPage(0)
+      setKeyword(searchTerm.trim())
+    }, 300)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [searchTerm])
 
   useEffect(() => {
     let ignore = false
     setLoading(true)
-    setError('')
+    setError("")
 
-    getRooms({ page, size: 10, keyword, status })
+    getRooms({ page, size: PAGE_SIZE, keyword, status })
       .then((data) => {
         if (!ignore) {
           setRooms(data.content || [])
           setTotalPages(data.totalPages || 0)
+          setTotalElements(data.totalElements || 0)
+
+          if (data.totalPages > 0 && page >= data.totalPages) {
+            setPage(data.totalPages - 1)
+          }
         }
       })
       .catch((requestError: Error) => {
@@ -45,91 +87,91 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
     }
   }, [keyword, page, status])
 
-  function handleSearch(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const form = event.currentTarget
+  function handleResetFilters() {
+    setSearchTerm("")
+    setKeyword("")
+    setStatus("")
     setPage(0)
-    setKeyword((form.elements.namedItem("keyword") as HTMLInputElement).value)
   }
 
   return (
-    <main className="app-shell">
-      <div className="admin-topbar">
-        <div className="brand-mark">CB</div>
+    <main className="app-shell room-admin-page room-list-page">
+      <header className="room-page-header">
         <div>
-          <strong>Cinema Booking System</strong>
-          <span>Không gian quản trị rạp chiếu</span>
-        </div>
-        <nav className="module-nav">
-          <button type="button" onClick={() => onNavigate('/admin/movies')}>Phim</button>
-          <button type="button" className="active" onClick={() => onNavigate('/admin/cinema-rooms')}>Phòng chiếu</button>
-        </nav>
-      </div>
-
-      <header className="page-header">
-        <div>
-          <p className="eyebrow">Sprint 2</p>
+          <p className="room-page-eyebrow">Sprint 2</p>
           <h1>Quản lý phòng chiếu</h1>
-          <p className="page-subtitle">Xem danh sách phòng và kiểm tra sơ đồ ghế theo dữ liệu MySQL.</p>
+          <p>Quản lý danh sách phòng và cấu hình sơ đồ ghế</p>
         </div>
       </header>
 
-      <section className="summary-grid" aria-label="Tổng quan phòng chiếu">
-        <div className="summary-card">
-          <span>Đang hiển thị</span>
-          <strong>{rooms.length}</strong>
-        </div>
-        <div className="summary-card summary-green">
-          <span>Hoạt động</span>
-          <strong>{rooms.filter((room) => room.status === 'ACTIVE').length}</strong>
-        </div>
-        <div className="summary-card summary-blue">
-          <span>Tổng ghế</span>
-          <strong>{rooms.reduce((total, room) => total + (room.totalSeats || 0), 0)}</strong>
-        </div>
-      </section>
+      <section className="room-toolbar" aria-label="Tìm kiếm và lọc phòng chiếu">
+        <label className="room-search-field">
+          <span>Tìm kiếm</span>
+          <input
+            name="keyword"
+            type="search"
+            placeholder="Tìm kiếm theo tên phòng..."
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </label>
 
-      <section className="toolbar">
-        <form className="search-box" onSubmit={handleSearch}>
-          <input name="keyword" type="search" placeholder="Tìm theo tên phòng" defaultValue={keyword} />
-          <button type="submit" className="secondary-button">Tìm kiếm</button>
-        </form>
-        <select
-          aria-label="Lọc trạng thái phòng"
-          value={status}
-          onChange={(event) => {
-            setStatus(event.target.value)
-            setPage(0)
-          }}
+        <label className="room-filter-field">
+          <span>Trạng thái</span>
+          <select
+            aria-label="Lọc trạng thái phòng"
+            value={status}
+            onChange={(event) => {
+              setStatus(event.target.value)
+              setPage(0)
+            }}
+          >
+            {STATUS_FILTERS.map((filter) => (
+              <option key={filter.value || "all"} value={filter.value}>
+                {filter.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <button
+          type="button"
+          className="secondary-button room-reset-button"
+          disabled={!hasActiveFilter}
+          aria-label="Đặt lại bộ lọc phòng chiếu"
+          onClick={handleResetFilters}
         >
-          <option value="">Tất cả trạng thái</option>
-          <option value="ACTIVE">Hoạt động</option>
-          <option value="INACTIVE">Ngừng hoạt động</option>
-          <option value="MAINTENANCE">Bảo trì</option>
-        </select>
+          Đặt lại
+        </button>
       </section>
 
-      {error && <div className="alert error-alert">{error}</div>}
-      {loading && <div className="alert">Đang tải danh sách phòng...</div>}
+      {error && <div className="room-alert room-alert-error">{error}</div>}
+
+      {loading && (
+        <div className="room-table-card" aria-label="Đang tải danh sách phòng">
+          <div className="room-skeleton-row" />
+          <div className="room-skeleton-row" />
+          <div className="room-skeleton-row" />
+        </div>
+      )}
 
       {!loading && !error && rooms.length === 0 && (
-        <section className="notice-panel">
-          <h2>Chưa có phòng phù hợp</h2>
+        <section className="room-empty-state">
+          <h2>Không tìm thấy phòng chiếu phù hợp</h2>
           <p>Thử đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái.</p>
         </section>
       )}
 
-      {!error && rooms.length > 0 && (
+      {!loading && !error && rooms.length > 0 && (
         <>
-          <div className="table-wrap">
-            <table className="movie-table">
+          <div className="room-table-card">
+            <table className="room-table">
               <thead>
                 <tr>
                   <th>STT</th>
-                  <th>Mã hiển thị</th>
                   <th>Tên phòng</th>
                   <th>Loại phòng</th>
-                  <th>Số lượng ghế</th>
+                  <th>Tổng số ghế</th>
                   <th>Trạng thái</th>
                   <th className="action-column">Thao tác</th>
                 </tr>
@@ -137,20 +179,22 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
               <tbody>
                 {rooms.map((room, index) => (
                   <tr key={room.id}>
-                    <td>{page * 10 + index + 1}</td>
-                    <td className="muted-code">#{room.id}</td>
-                    <td className="title-cell">{room.name}</td>
-                    <td>{room.roomType || '-'}</td>
-                    <td>{room.totalSeats || 0}</td>
+                    <td>{page * PAGE_SIZE + index + 1}</td>
                     <td>
-                      <span className={`status-badge room-status-${room.status?.toLowerCase() || 'unknown'}`}>
-                        {STATUS_LABELS[room.status] || room.status || '-'}
+                      <strong className="room-title-text">{room.name}</strong>
+                    </td>
+                    <td>{room.roomType || "-"}</td>
+                    <td>{room.totalSeats ?? 0}</td>
+                    <td>
+                      <span className={`status-badge room-status-${room.status?.toLowerCase() || "unknown"}`}>
+                        {STATUS_LABELS[room.status || ""] || room.status || "-"}
                       </span>
                     </td>
                     <td className="action-column">
                       <button
                         type="button"
-                        className="edit-button"
+                        className="edit-button room-detail-button"
+                        aria-label={`Xem chi tiết ghế của ${room.name}`}
                         onClick={() => onNavigate(`/admin/cinema-rooms/${room.id}`)}
                       >
                         Chi tiết ghế
@@ -162,21 +206,37 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
             </table>
           </div>
 
-          <nav className="pagination" aria-label="Phân trang phòng chiếu">
+          <nav className="pagination room-pagination" aria-label="Phân trang phòng chiếu">
+            <span className="pagination-summary">
+              Hiển thị {firstItemIndex}-{lastItemIndex} trong {totalElements} phòng
+            </span>
             <button
               type="button"
-              className="secondary-button"
+              className="pagination-button"
               disabled={page === 0}
+              aria-label="Trang trước"
               onClick={() => setPage((current) => Math.max(current - 1, 0))}
             >
               Trước
             </button>
-            <span>Trang {totalPages === 0 ? 0 : page + 1} / {totalPages}</span>
+            {visiblePages.map((pageNumber) => (
+              <button
+                key={pageNumber}
+                type="button"
+                className={`pagination-button${pageNumber === page ? " is-active" : ""}`}
+                aria-current={pageNumber === page ? "page" : undefined}
+                aria-label={`Trang ${pageNumber + 1}`}
+                onClick={() => setPage(pageNumber)}
+              >
+                {pageNumber + 1}
+              </button>
+            ))}
             <button
               type="button"
-              className="secondary-button"
+              className="pagination-button"
               disabled={page + 1 >= totalPages}
-              onClick={() => setPage((current) => current + 1)}
+              aria-label="Trang sau"
+              onClick={() => setPage((current) => Math.min(current + 1, totalPages - 1))}
             >
               Sau
             </button>
