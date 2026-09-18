@@ -37,7 +37,7 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
     @Override
     @Transactional(readOnly = true)
     public Page<CinemaRoomListResponse> getRooms(String keyword, String status, Pageable pageable) {
-        return cinemaRoomRepository.searchRooms(normalize(keyword), normalize(status), pageable)
+        return cinemaRoomRepository.searchRooms(normalize(keyword), normalizeStatus(status), pageable)
                 .map(CinemaRoomListResponse::fromEntity);
     }
 
@@ -52,6 +52,9 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
     @Transactional
     public CinemaRoomDetailResponse updateSeatTypes(Long roomId, UpdateSeatTypesRequest request) {
         CinemaRoom room = findRoom(roomId);
+        if (request == null || request.getSeats() == null || request.getSeats().isEmpty()) {
+            throw new BadRequestException("Seats must not be empty");
+        }
         validateDuplicateSeatIds(request.getSeats());
         validateSeatTypes(request.getSeats());
 
@@ -62,7 +65,7 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
 
         List<Seat> seats = seatRepository.findByRoomIdAndIdIn(roomId, requestedSeatIds);
         if (seats.size() != requestedSeatIds.size()) {
-            throw new BadRequestException("One or more seats do not belong to this room");
+            validateMissingOrForeignSeats(roomId, requestedSeatIds);
         }
 
         Map<Long, String> seatTypesById = new HashMap<>();
@@ -94,6 +97,9 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
     private void validateDuplicateSeatIds(List<SeatTypeUpdateRequest> seats) {
         Set<Long> ids = new HashSet<>();
         for (SeatTypeUpdateRequest seat : seats) {
+            if (seat == null || seat.getSeatId() == null) {
+                throw new BadRequestException("Seat id is required");
+            }
             if (!ids.add(seat.getSeatId())) {
                 throw new BadRequestException("Duplicate seatId: " + seat.getSeatId());
             }
@@ -102,9 +108,23 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
 
     private void validateSeatTypes(List<SeatTypeUpdateRequest> seats) {
         for (SeatTypeUpdateRequest seat : seats) {
+            if (seat == null || seat.getSeatType() == null || seat.getSeatType().isBlank()) {
+                throw new BadRequestException("Seat type is required");
+            }
             String seatType = seat.getSeatType().trim().toUpperCase();
             if (!ALLOWED_SEAT_TYPES.contains(seatType)) {
                 throw new BadRequestException("Invalid seatType: " + seat.getSeatType());
+            }
+        }
+    }
+
+    private void validateMissingOrForeignSeats(Long roomId, Set<Long> requestedSeatIds) {
+        for (Long seatId : requestedSeatIds) {
+            if (!seatRepository.existsById(seatId)) {
+                throw new ResourceNotFoundException("Seat not found with id " + seatId);
+            }
+            if (!seatRepository.existsByIdAndRoomId(seatId, roomId)) {
+                throw new BadRequestException("Seat " + seatId + " does not belong to room " + roomId);
             }
         }
     }
@@ -114,5 +134,10 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
             return null;
         }
         return value.trim();
+    }
+
+    private String normalizeStatus(String value) {
+        String normalized = normalize(value);
+        return normalized == null ? null : normalized.toUpperCase();
     }
 }

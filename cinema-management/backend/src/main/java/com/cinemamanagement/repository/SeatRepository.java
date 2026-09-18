@@ -10,4 +10,6 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     List<Seat> findByRoomIdOrderByRowLabelAscSeatNumberAsc(Long roomId);
 
     List<Seat> findByRoomIdAndIdIn(Long roomId, Collection<Long> ids);
+
+    boolean existsByIdAndRoomId(Long id, Long roomId);
 }
