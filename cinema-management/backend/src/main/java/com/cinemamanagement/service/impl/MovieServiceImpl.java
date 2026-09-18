@@ -6,6 +6,7 @@ import com.cinemamanagement.exception.ResourceNotFoundException;
 import com.cinemamanagement.repository.GenreRepository;
 import com.cinemamanagement.repository.MovieRepository;
 import com.cinemamanagement.request.MovieRequest;
+import com.cinemamanagement.response.GenreResponse;
 import com.cinemamanagement.response.MovieDetailResponse;
 import com.cinemamanagement.response.MovieListResponse;
 import com.cinemamanagement.response.MovieResponse;
@@ -18,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,11 +48,24 @@ public class MovieServiceImpl implements MovieService {
     @Override
     @Transactional(readOnly = true)
     public List<MovieResponse> getNowShowingMovies() {
-        return movieRepository.findByStatusOrderByReleaseDateDesc(SHOWING)
+        return movieRepository.findByStatusWithGenresOrderByReleaseDateDesc(SHOWING)
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieResponse> getHomeMovies(String status, Long genreId, LocalDate date) {
+        LocalDateTime startOfDay = date == null ? null : date.atStartOfDay();
+        LocalDateTime endOfDay = date == null ? null : date.plusDays(1).atStartOfDay();
+
+        return movieRepository.searchHomeMovies(normalize(status), genreId, startOfDay, endOfDay)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     @Override
     @Transactional(readOnly = true)
     public Page<MovieListResponse> getMovies(String keyword, String status, Pageable pageable) {
@@ -137,7 +154,11 @@ public class MovieServiceImpl implements MovieService {
                 movie.getLanguage(),
                 movie.getPosterUrl(),
                 movie.getTrailerUrl(),
-                movie.getStatus()
+                movie.getStatus(),
+                movie.getGenres().stream()
+                        .map(GenreResponse::fromEntity)
+                        .sorted(Comparator.comparing(GenreResponse::name))
+                        .toList()
         );
     }
 }

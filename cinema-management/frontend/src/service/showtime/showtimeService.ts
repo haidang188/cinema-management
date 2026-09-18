@@ -1,4 +1,5 @@
 import axios from "axios";
+import { request } from "../httpClient";
 import type {ShowtimeData} from "../../types/showtime/showtime";
 
 const URL: string = import.meta.env.VITE_API_URL;
@@ -27,3 +28,7 @@ export const getShowtimesByDate = async (
         return [];
     }
 };
+
+export function getShowtimesByMovieAndDate(movieId: string, date: string): Promise<ShowtimeData[]> {
+    return request<ShowtimeData[]>(`/api/showtimes/movie/${movieId}?date=${date}`);
+}
