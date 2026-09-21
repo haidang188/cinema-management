@@ -1,5 +1,5 @@
 import { request } from "../httpClient"
-import type { CinemaRoom, PageResponse, SeatTypeUpdate } from "../../types/admin"
+import type { CinemaRoom, CinemaRoomPayload, CinemaRoomUpdatePayload, PageResponse, SeatTypeUpdate } from "../../types/admin"
 
 interface RoomSearchParams {
   page?: number
@@ -31,6 +31,20 @@ export function getRooms({
 
 export function getRoomDetail(id: string): Promise<CinemaRoom> {
   return request<CinemaRoom>(`/api/admin/cinema-rooms/${id}`)
+}
+
+export function createRoom(payload: CinemaRoomPayload): Promise<CinemaRoom> {
+  return request<CinemaRoom>("/api/admin/cinema-rooms", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  })
+}
+
+export function updateRoom(id: string, payload: CinemaRoomUpdatePayload): Promise<CinemaRoom> {
+  return request<CinemaRoom>(`/api/admin/cinema-rooms/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  })
 }
 
 export function updateSeatTypes(roomId: string, seats: SeatTypeUpdate[]): Promise<CinemaRoom> {

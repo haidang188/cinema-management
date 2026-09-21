@@ -1173,7 +1173,7 @@ button {
 }
 
 .admin-sidebar button:hover,
-.admin-sidebar button:first-child {
+.admin-sidebar button.is-active {
   background: #ffb0a8;
   color: #0a0f0f;
 }
@@ -1409,12 +1409,12 @@ button {
 
 /* Softer admin movie form */
 .admin-sidebar button:hover,
-.admin-sidebar button:first-child {
+.admin-sidebar button.is-active {
   background: #2b3434;
   color: #ffe1dc;
 }
 
-.admin-sidebar button:first-child {
+.admin-sidebar button.is-active {
   border-left: 3px solid #e67e78;
 }
 
@@ -2848,6 +2848,8 @@ button {
 .admin-content .room-empty-state,
 .admin-content .room-alert,
 .admin-content .room-summary-card,
+.admin-content .room-form-card,
+.admin-content .room-form-preview,
 .admin-content .seat-map-panel,
 .admin-content .room-action-bar {
   background: #15191a;
@@ -2900,6 +2902,69 @@ button {
   box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.08);
 }
 
+.admin-content .room-form-card {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+}
+
+.admin-content .room-form-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-content .room-form-field {
+  display: grid;
+  gap: 7px;
+}
+
+.admin-content .room-form-field-full {
+  grid-column: 1 / -1;
+}
+
+.admin-content .room-form-field span,
+.admin-content .room-form-preview span {
+  color: #969b9c;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-content .room-form-field input,
+.admin-content .room-form-field select {
+  background: #191d1e;
+  border: 1px solid #303536;
+  border-radius: 8px;
+  color: #f4eee4;
+  min-height: 42px;
+  outline: none;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.admin-content .room-form-field input::placeholder {
+  color: #6f7475;
+}
+
+.admin-content .room-form-field input:focus,
+.admin-content .room-form-field select:focus {
+  border-color: #e50914;
+  box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.08);
+}
+
+.admin-content .room-form-preview {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.admin-content .room-form-preview strong {
+  color: #e6caa3;
+  font-size: 28px;
+  line-height: 1;
+}
+
 .admin-content .room-table-card {
   overflow-x: auto;
 }
@@ -2916,6 +2981,14 @@ button {
   padding: 16px;
   text-align: left;
   vertical-align: middle;
+}
+
+.admin-content .room-table .action-column {
+  white-space: nowrap;
+}
+
+.admin-content .room-table .action-column button + button {
+  margin-left: 8px;
 }
 
 .admin-content .room-table th {
@@ -3296,7 +3369,8 @@ button {
 
 @media (max-width: 1023px) {
   .admin-content .room-toolbar,
-  .admin-content .room-detail-grid {
+  .admin-content .room-detail-grid,
+  .admin-content .room-form-grid {
     grid-template-columns: 1fr;
   }
 
@@ -3318,6 +3392,7 @@ button {
   }
 
   .admin-content .room-back-button,
+  .admin-content .room-add-button,
   .admin-content .room-action-bar button {
     width: 100%;
   }

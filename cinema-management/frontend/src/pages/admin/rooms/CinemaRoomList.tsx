@@ -102,6 +102,9 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
           <h1>Quản lý phòng chiếu</h1>
           <p>Quản lý danh sách phòng và cấu hình sơ đồ ghế</p>
         </div>
+        <button type="button" className="primary-button room-add-button" onClick={() => onNavigate("/admin/cinema-rooms/create")}>
+          Thêm phòng chiếu
+        </button>
       </header>
 
       <section className="room-toolbar" aria-label="Tìm kiếm và lọc phòng chiếu">
@@ -191,6 +194,14 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
                       </span>
                     </td>
                     <td className="action-column">
+                      <button
+                        type="button"
+                        className="edit-button room-edit-button"
+                        aria-label={`Sửa phòng ${room.name}`}
+                        onClick={() => onNavigate(`/admin/cinema-rooms/${room.id}/edit`)}
+                      >
+                        Sửa
+                      </button>
                       <button
                         type="button"
                         className="edit-button room-detail-button"

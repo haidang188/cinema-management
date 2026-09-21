@@ -67,6 +67,20 @@ export interface CinemaRoom {
   seats?: Seat[]
 }
 
+export interface CinemaRoomPayload {
+  name: string
+  roomType: string
+  rows: number
+  seatsPerRow: number
+  status: string
+}
+
+export interface CinemaRoomUpdatePayload {
+  name: string
+  roomType: string
+  status: string
+}
+
 export interface SeatTypeUpdate {
   seatId: number
   seatType: string
