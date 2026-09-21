@@ -8,6 +8,7 @@ import com.cinemamanagement.service.MovieService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -57,7 +58,7 @@ public class MovieController {
     public Page<MovieListResponse> getMovies(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String status,
-            @PageableDefault(size = 10) Pageable pageable
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return movieService.getMovies(keyword, status, pageable);
     }

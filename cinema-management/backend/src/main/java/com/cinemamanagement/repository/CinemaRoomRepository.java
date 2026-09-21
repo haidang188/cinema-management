@@ -8,6 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface CinemaRoomRepository extends JpaRepository<CinemaRoom, Long> {
+    boolean existsByNameIgnoreCase(String name);
+
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
+
     @Query("""
             select room from CinemaRoom room
             where (:keyword is null or lower(room.name) like lower(concat('%', :keyword, '%')))

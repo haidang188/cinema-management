@@ -69,17 +69,21 @@ function AppRouteContent() {
       <Route path="/login" element={renderAuthPage("login")} />
       <Route path="/register" element={renderAuthPage("register")} />
 
-      {[...showtimeRoutes, ...ticketPriceRoutes].map((route) => (
+      {[...showtimeRoutes, ...ticketPriceRoutes].map((route) => {
+        const Shell = currentUser?.role === "ADMIN" ? AdminShell : CustomerShell
+
+        return (
         <Route
           key={route.path}
           path={route.path}
           element={
-            <CustomerShell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
+            <Shell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
               {route.element}
-            </CustomerShell>
+            </Shell>
           }
         />
-      ))}
+        )
+      })}
 
       {[...adminRoutes, ...promotionRoutes].map((route) => (
         <Route
