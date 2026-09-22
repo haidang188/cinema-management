@@ -28,6 +28,7 @@ import java.util.Set;
 @Service
 public class CinemaRoomServiceImpl implements CinemaRoomService {
     private static final Set<String> ALLOWED_SEAT_TYPES = Set.of("NORMAL", "VIP");
+    private static final Set<String> ALLOWED_SEAT_STATUSES = Set.of("ACTIVE", "INACTIVE");
     private static final Set<String> ALLOWED_ROOM_STATUSES = Set.of("ACTIVE", "MAINTENANCE", "INACTIVE");
 
     private final CinemaRoomRepository cinemaRoomRepository;
@@ -96,7 +97,7 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
             throw new BadRequestException("Seats must not be empty");
         }
         validateDuplicateSeatIds(request.getSeats());
-        validateSeatTypes(request.getSeats());
+        validateSeatUpdates(request.getSeats());
 
         Set<Long> requestedSeatIds = new HashSet<>();
         for (SeatTypeUpdateRequest item : request.getSeats()) {
@@ -108,16 +109,15 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
             validateMissingOrForeignSeats(roomId, requestedSeatIds);
         }
 
-        Map<Long, String> seatTypesById = new HashMap<>();
+        Map<Long, SeatTypeUpdateRequest> updatesBySeatId = new HashMap<>();
         for (SeatTypeUpdateRequest item : request.getSeats()) {
-            seatTypesById.put(item.getSeatId(), item.getSeatType().trim().toUpperCase());
+            updatesBySeatId.put(item.getSeatId(), item);
         }
 
         for (Seat seat : seats) {
-            if (!"ACTIVE".equalsIgnoreCase(seat.getStatus())) {
-                throw new BadRequestException("Inactive seat cannot be updated: " + seat.getRowLabel() + seat.getSeatNumber());
-            }
-            seat.setSeatType(seatTypesById.get(seat.getId()));
+            SeatTypeUpdateRequest update = updatesBySeatId.get(seat.getId());
+            seat.setSeatType(update.getSeatType().trim().toUpperCase());
+            seat.setStatus(update.getStatus().trim().toUpperCase());
         }
         seatRepository.saveAll(seats);
 
@@ -146,7 +146,7 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
         }
     }
 
-    private void validateSeatTypes(List<SeatTypeUpdateRequest> seats) {
+    private void validateSeatUpdates(List<SeatTypeUpdateRequest> seats) {
         for (SeatTypeUpdateRequest seat : seats) {
             if (seat == null || seat.getSeatType() == null || seat.getSeatType().isBlank()) {
                 throw new BadRequestException("Seat type is required");
@@ -154,6 +154,13 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
             String seatType = seat.getSeatType().trim().toUpperCase();
             if (!ALLOWED_SEAT_TYPES.contains(seatType)) {
                 throw new BadRequestException("Invalid seatType: " + seat.getSeatType());
+            }
+            if (seat.getStatus() == null || seat.getStatus().isBlank()) {
+                throw new BadRequestException("Seat status is required");
+            }
+            String status = seat.getStatus().trim().toUpperCase();
+            if (!ALLOWED_SEAT_STATUSES.contains(status)) {
+                throw new BadRequestException("Invalid seat status: " + seat.getStatus());
             }
         }
     }

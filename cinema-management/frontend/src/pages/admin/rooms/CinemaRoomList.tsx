@@ -100,7 +100,7 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
         <div>
           <p className="room-page-eyebrow">Sprint 2</p>
           <h1>Quản lý phòng chiếu</h1>
-          <p>Quản lý danh sách phòng và cấu hình sơ đồ ghế</p>
+          <p>Quản lý danh sách phòng và cấu hình sơ đồ ghế.</p>
         </div>
         <button type="button" className="primary-button room-add-button" onClick={() => onNavigate("/admin/cinema-rooms/create")}>
           Thêm phòng chiếu

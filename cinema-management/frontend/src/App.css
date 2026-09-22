@@ -1140,13 +1140,27 @@ button {
 
 .admin-brand {
   align-items: center;
+  background: transparent;
   border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
   color: #ffd0c8;
   display: flex;
   font-size: 12px;
   font-weight: 950;
   height: 44px;
   justify-content: center;
+  letter-spacing: 0;
+  padding: 0;
+  text-transform: none;
+  width: 100%;
+}
+
+.admin-sidebar .admin-brand:hover,
+.admin-sidebar .admin-brand:focus-visible {
+  background: #111717;
+  color: #ffffff;
 }
 
 .admin-sidebar nav {
@@ -3212,6 +3226,48 @@ button {
   padding: 22px;
 }
 
+.admin-content .seat-editor-layout {
+  align-items: start;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+}
+
+.admin-content .seat-editor-panel {
+  background: #15191a;
+  border: 1px solid #303536;
+  border-radius: 8px;
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.admin-content .seat-editor-panel > div {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-content .seat-editor-panel span,
+.admin-content .seat-editor-panel small,
+.admin-content .seat-editor-empty span {
+  color: #969b9c;
+  font-size: 13px;
+}
+
+.admin-content .seat-editor-panel strong,
+.admin-content .seat-editor-empty strong {
+  color: #f4eee4;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.admin-content .room-summary-card small {
+  color: #e6caa3;
+  display: block;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
 .admin-content .screen-line {
   align-items: center;
   border-top: 2px solid #e6caa3;
@@ -3256,6 +3312,11 @@ button {
 .admin-content .legend-inactive {
   background: #26292a;
   border: 1px dashed #686d6e;
+}
+
+.admin-content .legend-changed {
+  background: #3a2224;
+  border: 1px solid #e50914;
 }
 
 .admin-content .seat-rows {
@@ -3324,6 +3385,11 @@ button {
   box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.18);
 }
 
+.admin-content .seat-selected {
+  outline: 3px solid rgba(230, 202, 163, 0.5);
+  outline-offset: 2px;
+}
+
 .admin-content .seat-inactive {
   background: #26292a;
   border: 1px dashed #686d6e;
@@ -3370,7 +3436,8 @@ button {
 @media (max-width: 1023px) {
   .admin-content .room-toolbar,
   .admin-content .room-detail-grid,
-  .admin-content .room-form-grid {
+  .admin-content .room-form-grid,
+  .admin-content .seat-editor-layout {
     grid-template-columns: 1fr;
   }
 

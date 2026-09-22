@@ -127,14 +127,7 @@ function CinemaRoomCreate({ onNavigate }: CinemaRoomCreateProps) {
 
           <label className="room-form-field">
             <span>Số hàng ghế</span>
-            <input
-              min="1"
-              max="26"
-              name="rows"
-              type="number"
-              value={formValues.rows}
-              onChange={(event) => updateField("rows", event.target.value)}
-            />
+            <input min="1" max="26" name="rows" type="number" value={formValues.rows} onChange={(event) => updateField("rows", event.target.value)} />
           </label>
 
           <label className="room-form-field">
