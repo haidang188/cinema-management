@@ -18,7 +18,7 @@ interface SeatDraft {
 interface SeatMapProps {
   seats: Seat[]
   pendingSeats: Record<number, SeatDraft>
-  selectedSeatId?: number
+  selectedSeatIds: number[]
   onSelectSeat: (seat: Seat) => void
 }
 
@@ -41,9 +41,10 @@ function getSeatStatusLabel(status?: string) {
   return SEAT_STATUS_LABELS[status || ""] || status || "Chưa rõ trạng thái"
 }
 
-function SeatMap({ seats, pendingSeats, selectedSeatId, onSelectSeat }: SeatMapProps) {
+function SeatMap({ seats, pendingSeats, selectedSeatIds, onSelectSeat }: SeatMapProps) {
   const rows = groupSeatsByRow(seats)
   const sortedRowLabels = Object.keys(rows).sort((firstRow, secondRow) => firstRow.localeCompare(secondRow))
+  const selectedSeatIdSet = new Set(selectedSeatIds)
 
   return (
     <section className="seat-map-panel">
@@ -85,7 +86,7 @@ function SeatMap({ seats, pendingSeats, selectedSeatId, onSelectSeat }: SeatMapP
                   const status = draft?.status || seat.status
                   const isInactive = status !== "ACTIVE"
                   const changed = Boolean(draft)
-                  const selected = selectedSeatId === seat.id
+                  const selected = selectedSeatIdSet.has(seat.id)
                   const typeLabel = getSeatTypeLabel(seatType)
                   const statusLabel = getSeatStatusLabel(status)
 
@@ -105,7 +106,7 @@ function SeatMap({ seats, pendingSeats, selectedSeatId, onSelectSeat }: SeatMapP
                       onClick={() => onSelectSeat(seat)}
                       title={`${seat.seatName} - ${typeLabel} - ${statusLabel}`}
                       aria-pressed={selected}
-                      aria-label={`${seat.seatName}, ${typeLabel}, ${statusLabel}${changed ? ", chưa lưu" : ""}`}
+                      aria-label={`${seat.seatName}, ${typeLabel}, ${statusLabel}${selected ? ", đang chọn" : ""}${changed ? ", chưa lưu" : ""}`}
                     >
                       <span>{seat.seatName}</span>
                       <small>{isInactive ? "INACTIVE" : seatType}</small>

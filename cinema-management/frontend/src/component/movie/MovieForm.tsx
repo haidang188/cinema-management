@@ -27,6 +27,7 @@ const EMPTY_MOVIE: MovieFormValues = {
 interface MovieFormProps {
   initialMovie?: AdminMovie | null
   submitLabel: string
+  cancelLabel?: string
   onSubmit: (payload: MoviePayload) => Promise<void>
   onCancel: () => void
 }
@@ -109,7 +110,7 @@ function validate(values: MovieFormValues, requiresPoster: boolean): Record<stri
   return errors
 }
 
-function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormProps) {
+function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSubmit, onCancel }: MovieFormProps) {
   const [values, setValues] = useState(() => normalizeInitialMovie(initialMovie))
   const [genres, setGenres] = useState<Genre[]>([])
   const [genreError, setGenreError] = useState("")
@@ -203,7 +204,7 @@ function MovieForm({ initialMovie, submitLabel, onSubmit, onCancel }: MovieFormP
 
       <div className="form-actions movie-action-bar movie-action-bar-top">
         <button type="button" className="secondary-button" onClick={onCancel}>
-          Quay lại
+          {cancelLabel}
         </button>
         <button type="submit" className="primary-button" disabled={saving}>
           {saving ? "Đang lưu..." : submitLabel}

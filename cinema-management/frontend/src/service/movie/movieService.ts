@@ -17,17 +17,6 @@ interface HomeMovieSearchParams {
   date?: string
 }
 
-function buildMovieFormData(payload: MoviePayload, posterFile: File | null): FormData {
-  const formData = new FormData()
-  const { posterUrl: _posterUrl, ...moviePayload } = payload
-
-  formData.append("movie", new Blob([JSON.stringify(moviePayload)], { type: "application/json" }))
-  if (posterFile) {
-    formData.append("poster", posterFile)
-  }
-
-  return formData
-}
 export function getPublicMovie(id: string): Promise<Movie> {
   return request<Movie>(`/api/movies/${id}`)
 }
@@ -83,17 +72,17 @@ export function getMovie(id: string): Promise<AdminMovie> {
   return request<AdminMovie>(`/api/movies/admin/${id}`)
 }
 
-export function createMovie(payload: MoviePayload, posterFile: File | null): Promise<AdminMovie> {
+export function createMovie(payload: MoviePayload): Promise<AdminMovie> {
   return request<AdminMovie>("/api/movies/admin", {
     method: "POST",
-    body: buildMovieFormData(payload, posterFile),
+    body: JSON.stringify(payload),
   })
 }
 
-export function updateMovie(id: string, payload: MoviePayload, posterFile: File | null): Promise<AdminMovie> {
+export function updateMovie(id: string, payload: MoviePayload): Promise<AdminMovie> {
   return request<AdminMovie>(`/api/movies/admin/${id}`, {
     method: "PUT",
-    body: buildMovieFormData(payload, posterFile),
+    body: JSON.stringify(payload),
   })
 }
 
