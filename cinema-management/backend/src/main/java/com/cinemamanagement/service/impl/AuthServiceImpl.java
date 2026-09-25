@@ -5,6 +5,7 @@ import com.cinemamanagement.entity.Member;
 import com.cinemamanagement.entity.Role;
 import com.cinemamanagement.entity.User;
 import com.cinemamanagement.exception.AuthValidationException;
+import com.cinemamanagement.repository.AdminRepository;
 import com.cinemamanagement.repository.EmployeeRepository;
 import com.cinemamanagement.repository.MemberRepository;
 import com.cinemamanagement.repository.RoleRepository;
@@ -26,11 +27,13 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+    private static final String ROLE_ADMIN = "ADMIN";
     private static final String ROLE_MEMBER = "MEMBER";
     private static final String ROLE_EMPLOYEE = "EMPLOYEE";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final AdminRepository adminRepository;
     private final MemberRepository memberRepository;
     private final EmployeeRepository employeeRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -138,6 +141,20 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private AuthResponse buildResponse(User user, String role, String message) {
+        if (ROLE_ADMIN.equals(role)) {
+            return adminRepository.findByUserId(user.getId())
+                    .map(admin -> new AuthResponse(
+                            user.getId(),
+                            admin.getId(),
+                            admin.getFullName(),
+                            admin.getEmail(),
+                            admin.getPhone(),
+                            role,
+                            message
+                    ))
+                    .orElse(new AuthResponse(user.getId(), null, null, user.getUsername(), null, role, message));
+        }
+
         if (ROLE_EMPLOYEE.equals(role)) {
             return employeeRepository.findByUserId(user.getId())
                     .map(employee -> new AuthResponse(

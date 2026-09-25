@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { Navigate, useNavigate } from "react-router-dom"
+import { Navigate, useLocation, useNavigate } from "react-router-dom"
 
 import HomeFooter from "../component/home/HomeFooter"
 import HomeHeader from "../component/home/HomeHeader"
@@ -24,6 +24,7 @@ export function CustomerShell({ children, currentUser, onLogout, onLoginClick }:
 
 export function AdminShell({ children, currentUser, onLogout }: AppShellProps) {
   const navigate = useNavigate()
+  const location = useLocation()
 
   if (!currentUser) {
     return <Navigate to="/login" replace />
@@ -33,30 +34,37 @@ export function AdminShell({ children, currentUser, onLogout }: AppShellProps) {
     return <Navigate to="/" replace />
   }
 
+  const navItems = [
+    { path: "/admin/movies", icon: "MV", label: "Quản lý phim" },
+    { path: "/admin/cinema-rooms", icon: "RM", label: "Quản lý phòng chiếu" },
+    { path: "/admin/promotions", icon: "KM", label: "Khuyến mãi" },
+    { path: "/showtimes", icon: "LC", label: "Lịch chiếu" },
+    { path: "/ticket-prices", icon: "GV", label: "Giá vé" },
+  ]
+
   return (
     <main className="admin-layout">
       <aside className="admin-sidebar">
         <div className="admin-brand">PREMIERE ADMIN</div>
         <nav aria-label="Điều hướng quản trị">
-          <button type="button" onClick={() => navigate("/admin/movies")}>
-            <span>▣</span>
-            Quản lý phim
-          </button>
-          <button type="button" onClick={() => navigate("/admin/promotions")}>
-            <span>◇</span>
-            Khuyến mãi
-          </button>
-          <button type="button" onClick={() => navigate("/showtimes")}>
-            <span>▦</span>
-            Lịch chiếu
-          </button>
-          <button type="button" onClick={() => navigate("/ticket-prices")}>
-            <span>▥</span>
-            Giá vé
-          </button>
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
+
+            return (
+              <button
+                key={item.path}
+                type="button"
+                className={isActive ? "is-active" : undefined}
+                onClick={() => navigate(item.path)}
+              >
+                <span>{item.icon}</span>
+                {item.label}
+              </button>
+            )
+          })}
         </nav>
         <button type="button" className="admin-logout" onClick={onLogout}>
-          ⇱ Đăng xuất
+          Đăng xuất
         </button>
       </aside>
       <section className="admin-content">{children}</section>

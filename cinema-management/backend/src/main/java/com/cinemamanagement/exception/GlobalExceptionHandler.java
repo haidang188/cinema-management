@@ -37,6 +37,12 @@ public class GlobalExceptionHandler {
                 .body(ApiErrorResponse.of(400, "Bad Request", exception.getMessage()));
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleConflict(ConflictException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiErrorResponse.of(409, "Conflict", exception.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException exception) {
         Map<String, String> fieldErrors = new LinkedHashMap<>();

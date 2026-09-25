@@ -11,6 +11,12 @@ interface MovieSearchParams {
   status?: string
 }
 
+interface HomeMovieSearchParams {
+  status?: string
+  genreId?: string
+  date?: string
+}
+
 function buildMovieFormData(payload: MoviePayload, posterFile: File | null): FormData {
   const formData = new FormData()
   const { posterUrl: _posterUrl, ...moviePayload } = payload
@@ -22,7 +28,9 @@ function buildMovieFormData(payload: MoviePayload, posterFile: File | null): For
 
   return formData
 }
-
+export function getPublicMovie(id: string): Promise<Movie> {
+  return request<Movie>(`/api/movies/${id}`)
+}
 export async function getNowShowingMovies(): Promise<Movie[]> {
   const response = await fetch(`${MOVIE_API_BASE_URL}/now-showing`)
 
@@ -31,6 +39,23 @@ export async function getNowShowingMovies(): Promise<Movie[]> {
   }
 
   return response.json()
+}
+
+export function getHomeMovies({ status = "SHOWING", genreId = "", date = "" }: HomeMovieSearchParams = {}): Promise<Movie[]> {
+  const params = new URLSearchParams()
+
+  if (status) {
+    params.set("status", status)
+  }
+  if (genreId) {
+    params.set("genreId", genreId)
+  }
+  if (date) {
+    params.set("date", date)
+  }
+
+  const query = params.toString()
+  return request<Movie[]>(`/api/movies${query ? `?${query}` : ""}`)
 }
 
 export function getMovies({
