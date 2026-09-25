@@ -38,10 +38,19 @@ function getSeatDraft(seat: Seat, pendingSeats: Record<number, SeatDraft>): Seat
   return pendingSeats[seat.id] || { seatType: seat.seatType || "NORMAL", status: seat.status || "ACTIVE" }
 }
 
+function getBulkFieldValue(seats: Seat[], pendingSeats: Record<number, SeatDraft>, field: keyof SeatDraft) {
+  if (seats.length === 0) return ""
+
+  const [firstSeat, ...remainingSeats] = seats
+  const firstValue = getSeatDraft(firstSeat, pendingSeats)[field]
+  const hasMixedValue = remainingSeats.some((seat) => getSeatDraft(seat, pendingSeats)[field] !== firstValue)
+  return hasMixedValue ? "MIXED" : firstValue
+}
+
 function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
   const [room, setRoom] = useState<CinemaRoom | null>(null)
   const [pendingSeats, setPendingSeats] = useState<Record<number, SeatDraft>>({})
-  const [selectedSeatId, setSelectedSeatId] = useState<number | undefined>()
+  const [selectedSeatIds, setSelectedSeatIds] = useState<number[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
@@ -58,7 +67,7 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
         if (!ignore) {
           setRoom(data)
           setPendingSeats({})
-          setSelectedSeatId(undefined)
+          setSelectedSeatIds([])
         }
       })
       .catch((requestError: Error) => {
@@ -95,12 +104,15 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload)
   }, [hasChanges])
 
-  const selectedSeat = useMemo(
-    () => room?.seats?.find((seat) => seat.id === selectedSeatId),
-    [room?.seats, selectedSeatId],
-  )
+  const selectedSeats = useMemo(() => {
+    const selectedSeatIdSet = new Set(selectedSeatIds)
+    return (room?.seats || []).filter((seat) => selectedSeatIdSet.has(seat.id))
+  }, [room?.seats, selectedSeatIds])
 
-  const selectedDraft = selectedSeat ? getSeatDraft(selectedSeat, pendingSeats) : null
+  const selectedSeat = selectedSeats.length === 1 ? selectedSeats[0] : null
+  const selectedSeatNames = selectedSeats.map((seat) => seat.seatName).join(", ")
+  const selectedSeatType = getBulkFieldValue(selectedSeats, pendingSeats, "seatType")
+  const selectedSeatStatus = getBulkFieldValue(selectedSeats, pendingSeats, "status")
 
   const seatStats = useMemo(() => {
     const seats = room?.seats || []
@@ -112,22 +124,32 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
     }
   }, [pendingSeats, room])
 
-  function updateSelectedSeat(field: keyof SeatDraft, value: string) {
-    if (!selectedSeat || saving) return
+  function toggleSelectedSeat(seat: Seat) {
+    if (saving) return
+    setSelectedSeatIds((current) =>
+      current.includes(seat.id) ? current.filter((seatId) => seatId !== seat.id) : [...current, seat.id],
+    )
+  }
+
+  function updateSelectedSeats(field: keyof SeatDraft, value: string) {
+    if (selectedSeats.length === 0 || saving || value === "MIXED") return
 
     setPendingSeats((current) => {
-      const nextDraft = {
-        seatType: field === "seatType" ? value : current[selectedSeat.id]?.seatType || selectedSeat.seatType || "NORMAL",
-        status: field === "status" ? value : current[selectedSeat.id]?.status || selectedSeat.status || "ACTIVE",
-      }
-
-      const unchanged = nextDraft.seatType === selectedSeat.seatType && nextDraft.status === selectedSeat.status
       const updated = { ...current }
-      if (unchanged) {
-        delete updated[selectedSeat.id]
-      } else {
-        updated[selectedSeat.id] = nextDraft
-      }
+      selectedSeats.forEach((seat) => {
+        const currentDraft = current[seat.id]
+        const nextDraft = {
+          seatType: field === "seatType" ? value : currentDraft?.seatType || seat.seatType || "NORMAL",
+          status: field === "status" ? value : currentDraft?.status || seat.status || "ACTIVE",
+        }
+
+        const unchanged = nextDraft.seatType === seat.seatType && nextDraft.status === seat.status
+        if (unchanged) {
+          delete updated[seat.id]
+        } else {
+          updated[seat.id] = nextDraft
+        }
+      })
       return updated
     })
   }
@@ -147,7 +169,7 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
       const updatedRoom = await updateSeatTypes(roomId, seats)
       setRoom(updatedRoom)
       setPendingSeats({})
-      setSelectedSeatId(undefined)
+      setSelectedSeatIds([])
       setToastMessage(SAVE_SUCCESS_MESSAGE)
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : SAVE_ERROR_MESSAGE)
@@ -226,28 +248,35 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
             <SeatMap
               seats={room.seats || []}
               pendingSeats={pendingSeats}
-              selectedSeatId={selectedSeatId}
-              onSelectSeat={(seat) => setSelectedSeatId(seat.id)}
+              selectedSeatIds={selectedSeatIds}
+              onSelectSeat={toggleSelectedSeat}
             />
 
             <aside className="seat-editor-panel" aria-label="Chỉnh sửa ghế">
-              {selectedSeat && selectedDraft ? (
+              {selectedSeats.length > 0 ? (
                 <>
                   <div>
-                    <span>Ghế đang chọn</span>
-                    <strong>{selectedSeat.seatName}</strong>
+                    <span>{selectedSeats.length === 1 ? "Ghế đang chọn" : "Các ghế đang chọn"}</span>
+                    <strong>{selectedSeats.length === 1 && selectedSeat ? selectedSeat.seatName : `${selectedSeats.length} ghế`}</strong>
                     <small>
-                      Hàng {selectedSeat.rowLabel}, số {selectedSeat.seatNumber}
+                      {selectedSeats.length === 1 && selectedSeat
+                        ? `Hàng ${selectedSeat.rowLabel}, số ${selectedSeat.seatNumber}`
+                        : selectedSeatNames}
                     </small>
                   </div>
 
                   <label className="room-form-field">
                     <span>Loại ghế</span>
                     <select
-                      value={selectedDraft.seatType}
+                      value={selectedSeatType}
                       disabled={saving}
-                      onChange={(event) => updateSelectedSeat("seatType", event.target.value)}
+                      onChange={(event) => updateSelectedSeats("seatType", event.target.value)}
                     >
+                      {selectedSeatType === "MIXED" && (
+                        <option value="MIXED" disabled>
+                          Nhiều giá trị
+                        </option>
+                      )}
                       {Object.entries(SEAT_TYPE_LABELS).map(([value, label]) => (
                         <option key={value} value={value}>
                           {label}
@@ -259,10 +288,15 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
                   <label className="room-form-field">
                     <span>Trạng thái ghế</span>
                     <select
-                      value={selectedDraft.status}
+                      value={selectedSeatStatus}
                       disabled={saving}
-                      onChange={(event) => updateSelectedSeat("status", event.target.value)}
+                      onChange={(event) => updateSelectedSeats("status", event.target.value)}
                     >
+                      {selectedSeatStatus === "MIXED" && (
+                        <option value="MIXED" disabled>
+                          Nhiều giá trị
+                        </option>
+                      )}
                       {Object.entries(SEAT_STATUS_LABELS).map(([value, label]) => (
                         <option key={value} value={value}>
                           {label}
@@ -270,10 +304,19 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
                       ))}
                     </select>
                   </label>
+
+                  <button
+                    type="button"
+                    className="secondary-button seat-clear-selection-button"
+                    disabled={saving}
+                    onClick={() => setSelectedSeatIds([])}
+                  >
+                    Bỏ chọn
+                  </button>
                 </>
               ) : (
                 <div className="seat-editor-empty">
-                  <strong>Chọn một ghế</strong>
+                  <strong>Chọn ghế</strong>
                   <span>Thông tin chỉnh sửa sẽ hiển thị tại đây.</span>
                 </div>
               )}

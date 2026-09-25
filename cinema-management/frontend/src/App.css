@@ -3254,6 +3254,13 @@ button {
   font-size: 13px;
 }
 
+.admin-content .seat-editor-panel small {
+  line-height: 1.5;
+  max-height: 96px;
+  overflow: auto;
+  word-break: break-word;
+}
+
 .admin-content .seat-editor-panel strong,
 .admin-content .seat-editor-empty strong {
   color: #f4eee4;
@@ -3394,7 +3401,7 @@ button {
   background: #26292a;
   border: 1px dashed #686d6e;
   color: #777c7d;
-  cursor: not-allowed;
+  cursor: pointer;
 }
 
 .admin-content .seat-button:focus-visible {
@@ -3409,6 +3416,11 @@ button {
   justify-content: flex-end;
   margin-top: 18px;
   padding: 12px;
+}
+
+.admin-content .seat-clear-selection-button {
+  justify-content: center;
+  width: 100%;
 }
 
 .admin-content .dirty-note.active {
