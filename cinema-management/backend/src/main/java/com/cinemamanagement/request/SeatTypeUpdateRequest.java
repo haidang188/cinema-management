@@ -10,6 +10,9 @@ public class SeatTypeUpdateRequest {
     @NotBlank(message = "Seat type is required")
     private String seatType;
 
+    @NotBlank(message = "Seat status is required")
+    private String status;
+
     public Long getSeatId() {
         return seatId;
     }
@@ -24,5 +27,13 @@ public class SeatTypeUpdateRequest {
 
     public void setSeatType(String seatType) {
         this.seatType = seatType;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
