@@ -1,0 +1,1031 @@
+
+.cs-result-page,
+.cs-print-area {
+    --red: #e50914;
+    --red-hover: #ff1f2b;
+    --red-soft: rgba(229, 9, 20, 0.14);
+    --red-line: rgba(229, 9, 20, 0.45);
+    --green: #22c07a;
+    --gold: #d4a44c;
+    --bg: #0b0e12;
+    --panel: #14181d;
+    --panel-2: #1a1f25;
+    --border: #2b3139;
+    --text: #f5f7f8;
+    --muted: #9ca5af;
+    --faint: #6c757e;
+}
+
+.cs-result-page {
+    width: min(1240px, calc(100% - 24px));
+    margin: 12px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    color: var(--text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.cs-result-page *,
+.cs-result-page *::before,
+.cs-result-page *::after,
+.cs-print-area *,
+.cs-print-area *::before,
+.cs-print-area *::after {
+    box-sizing: border-box;
+}
+
+.cs-result-page :is(h1, h2, h3, p, dl, dd),
+.cs-print-area :is(h1, h2, h3, p, dl, dd) {
+    margin: 0;
+    padding: 0;
+    font-family: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.cs-result-page button {
+    font-family: inherit;
+}
+
+.cs-result-page button:focus-visible {
+    outline: 2px solid var(--red-hover);
+    outline-offset: 2px;
+}
+
+/* =========================================================
+   COMMON
+   ========================================================= */
+
+.cs-result-page .cs-btn {
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.cs-result-page .cs-btn-ghost {
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--border);
+}
+
+.cs-result-page .cs-btn-ghost:hover:not(:disabled) {
+    background: var(--panel-2);
+    border-color: #4a525b;
+}
+
+.cs-result-page .cs-btn-ghost:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.cs-result-page .cs-btn-primary {
+    color: #fff;
+    background: var(--red);
+    border: 0;
+}
+
+.cs-result-page .cs-btn-primary:hover {
+    background: var(--red-hover);
+}
+
+.cs-result-page .cs-card {
+    min-width: 0;
+    padding: 16px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+}
+
+.cs-result-page .cs-eyebrow {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--red);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.cs-result-page .cs-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.cs-result-page .cs-chip {
+    padding: 3px 8px;
+    color: #c9d0d6;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.cs-result-page .cs-chip-strong {
+    color: #fff;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-result-page .cs-chip-red {
+    color: #fff;
+    background: var(--red-soft);
+    border-color: var(--red-line);
+}
+
+.cs-result-page kbd {
+    padding: 1px 5px;
+    color: var(--muted);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 10.5px;
+}
+
+.cs-result-page img.is-broken {
+    visibility: hidden;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.cs-result-page .cs-result-hero {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 22px;
+    background:
+            radial-gradient(ellipse 420px 180px at 0 50%, rgba(229, 9, 20, 0.22), transparent 70%),
+            linear-gradient(90deg, #1a0a0c, #111418 60%);
+    border: 1px solid var(--red-line);
+    border-radius: 16px;
+}
+
+.cs-result-page .cs-result-check {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: var(--red);
+    border-radius: 50%;
+    font-size: 26px;
+    font-weight: 900;
+    box-shadow: 0 0 0 6px rgba(229, 9, 20, 0.18), 0 8px 24px rgba(229, 9, 20, 0.45);
+    animation: cs-pop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+
+@keyframes cs-pop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.cs-result-page .cs-result-hero-text {
+    min-width: 0;
+}
+
+.cs-result-page .cs-result-hero h1 {
+    color: #fff;
+    font-size: 22px;
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.cs-result-page .cs-result-hero p {
+    margin-top: 4px;
+    overflow: hidden;
+    color: #d4d9de;
+    font-size: 12.5px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.cs-result-page .cs-result-hero-total {
+    margin-left: auto;
+    flex: 0 0 auto;
+    text-align: right;
+}
+
+.cs-result-page .cs-result-hero-total span {
+    display: block;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.cs-result-page .cs-result-hero-total strong {
+    color: #fff;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   BODY
+   ========================================================= */
+
+.cs-result-page .cs-result-body {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: start;
+    gap: 14px;
+}
+
+.cs-result-page .cs-result-left {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ---------- Booking ---------- */
+
+.cs-result-page .cs-booking {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-top: 3px solid var(--red);
+}
+
+.cs-result-page .cs-booking-code > span {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.cs-result-page .cs-booking-code > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 10px 10px 14px;
+    background: #0f1216;
+    border: 1px dashed var(--red-line);
+    border-radius: 10px;
+}
+
+.cs-result-page .cs-booking-code code {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: #fff;
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+}
+
+.cs-result-page .cs-icon-btn {
+    flex: 0 0 auto;
+    height: 30px;
+    padding: 0 10px;
+    color: #d7dce1;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cs-result-page .cs-icon-btn:hover {
+    color: #fff;
+    border-color: #4a525b;
+}
+
+.cs-result-page .cs-booking-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 14px;
+}
+
+.cs-result-page .cs-booking-meta dt {
+    margin-bottom: 3px;
+    color: var(--faint);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.cs-result-page .cs-booking-meta dd {
+    overflow-wrap: anywhere;
+    color: #e8ecef;
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.cs-result-page .cs-booking-meta dd.is-code {
+    font-family: Consolas, "SFMono-Regular", monospace;
+}
+
+.cs-result-page .cs-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 800;
+}
+
+.cs-result-page .cs-status::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.cs-result-page .cs-status.is-ok {
+    color: var(--green);
+    background: rgba(34, 192, 122, 0.12);
+    border: 1px solid rgba(34, 192, 122, 0.35);
+}
+
+.cs-result-page .cs-status.is-warn {
+    color: #ffb4b8;
+    background: var(--red-soft);
+    border: 1px solid var(--red-line);
+}
+
+/* ---------- Movie ---------- */
+
+.cs-result-page .cs-result-movie {
+    display: flex;
+    gap: 14px;
+}
+
+.cs-result-page .cs-result-poster {
+    width: 64px;
+    height: 96px;
+    flex: 0 0 64px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #262c33;
+}
+
+.cs-result-page .cs-result-poster img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.cs-result-page .cs-result-movie-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cs-result-page .cs-result-movie-info h2 {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.cs-result-page .cs-result-seats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.cs-result-page .cs-result-seats span {
+    padding: 4px 9px;
+    color: #fff;
+    background: var(--red-soft);
+    border: 1px solid var(--red-line);
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.cs-result-page .cs-result-seats span.is-vip {
+    background: rgba(212, 164, 76, 0.12);
+    border-color: rgba(212, 164, 76, 0.55);
+    color: #f0d49a;
+}
+
+/* ---------- Price ---------- */
+
+.cs-result-page .cs-result-price {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cs-result-page .cs-result-price > div:not(.cs-result-cash),
+.cs-result-page .cs-result-cash > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: 12.5px;
+}
+
+.cs-result-page .cs-result-price span {
+    color: var(--muted);
+}
+
+.cs-result-page .cs-result-price strong {
+    color: #fff;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-result-page .cs-result-price strong.is-discount {
+    color: #8fd19e;
+}
+
+.cs-result-page .cs-result-price .cs-result-total {
+    margin-top: 2px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+}
+
+.cs-result-page .cs-result-total span {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.cs-result-page .cs-result-total strong {
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.cs-result-page .cs-result-cash {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 10px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.cs-result-page .cs-result-cash .is-change strong {
+    color: var(--green);
+    font-size: 16px;
+}
+
+/* ---------- Tickets column ---------- */
+
+.cs-result-page .cs-result-tickets {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cs-result-page .cs-tickets-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.cs-result-page .cs-tickets-head h2 {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.cs-result-page .cs-tickets-head p {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 11.5px;
+}
+
+.cs-result-page .cs-tickets-count {
+    padding: 3px 9px;
+    color: #fff;
+    background: var(--red-soft);
+    border: 1px solid var(--red-line);
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 800;
+}
+
+.cs-result-page .cs-tickets-list {
+    max-height: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 4px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3a424b transparent;
+}
+
+.cs-result-page .cs-tickets-empty {
+    padding: 24px;
+    color: var(--muted);
+    text-align: center;
+    background: var(--panel-2);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+}
+
+/* =========================================================
+   TICKET (màn hình + in)
+   ========================================================= */
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket {
+    position: relative;
+    display: flex;
+    min-height: 150px;
+    color: var(--text);
+    background:
+            linear-gradient(120deg, rgba(229, 9, 20, 0.12), transparent 45%),
+            #111418;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--red);
+    border-radius: 12px;
+    animation: cs-ticket-in 0.3s ease-out both;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket.is-vip {
+    border-left-color: var(--gold);
+}
+
+.cs-result-page .cs-ticket:nth-child(2) { animation-delay: 0.05s; }
+.cs-result-page .cs-ticket:nth-child(3) { animation-delay: 0.1s; }
+.cs-result-page .cs-ticket:nth-child(4) { animation-delay: 0.15s; }
+
+@keyframes cs-ticket-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-main {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-main > header,
+:is(.cs-result-page, .cs-print-area) .cs-ticket-main > footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-brand {
+    color: #fff;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-brand b {
+    color: var(--red);
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-index {
+    color: var(--muted);
+    font-size: 10.5px;
+    font-weight: 700;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket h3 {
+    overflow: hidden;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.8fr 1.1fr 0.9fr;
+    gap: 8px;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-grid dt {
+    color: var(--faint);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-grid dd {
+    overflow: hidden;
+    color: #e8ecef;
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-grid dd.is-big {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-grid dd.is-seat {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-grid dd.is-seat small {
+    color: #ffb4b8;
+    font-size: 9.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket.is-vip .cs-ticket-grid dd.is-seat small {
+    color: var(--gold);
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-main > footer {
+    margin-top: auto;
+    color: var(--faint);
+    font-size: 10.5px;
+    font-weight: 600;
+}
+
+/* Cuống vé: đường xé + 2 vết khuyết */
+:is(.cs-result-page, .cs-print-area) .cs-ticket-stub {
+    position: relative;
+    width: 150px;
+    flex: 0 0 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 12px 10px;
+    border-left: 2px dashed #353c44;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-stub::before,
+:is(.cs-result-page, .cs-print-area) .cs-ticket-stub::after {
+    content: "";
+    position: absolute;
+    left: -10px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--panel);
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-stub::before {
+    top: -10px;
+    border-bottom: 1px solid var(--border);
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-stub::after {
+    bottom: -10px;
+    border-top: 1px solid var(--border);
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-qr {
+    width: 100px;
+    height: 100px;
+    padding: 4px;
+    background: #fff;
+    border-radius: 8px;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-qr svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+:is(.cs-result-page, .cs-print-area) .cs-ticket-stub code {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    color: #d7dce1;
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+
+.cs-result-page .cs-ticket-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.cs-result-page .cs-ticket-actions button {
+    width: 30px;
+    height: 26px;
+    padding: 0;
+    color: #d7dce1;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.cs-result-page .cs-ticket-actions button:hover {
+    color: #fff;
+    border-color: var(--red);
+}
+
+/* =========================================================
+   ACTION BAR
+   ========================================================= */
+
+.cs-result-page .cs-result-action {
+    position: sticky;
+    bottom: 10px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 10px 10px 10px 16px;
+    background: #090b0e;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.55);
+}
+
+.cs-result-page .cs-result-action-hint {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    color: var(--faint);
+    font-size: 11.5px;
+}
+
+.cs-result-page .cs-printed {
+    margin-left: 8px;
+    color: var(--green);
+    font-weight: 700;
+}
+
+.cs-result-page .cs-result-action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.cs-result-page .cs-new-sale {
+    min-width: 160px;
+    height: 46px;
+    font-size: 14px;
+}
+
+/* =========================================================
+   EMPTY
+   ========================================================= */
+
+.cs-result-page .cs-result-empty {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+}
+
+.cs-result-page .cs-result-empty > span {
+    font-size: 34px;
+}
+
+.cs-result-page .cs-result-empty h2 {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.cs-result-page .cs-result-empty p {
+    color: var(--muted);
+}
+
+.cs-result-page .cs-result-empty .cs-btn {
+    margin-top: 8px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1000px) {
+    .cs-result-page .cs-result-body {
+        grid-template-columns: 1fr;
+    }
+
+    .cs-result-page .cs-tickets-list {
+        max-height: none;
+        overflow: visible;
+    }
+}
+
+@media (max-width: 640px) {
+    .cs-result-page .cs-result-hero {
+        flex-wrap: wrap;
+    }
+
+    .cs-result-page .cs-result-hero-total {
+        width: 100%;
+        margin-left: 0;
+        text-align: left;
+    }
+
+    .cs-result-page .cs-ticket {
+        flex-direction: column;
+    }
+
+    .cs-result-page .cs-ticket-stub {
+        width: 100%;
+        flex-basis: auto;
+        flex-direction: row;
+        border-left: 0;
+        border-top: 2px dashed #353c44;
+    }
+
+    .cs-result-page .cs-ticket-stub::before,
+    .cs-result-page .cs-ticket-stub::after {
+        display: none;
+    }
+
+    .cs-result-page .cs-ticket-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .cs-result-page .cs-result-action {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .cs-result-page .cs-result-action-hint {
+        display: none;
+    }
+
+    .cs-result-page .cs-result-action-buttons > * {
+        flex: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cs-result-page *,
+    .cs-result-page *::before,
+    .cs-result-page *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* =========================================================
+   IN VÉ
+   - Vùng in được portal thẳng vào <body>, nên ẩn mọi thứ khác
+     bằng display:none -> không sinh trang trắng.
+   - Mỗi vé một trang, khổ giấy nhiệt 80mm (máy in bill phổ biến);
+     in giấy A4 vẫn ra đúng, mỗi vé nằm đầu trang.
+   - Nền trắng chữ đen để tiết kiệm mực, QR giữ tương phản cao.
+   ========================================================= */
+
+.cs-print-area {
+    display: none;
+}
+
+@media print {
+    @page {
+        size: 80mm auto;
+        margin: 3mm;
+    }
+
+    body > *:not(.cs-print-area) {
+        display: none !important;
+    }
+
+    html,
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+    }
+
+    .cs-print-area {
+        display: block;
+        width: 74mm;
+        color: #000;
+        font-family: Arial, Helvetica, sans-serif;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .cs-print-area .cs-print-page {
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .cs-print-area .cs-print-page:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+
+    .cs-print-area .cs-ticket {
+        flex-direction: column;
+        min-height: 0;
+        color: #000;
+        background: #fff;
+        border: 1px solid #000;
+        border-left-width: 1px;
+        border-radius: 0;
+        animation: none;
+    }
+
+    .cs-print-area .cs-ticket-main {
+        padding: 3mm;
+        gap: 2mm;
+    }
+
+    .cs-print-area .cs-ticket-brand,
+    .cs-print-area .cs-ticket-brand b,
+    .cs-print-area .cs-ticket h3,
+    .cs-print-area .cs-ticket-grid dd,
+    .cs-print-area .cs-ticket-grid dd.is-big,
+    .cs-print-area .cs-ticket-grid dd.is-seat,
+    .cs-print-area .cs-ticket-grid dd.is-seat small,
+    .cs-print-area .cs-ticket-index,
+    .cs-print-area .cs-ticket-grid dt,
+    .cs-print-area .cs-ticket-main > footer,
+    .cs-print-area .cs-ticket-stub code {
+        color: #000 !important;
+    }
+
+    .cs-print-area .cs-ticket h3 {
+        white-space: normal;
+        font-size: 13pt;
+    }
+
+    .cs-print-area .cs-ticket-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .cs-print-area .cs-ticket-grid dd.is-seat {
+        font-size: 18pt;
+    }
+
+    .cs-print-area .cs-ticket-stub {
+        width: 100%;
+        flex-basis: auto;
+        padding: 3mm;
+        border-left: 0;
+        border-top: 1px dashed #000;
+    }
+
+    .cs-print-area .cs-ticket-stub::before,
+    .cs-print-area .cs-ticket-stub::after {
+        display: none;
+    }
+
+    .cs-print-area .cs-ticket-qr {
+        width: 34mm;
+        height: 34mm;
+        padding: 0;
+    }
+
+    .cs-print-area .cs-print-note {
+        margin-top: 2mm;
+        color: #000;
+        font-size: 8pt;
+        text-align: center;
+    }
+}
