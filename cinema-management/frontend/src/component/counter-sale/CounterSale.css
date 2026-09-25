@@ -1,0 +1,1188 @@
+
+.counter-sale {
+    /* ---- Kích thước poster: chỉnh 1 chỗ, cả khung tự co theo ---- */
+    --poster-w: 164px;
+    --poster-h: calc(var(--poster-w) * 1.5);
+    --movie-info-h: 64px;
+    --movie-gap: 12px;
+    --section-pad: 12px;
+    --frame-pad: 14px;
+    /* Khoảng cách DUY NHẤT giữa các khối: header, 01, 02, 03, thanh hành động */
+    --stack-gap: 14px;
+
+    --sale-red: #e50914;
+    --sale-red-hover: #ff1f2b;
+    --sale-red-soft: rgba(229, 9, 20, 0.12);
+    --sale-amber: #f5a524;
+    --sale-bg: #0b0e12;
+    --sale-panel: #15191e;
+    --sale-card: #1b2026;
+    --sale-border: #30363e;
+    --sale-border-soft: #272d34;
+    --sale-text: #f5f7f8;
+    --sale-muted: #9ca5af;
+
+    /* 5 poster + 4 khe + padding section + viền + padding khung + viền */
+    width: calc(
+            5 * var(--poster-w) + 4 * var(--movie-gap) +
+            2 * var(--section-pad) + 2px +
+            2 * var(--frame-pad) + 2px
+    );
+    max-width: calc(100% - 24px);
+    margin: 12px auto;
+    padding: 12px var(--frame-pad) 12px;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--stack-gap);
+
+    color: var(--sale-text);
+    background: var(--sale-bg);
+    border: 1px solid #232a31;
+    border-radius: 16px;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.3;
+    letter-spacing: normal;
+}
+
+
+
+.counter-sale > * {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.counter-sale > .counter-sale-section {
+    height: auto;
+    min-height: 0;
+}
+.counter-sale *,
+.counter-sale *::before,
+.counter-sale *::after {
+    box-sizing: border-box;
+}
+
+.counter-sale h1,
+.counter-sale h2,
+.counter-sale h3,
+.counter-sale p {
+    margin: 0;
+    font-family: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.counter-sale button,
+.counter-sale input {
+    font-family: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.counter-sale button:focus-visible,
+.counter-sale input:focus-visible,
+.counter-sale .date-display-box:focus-within {
+    outline: 2px solid var(--sale-red-hover);
+    outline-offset: 2px;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.counter-sale .counter-sale-header {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 2px;
+}
+
+.counter-sale .page-eyebrow {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--sale-red);
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.counter-sale .counter-sale-header h1 {
+    color: #fff;
+    font-size: 20px;
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.counter-sale .counter-sale-header p {
+    margin-top: 3px;
+    color: var(--sale-muted);
+    font-size: 11px;
+}
+
+.counter-sale .sale-status {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    color: #e8ebed;
+    background: #171b20;
+    border: 1px solid var(--sale-border);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.counter-sale .sale-status span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #1fa85a;
+}
+
+/* =========================================================
+   COMMON SECTION
+   ========================================================= */
+
+.counter-sale .counter-sale-section {
+    min-width: 0;
+    padding: 10px var(--section-pad) var(--section-pad);
+    background: var(--sale-panel);
+    border: 1px solid var(--sale-border);
+    border-radius: 13px;
+}
+
+.counter-sale .section-heading {
+    min-width: 0;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.counter-sale .section-title {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.counter-sale .section-title > div {
+    min-width: 0;
+}
+
+.counter-sale .section-step {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: var(--sale-red);
+    border-radius: 8px;
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 800;
+}
+
+.counter-sale .section-title h2 {
+    color: #f7f8f9;
+    font-size: 14px;
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.counter-sale .section-title p {
+    margin-top: 3px;
+    overflow: hidden;
+    color: var(--sale-muted);
+    font-size: 10.5px;
+    line-height: 1.2;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* =========================================================
+   01 - DATE
+   ========================================================= */
+
+.counter-sale .date-display {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.counter-sale .date-display > span:first-child {
+    color: var(--sale-muted);
+    font-size: 10.5px;
+    font-weight: 600;
+}
+
+.counter-sale .date-display-box {
+    position: relative;
+    width: 132px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    color: #fff;
+    background: #20252b;
+    border: 1px solid var(--sale-border);
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.counter-sale .date-display-box:hover {
+    border-color: #565e67;
+}
+
+.counter-sale .date-display-box strong {
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 800;
+}
+
+.counter-sale .date-arrow {
+    margin-left: auto;
+    color: var(--sale-muted);
+    font-size: 10px;
+}
+
+.counter-sale .date-display-box input[type="date"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/*
+ * Dải ngày: ‹ [7 ô ngày] ›
+ * Nút và ô ngày dùng CHUNG chiều cao --date-row-h, hàng dùng stretch
+ * thay vì center. Trước đây nếu .date-selector bị thêm padding/margin
+ * (vd: padding-bottom chừa chỗ cho scrollbar từ CSS trang khác trùng
+ * tên class) thì nút ‹ › được căn giữa theo khối cao hơn -> lệch xuống.
+ */
+.counter-sale .date-selector-wrap {
+    --date-row-h: 44px;
+
+    min-width: 0;
+    height: var(--date-row-h);
+    display: flex;
+    align-items: stretch;
+    gap: 7px;
+    margin: 8px 0 0;
+    padding: 0;
+}
+
+.counter-sale .date-selector-wrap > .date-selector {
+    min-width: 0;
+    height: 100%;
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-rows: 100%;
+    align-items: stretch;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: visible;
+}
+
+/* Ô ngày và nút điều hướng: cùng chiều cao, không margin/transform lạ */
+.counter-sale .date-selector-wrap .date-card,
+.counter-sale .date-selector-wrap > .date-nav-button {
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    margin: 0;
+    transform: none;
+    align-self: stretch;
+}
+
+.counter-sale .date-nav-button {
+    width: 32px;
+    height: 100%;
+    flex: 0 0 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #eef0f2;
+    background: #20252b;
+    border: 1px solid var(--sale-border);
+    border-radius: 8px;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.counter-sale .date-nav-button:hover:not(:disabled) {
+    border-color: var(--sale-red);
+    background: #282e35;
+}
+
+.counter-sale .date-nav-button:disabled {
+    color: #555c64;
+    background: #191d22;
+    cursor: not-allowed;
+}
+
+.counter-sale .date-card {
+    position: relative;
+    height: 100%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 3px;
+    padding: 3px 4px;
+    color: #d9dde1;
+    background: #1d2228;
+    border: 1px solid var(--sale-border);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.counter-sale .date-card:hover:not(:disabled) {
+    border-color: #555d66;
+    background: #262c32;
+}
+
+.counter-sale .date-card:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.counter-sale .date-card.selected {
+    color: #fff;
+    background: var(--sale-red-soft);
+    border-color: var(--sale-red);
+    box-shadow: inset 0 -2px 0 var(--sale-red);
+}
+
+.counter-sale .date-value {
+    color: inherit;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.counter-sale .date-day {
+    color: var(--sale-muted);
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.counter-sale .date-card.selected .date-day {
+    color: #ffb4b8;
+}
+
+.counter-sale .date-check {
+    position: absolute;
+    top: 3px;
+    right: 5px;
+    color: var(--sale-red);
+    font-size: 9px;
+    font-weight: 900;
+}
+
+/* =========================================================
+   02 - MOVIE
+   ========================================================= */
+
+.counter-sale .movie-controls {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.counter-sale .movie-search {
+    width: 170px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 8px;
+    background: #20252b;
+    border: 1px solid var(--sale-border);
+    border-radius: 7px;
+}
+
+.counter-sale .movie-search:focus-within {
+    border-color: var(--sale-red);
+}
+
+.counter-sale .movie-search span {
+    color: #8f98a1;
+    font-size: 15px;
+    line-height: 1;
+}
+
+.counter-sale .movie-search input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 11px;
+}
+
+.counter-sale .movie-search input::placeholder {
+    color: #7f8892;
+}
+
+.counter-sale .movie-page-indicator {
+    min-width: 30px;
+    color: var(--sale-muted);
+    font-size: 10.5px;
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.counter-sale .movie-nav-button {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #e7eaed;
+    background: #20252b;
+    border: 1px solid var(--sale-border);
+    border-radius: 7px;
+    font-size: 19px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.counter-sale .movie-nav-button:hover:not(:disabled) {
+    border-color: var(--sale-red);
+    background: #282e35;
+}
+
+.counter-sale .movie-nav-button:disabled {
+    color: #50575f;
+    background: #191d22;
+    cursor: not-allowed;
+}
+
+.counter-sale .movie-grid {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(5, var(--poster-w));
+    grid-auto-rows: calc(var(--poster-h) + var(--movie-info-h));
+    justify-content: space-between;
+    gap: var(--movie-gap);
+    margin-top: 8px;
+}
+
+/* Rỗng / lỗi giữ nguyên chiều cao để layout không nhảy */
+.counter-sale .movie-section .empty-state {
+    min-height: calc(var(--poster-h) + var(--movie-info-h));
+    margin-top: 8px;
+}
+
+.counter-sale .movie-card {
+    position: relative;
+    width: var(--poster-w);
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    color: var(--sale-text);
+    background: var(--sale-card);
+    border: 1px solid var(--sale-border);
+    border-radius: 9px;
+    overflow: hidden;
+    appearance: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.counter-sale .movie-card:hover {
+    border-color: #5a636d;
+}
+
+.counter-sale .movie-card.selected {
+    border-color: var(--sale-red);
+    box-shadow: inset 0 0 0 1px var(--sale-red), 0 0 0 3px var(--sale-red-soft);
+}
+
+.counter-sale .movie-poster-wrapper {
+    position: relative;
+    width: 100%;
+    height: var(--poster-h);
+    flex: 0 0 var(--poster-h);
+    overflow: hidden;
+    background: #090b0e;
+}
+
+.counter-sale .movie-poster {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: center;
+}
+
+.counter-sale .movie-poster.is-broken,
+.counter-sale .selected-summary-poster img.is-broken {
+    visibility: hidden;
+}
+
+.counter-sale .movie-age {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    min-width: 28px;
+    padding: 4px 6px;
+    color: #fff;
+    background: var(--sale-red);
+    border-radius: 5px;
+    font-size: 9px;
+    line-height: 1;
+    font-weight: 800;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+}
+
+/* Phòng + số suất: 1 phim chỉ chiếu 1 phòng/ngày nên hiện ngay trên poster */
+.counter-sale .movie-room {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 18px 8px 7px;
+    color: #fff;
+    background: linear-gradient(to top, rgba(9, 11, 14, 0.92), rgba(9, 11, 14, 0));
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.counter-sale .movie-room b {
+    padding: 3px 6px;
+    color: #e8ebee;
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.counter-sale .movie-selected {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: var(--sale-red);
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.counter-sale .movie-info {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 7px 8px 7px;
+    background: var(--sale-card);
+    overflow: hidden;
+}
+
+/* Specificity cao để thắng mọi rule h3 global */
+.counter-sale .movie-card .movie-info h3 {
+    height: 30px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    color: #f5f7f8;
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 15px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+}
+
+.counter-sale .movie-card .movie-meta {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.counter-sale .movie-card .movie-meta span {
+    min-width: 0;
+    max-width: 100%;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 6px;
+    color: #d8dde2;
+    background: #2a3037;
+    border: 1px solid #3b424a;
+    border-radius: 999px;
+    font-size: 9.5px;
+    line-height: 1;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.counter-sale .movie-skeleton {
+    width: var(--poster-w);
+    height: 100%;
+    border-radius: 9px;
+    background: linear-gradient(100deg, #1b2025 30%, #232a31 50%, #1b2025 70%);
+    background-size: 300% 100%;
+    animation: sale-skeleton 1.4s ease-in-out infinite;
+}
+
+@keyframes sale-skeleton {
+    from { background-position: 100% 0; }
+    to { background-position: 0 0; }
+}
+
+/* =========================================================
+   EMPTY / ERROR
+   ========================================================= */
+
+.counter-sale .empty-state,
+.counter-sale .showtime-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 5px;
+    color: var(--sale-muted);
+    text-align: center;
+}
+
+.counter-sale .showtime-empty {
+    min-height: 96px;
+}
+
+.counter-sale .empty-state strong,
+.counter-sale .showtime-empty strong {
+    color: #e9ecef;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.counter-sale .empty-state span,
+.counter-sale .showtime-empty span {
+    font-size: 10.5px;
+}
+
+.counter-sale .error-state strong {
+    color: #ff6a72;
+}
+
+.counter-sale .retry-button {
+    margin-top: 6px;
+    height: 30px;
+    padding: 0 14px;
+    color: #fff;
+    background: #2a3037;
+    border: 1px solid #3b424a;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.counter-sale .retry-button:hover {
+    border-color: var(--sale-red);
+}
+
+/* =========================================================
+   03 - SHOWTIME
+   Không còn bị ép chiều cao: cao theo số suất, tối thiểu 96px.
+   ========================================================= */
+
+.counter-sale .showtime-section {
+    /* chừa chỗ cho topbar và thanh sticky khi scrollIntoView */
+    scroll-margin-top: 90px;
+    scroll-margin-bottom: 84px;
+}
+
+/* Thông tin phòng trên tiêu đề (trường hợp chuẩn: 1 phòng) */
+.counter-sale .showtime-room-badge {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.counter-sale .showtime-room-badge strong {
+    padding: 5px 9px;
+    color: #fff;
+    background: var(--sale-red-soft);
+    border: 1px solid rgba(229, 9, 20, 0.45);
+    border-radius: 6px;
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 800;
+}
+
+.counter-sale .showtime-room-badge span {
+    padding: 5px 8px;
+    color: #c9d0d6;
+    background: #20252b;
+    border: 1px solid var(--sale-border);
+    border-radius: 6px;
+    font-size: 10.5px;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.counter-sale .showtime-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.counter-sale .showtime-group {
+    min-width: 0;
+    padding: 7px 8px 8px;
+    background: #1b2025;
+    border: 1px solid var(--sale-border-soft);
+    border-radius: 8px;
+}
+
+.counter-sale .showtime-group-header {
+    min-height: 22px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.counter-sale .showtime-group-header strong {
+    padding: 4px 7px;
+    color: #fff;
+    background: #2b3138;
+    border-radius: 5px;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 800;
+}
+
+.counter-sale .showtime-group-header span {
+    color: #b8c0c8;
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 600;
+}
+
+/* ---------------------------------------------------------
+   Ô suất chiếu: MỘT khung bo tròn duy nhất.
+     08:00 ~ 09:59
+     100/100
+   `all: unset` xoá mọi style button/global rò vào, kể cả
+   ::before/::after (nguồn của chữ "Chọn suất" và khung thứ 2).
+   --------------------------------------------------------- */
+
+.counter-sale .cs-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.counter-sale .cs-slot {
+    all: unset;
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 58px;
+    padding: 9px 12px;
+    color: #f2f4f6;
+    background: #1f252b;
+    border: 1px solid #353d45;
+    border-radius: 14px;
+    font-family: inherit;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+/* Reset phần tử con trước (specificity 0,2,0), các rule bên dưới cùng
+   specificity nhưng khai báo sau nên thắng; vẫn thắng mọi rule global
+   dạng "button span". */
+.counter-sale .cs-slot :where(span, b) {
+    all: unset;
+    display: inline;
+    font-family: inherit;
+}
+
+.counter-sale .cs-slot::before,
+.counter-sale .cs-slot::after,
+.counter-sale .cs-slot *::before,
+.counter-sale .cs-slot *::after {
+    content: none !important;
+    display: none !important;
+}
+
+.counter-sale .cs-slot:hover:not(:disabled) {
+    background: #262d34;
+    border-color: #6b3438;
+}
+
+.counter-sale .cs-slot:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.counter-sale .cs-slot:focus-visible {
+    outline: 2px solid var(--sale-red-hover);
+    outline-offset: 2px;
+}
+
+.counter-sale .cs-slot-time,
+.counter-sale .cs-slot-seats {
+    display: block;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    line-height: 1;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.counter-sale .cs-slot-time {
+    color: #fff;
+    font-size: 14px;
+    letter-spacing: 0.2px;
+}
+
+.counter-sale .cs-slot-time b {
+    font-weight: 800;
+}
+
+.counter-sale .cs-slot-sep {
+    margin: 0 5px;
+    color: #6f7881;
+    font-weight: 500;
+}
+
+.counter-sale .cs-slot-end {
+    color: #a3acb5;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.counter-sale .cs-slot-seats {
+    color: #8fd19e;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+/* Sắp hết ghế */
+.counter-sale .cs-slot.is-low .cs-slot-seats {
+    color: var(--sale-amber);
+}
+
+/* Đang chọn: nền đỏ nhạt + viền đỏ, không đổi kích thước */
+.counter-sale .cs-slot.is-selected {
+    background: rgba(229, 9, 20, 0.16);
+    border-color: var(--sale-red);
+    box-shadow: 0 0 0 1px var(--sale-red), 0 6px 18px rgba(229, 9, 20, 0.22);
+}
+
+.counter-sale .cs-slot.is-selected .cs-slot-end,
+.counter-sale .cs-slot.is-selected .cs-slot-sep {
+    color: #ffc9cc;
+}
+
+.counter-sale .cs-slot.is-selected .cs-slot-seats {
+    color: #fff;
+}
+
+/* Hết vé */
+.counter-sale .cs-slot.is-sold-out {
+    background: #181c21;
+    border-style: dashed;
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.counter-sale .cs-slot.is-sold-out .cs-slot-time b {
+    text-decoration: line-through;
+    text-decoration-color: rgba(255, 106, 114, 0.7);
+}
+
+.counter-sale .cs-slot.is-sold-out .cs-slot-seats {
+    color: #ff6a72;
+}
+
+/* Đang tải ghế */
+.counter-sale .cs-slot.is-loading {
+    opacity: 0.7;
+    cursor: progress;
+}
+
+.counter-sale .cs-slot.is-loading .cs-slot-seats {
+    color: var(--sale-muted);
+}
+
+/* =========================================================
+   BOTTOM ACTION - luôn dính đáy màn hình khi trang cuộn
+   ========================================================= */
+
+.counter-sale .counter-sale-action {
+    position: sticky;
+    bottom: 10px;
+    z-index: 5;
+    min-width: 0;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 7px 6px 10px;
+    background: #090b0e;
+    border: 1px solid #292f36;
+    border-radius: 10px;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.55);
+}
+
+.counter-sale .selected-summary {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.counter-sale .selected-summary-poster {
+    width: 28px;
+    height: 40px;
+    flex: 0 0 28px;
+    overflow: hidden;
+    border-radius: 4px;
+    background: #30363d;
+}
+
+.counter-sale .selected-summary-poster img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.counter-sale .selected-summary-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.counter-sale .selected-summary-label {
+    color: #7f8891;
+    font-size: 9px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.counter-sale .selected-summary-info strong {
+    overflow: hidden;
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.15;
+    font-weight: 800;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.counter-sale .selected-summary-info > span:last-child {
+    overflow: hidden;
+    color: #aeb6be;
+    font-size: 10.5px;
+    line-height: 1.1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.counter-sale .selected-summary.empty {
+    padding-left: 3px;
+    color: #7f8891;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.counter-sale .continue-button {
+    height: 38px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 18px;
+    color: #fff;
+    background: var(--sale-red);
+    border: 0;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.counter-sale .continue-button:hover:not(:disabled) {
+    background: var(--sale-red-hover);
+}
+
+.counter-sale .continue-button:disabled {
+    color: rgba(255, 255, 255, 0.55);
+    background: #3a1215;
+    cursor: not-allowed;
+}
+
+.counter-sale .continue-button span {
+    font-size: 15px;
+    line-height: 1;
+}
+
+/* =========================================================
+   RESPONSIVE
+   Dùng container query theo CHÍNH khung bán vé (không theo
+   viewport), vì sidebar + zoom trình duyệt làm độ rộng
+   viewport không phản ánh đúng chỗ trống thật.
+   ========================================================= */
+
+.counter-sale {
+    container-type: inline-size;
+    container-name: counter-sale;
+}
+
+/* Không đủ chỗ cho poster 164px -> 148px */
+@container counter-sale (max-width: 893px) {
+    .counter-sale-section {
+        --poster-w: 148px;
+        --poster-h: 222px; /* phải khai báo lại: var() đã được tính sẵn ở .counter-sale */
+        --movie-gap: 10px;
+    }
+}
+
+/* Hẹp hơn nữa -> 132px */
+@container counter-sale (max-width: 805px) {
+    .counter-sale-section {
+        --poster-w: 132px;
+        --poster-h: 198px;
+        --movie-info-h: 62px;
+    }
+
+    .counter-sale .date-day {
+        font-size: 9px;
+    }
+}
+
+/* Không đủ cho 5 poster: cuộn ngang poster, cuộn ngang dải ngày */
+@container counter-sale (max-width: 720px) {
+    .counter-sale .section-heading {
+        flex-wrap: wrap;
+    }
+
+    .counter-sale .movie-controls {
+        width: 100%;
+    }
+
+    .counter-sale .movie-search {
+        flex: 1 1 auto;
+        width: auto;
+    }
+
+    .counter-sale .date-selector-wrap > .date-selector {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+    }
+
+    .counter-sale .date-selector::-webkit-scrollbar {
+        display: none;
+    }
+
+    .counter-sale .date-selector-wrap .date-card {
+        flex: 0 0 76px;
+    }
+
+    .counter-sale .movie-grid {
+        justify-content: start;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scroll-snap-type: x mandatory;
+    }
+
+    .counter-sale .movie-card {
+        scroll-snap-align: start;
+    }
+}
+
+@media (max-width: 760px) {
+    .counter-sale {
+        width: auto;
+        max-width: none;
+        margin: 8px;
+        padding: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .counter-sale .movie-skeleton {
+        animation: none;
+    }
+
+    .counter-sale .movie-card,
+    .counter-sale .cs-slot {
+        transition: none;
+    }
+}

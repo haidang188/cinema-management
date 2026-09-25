@@ -9,6 +9,9 @@ import { promotionRoutes } from "./PromotionRoutes"
 import { AdminShell, CustomerShell } from "./RouteShells"
 import { showtimeRoutes } from "./showtimeRoutes"
 import { ticketPriceRoutes } from "./ticketPriceRoutes"
+import { counterSaleRoutes } from "./counterSaleRoutes"
+
+
 
 function AppRouteContent() {
   const navigate = useNavigate()
@@ -63,6 +66,8 @@ function AppRouteContent() {
       <Route path="/login" element={renderAuthPage("login")} />
       <Route path="/register" element={renderAuthPage("register")} />
 
+
+
       {[...showtimeRoutes, ...ticketPriceRoutes].map((route) => (
         <Route
           key={route.path}
@@ -86,6 +91,14 @@ function AppRouteContent() {
           }
         />
       ))}
+
+        {counterSaleRoutes.map((route) => (
+            <Route
+                key={route.path}
+                path={route.path}
+                element={route.element}
+            />
+        ))}
 
       <Route path="*" element={<Navigate to={getHomePath(currentUser)} replace />} />
     </Routes>

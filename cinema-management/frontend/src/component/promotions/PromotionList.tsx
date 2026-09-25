@@ -21,9 +21,7 @@ import type {
   PromotionStatistics
 } from '../../service/promotion/promotionService'
 
-// The stylesheet is handled by the bundler; TypeScript has no declaration for
-// this side-effect-only import.
-// @ts-expect-error Missing declaration is expected for the CSS asset.
+
 import './promotion.css'
 
 interface PromotionLocationState {

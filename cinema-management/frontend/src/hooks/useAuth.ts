@@ -31,7 +31,15 @@ function storeUser(user: AuthResponse | null) {
 }
 
 export function getHomePath(user: AuthResponse | null): string {
-  return user?.role === "ADMIN" ? "/admin/movies" : "/"
+  if (user?.role === "ADMIN") {
+    return "/admin/movies"
+  }
+
+  if (user?.role === "EMPLOYEE") {
+    return "/counter-sale"
+  }
+
+  return "/"
 }
 
 export function useAuth() {

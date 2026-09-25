@@ -2,6 +2,7 @@ package com.cinemamanagement.service.impl;
 
 import com.cinemamanagement.entity.Showtime;
 import com.cinemamanagement.repository.ShowtimeRepository;
+import com.cinemamanagement.repository.ShowtimeSeatRepository;
 import com.cinemamanagement.response.ShowtimeResponse;
 import com.cinemamanagement.service.ShowtimeService;
 import lombok.RequiredArgsConstructor;
@@ -16,19 +17,49 @@ import java.util.List;
 public class ShowtimeServiceImpl implements ShowtimeService {
 
     private final ShowtimeRepository showtimeRepository;
+    private final ShowtimeSeatRepository showtimeSeatRepository;
 
     @Override
     public List<ShowtimeResponse> getShowtimeByDate(LocalDate date) {
+
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
 
-        List<Showtime> showtimes = showtimeRepository.findByStartTimeGreaterThanEqualAndStartTimeLessThan(
-                startOfDay, endOfDay
-        );
-        return showtimes.stream().map(this::toResponse).toList();
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Showtime> showtimes =
+                showtimeRepository
+                        .findByStartTimeGreaterThanEqualAndStartTimeLessThan(
+                                startOfDay,
+                                endOfDay
+                        );
+
+        return showtimes.stream()
+                .filter(showtime ->
+                        "OPEN".equalsIgnoreCase(showtime.getStatus())
+                )
+                .filter(showtime ->
+                        now.isBefore(
+                                showtime.getStartTime().minusMinutes(5)
+                        )
+                )
+                .map(this::toResponse)
+                .toList();
     }
 
     private ShowtimeResponse toResponse(Showtime showtime) {
+
+        long totalSeats =
+                showtimeSeatRepository.countByShowtimeId(
+                        showtime.getId()
+                );
+
+        long availableSeats =
+                showtimeSeatRepository.countByShowtimeIdAndStatus(
+                        showtime.getId(),
+                        "AVAILABLE"
+                );
+
         return new ShowtimeResponse(
                 showtime.getId(),
 
@@ -37,6 +68,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
                 showtime.getMovie().getPosterUrl(),
                 showtime.getMovie().getDurationMinutes(),
                 showtime.getMovie().getAgeRating(),
+                showtime.getMovie().getLanguage(),
 
                 showtime.getRoom().getId(),
                 showtime.getRoom().getName(),
@@ -45,7 +77,10 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
                 showtime.getStartTime(),
                 showtime.getEndTime(),
-                showtime.getStatus()
+                showtime.getStatus(),
+
+                availableSeats,
+                totalSeats
         );
     }
 }

@@ -10,15 +10,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@daypicker/react": "^10.0.1",
     "axios": "^1.20.0",
     "bootstrap": "5.3",
     "formik": "^2.4.9",
     "json-server": "^1.0.0-beta.15",
+    "lucide-react": "^1.47.0",
+    "motion": "^13.4.1",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.8",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.3",
     "react-toastify": "^11.1.0",
+    "swiper": "^14.2.0",
     "yup": "^1.7.1"
   },
   "devDependencies": {
