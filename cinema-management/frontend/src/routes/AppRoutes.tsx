@@ -3,12 +3,16 @@ import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-route
 import AuthPage from "../component/auth/AuthPage"
 import HomePage from "../component/home/HomePage"
 import { getHomePath, useAuth } from "../hooks/useAuth"
+import MovieDetailPage from "../pages/movies/MovieDetailPage"
 import type { AuthMode } from "../types/auth"
 import { adminRoutes } from "./adminRoutes"
 import { promotionRoutes } from "./PromotionRoutes"
 import { AdminShell, CustomerShell } from "./RouteShells"
 import { showtimeRoutes } from "./showtimeRoutes"
 import { ticketPriceRoutes } from "./ticketPriceRoutes"
+import { counterSaleRoutes } from "./counterSaleRoutes"
+
+
 
 function AppRouteContent() {
   const navigate = useNavigate()
@@ -60,20 +64,29 @@ function AppRouteContent() {
         }
       />
 
+      <Route
+        path="/movies/:movieId"
+        element={<MovieDetailPage currentUser={currentUser} onLoginClick={goToLogin} />}
+      />
+
       <Route path="/login" element={renderAuthPage("login")} />
       <Route path="/register" element={renderAuthPage("register")} />
 
-      {[...showtimeRoutes, ...ticketPriceRoutes].map((route) => (
-        <Route
-          key={route.path}
-          path={route.path}
-          element={
-            <CustomerShell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
-              {route.element}
-            </CustomerShell>
-          }
-        />
-      ))}
+      {[...showtimeRoutes, ...ticketPriceRoutes].map((route) => {
+        const Shell = currentUser?.role === "ADMIN" ? AdminShell : CustomerShell
+
+        return (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <Shell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
+                {route.element}
+              </Shell>
+            }
+          />
+        )
+      })}
 
       {[...adminRoutes, ...promotionRoutes].map((route) => (
         <Route
@@ -84,6 +97,14 @@ function AppRouteContent() {
               {route.element}
             </AdminShell>
           }
+        />
+      ))}
+
+      {counterSaleRoutes.map((route) => (
+        <Route
+          key={route.path}
+          path={route.path}
+          element={route.element}
         />
       ))}
 

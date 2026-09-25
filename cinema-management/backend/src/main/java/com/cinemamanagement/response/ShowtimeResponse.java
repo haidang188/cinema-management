@@ -12,17 +12,25 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShowtimeResponse {
+
     private Long id;
+
     private Long movieId;
     private String movieTitle;
     private String posterUrl;
     private Integer durationMinutes;
     private String ageRating;
+    private String language;
+
     private Long roomId;
     private String roomName;
     private String roomType;
+
     private String format;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String status;
+
+    private Long availableSeats;
+    private Long totalSeats;
 }

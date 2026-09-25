@@ -6,49 +6,60 @@ import com.cinemamanagement.exception.ResourceNotFoundException;
 import com.cinemamanagement.repository.GenreRepository;
 import com.cinemamanagement.repository.MovieRepository;
 import com.cinemamanagement.request.MovieRequest;
+import com.cinemamanagement.response.GenreResponse;
 import com.cinemamanagement.response.MovieDetailResponse;
 import com.cinemamanagement.response.MovieListResponse;
 import com.cinemamanagement.response.MovieResponse;
-import com.cinemamanagement.service.CloudinaryService;
 import com.cinemamanagement.service.MovieService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 @Service
 public class MovieServiceImpl implements MovieService {
-    private static final String POSTER_FOLDER = "cinema/posters";
     private static final String SHOWING = "SHOWING";
 
     private final MovieRepository movieRepository;
     private final GenreRepository genreRepository;
-    private final CloudinaryService cloudinaryService;
 
     public MovieServiceImpl(
             MovieRepository movieRepository,
-            GenreRepository genreRepository,
-            CloudinaryService cloudinaryService
+            GenreRepository genreRepository
     ) {
         this.movieRepository = movieRepository;
         this.genreRepository = genreRepository;
-        this.cloudinaryService = cloudinaryService;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<MovieResponse> getNowShowingMovies() {
-        return movieRepository.findByStatusOrderByReleaseDateDesc(SHOWING)
+        return movieRepository.findByStatusWithGenresOrderByReleaseDateDesc(SHOWING)
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieResponse> getHomeMovies(String status, Long genreId, LocalDate date) {
+        LocalDateTime startOfDay = date == null ? null : date.atStartOfDay();
+        LocalDateTime endOfDay = date == null ? null : date.plusDays(1).atStartOfDay();
+
+        return movieRepository.searchHomeMovies(normalize(status), genreId, startOfDay, endOfDay)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     @Override
     @Transactional(readOnly = true)
     public Page<MovieListResponse> getMovies(String keyword, String status, Pageable pageable) {
@@ -65,24 +76,18 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     @Transactional
-    public MovieDetailResponse createMovie(MovieRequest request, MultipartFile poster) {
+    public MovieDetailResponse createMovie(MovieRequest request) {
         Movie movie = new Movie();
         applyRequest(movie, request);
-        movie.setPosterUrl(cloudinaryService.uploadImage(poster, POSTER_FOLDER));
         Movie savedMovie = movieRepository.save(movie);
         return MovieDetailResponse.fromEntity(savedMovie);
     }
 
     @Override
     @Transactional
-    public MovieDetailResponse updateMovie(Long id, MovieRequest request, MultipartFile poster) {
+    public MovieDetailResponse updateMovie(Long id, MovieRequest request) {
         Movie movie = getMovieWithGenres(id);
-        String currentPosterUrl = movie.getPosterUrl();
         applyRequest(movie, request);
-        movie.setPosterUrl(currentPosterUrl);
-        if (poster != null && !poster.isEmpty()) {
-            movie.setPosterUrl(cloudinaryService.uploadImage(poster, POSTER_FOLDER));
-        }
         return MovieDetailResponse.fromEntity(movieRepository.save(movie));
     }
 
@@ -100,6 +105,7 @@ public class MovieServiceImpl implements MovieService {
         movie.setDirector(request.getDirector());
         movie.setCast(request.getCast());
         movie.setLanguage(request.getLanguage());
+        movie.setPosterUrl(request.getPosterUrl());
         movie.setTrailerUrl(request.getTrailerUrl());
         movie.setStatus(request.getStatus());
         movie.setGenres(resolveGenres(request.getGenreIds()));
@@ -137,7 +143,11 @@ public class MovieServiceImpl implements MovieService {
                 movie.getLanguage(),
                 movie.getPosterUrl(),
                 movie.getTrailerUrl(),
-                movie.getStatus()
+                movie.getStatus(),
+                movie.getGenres().stream()
+                        .map(GenreResponse::fromEntity)
+                        .sorted(Comparator.comparing(GenreResponse::name))
+                        .toList()
         );
     }
 }

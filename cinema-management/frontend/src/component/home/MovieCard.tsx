@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import type { Movie } from '../../types/movie'
 
 interface MovieCardProps {
@@ -5,13 +6,27 @@ interface MovieCardProps {
 }
 
 function MovieCard({ movie }: MovieCardProps) {
+  const navigate = useNavigate()
+
+  function openMovieDetail() {
+    navigate(`/movies/${movie.id}`)
+  }
+
   return (
     <article className="movie-card">
-      <div className="movie-poster" style={{ backgroundImage: `url(${movie.posterUrl})` }}>
+      <button
+        className="movie-poster movie-poster--button"
+        style={{ backgroundImage: `url(${movie.posterUrl})` }}
+        type="button"
+        onClick={openMovieDetail}
+        aria-label={`Xem chi tiết phim ${movie.title}`}
+      >
         <span>{movie.ageRating}</span>
-      </div>
+      </button>
       <div className="movie-card__body">
-        <h3>{movie.title}</h3>
+        <button className="movie-card__title-button" type="button" onClick={openMovieDetail}>
+          <h3>{movie.title}</h3>
+        </button>
         <p>
           {movie.durationMinutes} phút - {movie.language}
         </p>

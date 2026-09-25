@@ -1,0 +1,834 @@
+
+
+:root {
+    --pl-red: #e50914;
+    --pl-red-hover: #ff1f2b;
+    --pl-red-soft: rgba(229, 9, 20, 0.14);
+    --pl-red-line: rgba(229, 9, 20, 0.45);
+
+    --pl-bg: #07090c;
+    --pl-sidebar-bg: #0b0e12;
+    --pl-header-bg: rgba(9, 11, 14, 0.86);
+    --pl-surface: #14181d;
+    --pl-surface-2: #1a1f25;
+    --pl-border: #22282f;
+    --pl-border-strong: #2e353d;
+
+    --pl-text: #f5f7f8;
+    --pl-muted: #9ca5af;
+    --pl-faint: #6c757e;
+
+    --pl-sidebar-w: 240px;
+    --pl-sidebar-w-collapsed: 72px;
+    --pl-header-h: 60px;
+    --pl-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.pl-shell,
+.pl-shell *,
+.pl-shell *::before,
+.pl-shell *::after {
+    box-sizing: border-box;
+}
+
+.pl-shell {
+    --pl-current-w: 0px;
+
+    min-height: 100vh;
+    min-height: 100dvh;
+    color: var(--pl-text);
+    background:
+            radial-gradient(ellipse 900px 420px at 70% -120px, rgba(229, 9, 20, 0.07), transparent 70%),
+            var(--pl-bg);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.pl-shell.has-sidebar {
+    --pl-current-w: var(--pl-sidebar-w);
+}
+
+.pl-shell.has-sidebar.is-collapsed {
+    --pl-current-w: var(--pl-sidebar-w-collapsed);
+}
+
+.pl-shell :is(button, a):focus-visible {
+    outline: 2px solid var(--pl-red-hover);
+    outline-offset: 2px;
+}
+
+/* Bỏ qua điều hướng (bàn phím / trình đọc màn hình) */
+.pl-skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 2000;
+    padding: 8px 14px;
+    color: #fff;
+    background: var(--pl-red);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transform: translateY(-160%);
+    transition: transform 0.15s ease;
+}
+
+.pl-skip-link:focus {
+    transform: none;
+}
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.pl-main {
+    min-width: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin-left: var(--pl-current-w);
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.22s var(--pl-ease);
+}
+
+.pl-content {
+    min-width: 0;
+    flex: 1;
+    outline: none;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.pl-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    width: var(--pl-current-w);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--pl-sidebar-bg);
+    border-right: 1px solid var(--pl-border);
+    transition: width 0.22s var(--pl-ease), transform 0.22s var(--pl-ease);
+}
+
+/* ---------- Brand ---------- */
+
+.pl-sidebar-brand {
+    height: var(--pl-header-h);
+    flex: 0 0 var(--pl-header-h);
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--pl-border);
+}
+
+.pl-logo-mark {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: linear-gradient(145deg, #ff2a33, #b0060e);
+    border-radius: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 19px;
+    font-weight: 900;
+    box-shadow: 0 6px 18px rgba(229, 9, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Khuyết vé hai bên logo */
+.pl-logo-mark::before,
+.pl-logo-mark::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    margin-top: -4px;
+    border-radius: 50%;
+    background: var(--pl-sidebar-bg);
+}
+
+.pl-logo-mark::before {
+    left: -4px;
+}
+
+.pl-logo-mark::after {
+    right: -4px;
+}
+
+.pl-brand-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    white-space: nowrap;
+}
+
+.pl-brand-text b {
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: -0.2px;
+}
+
+.pl-brand-text em {
+    color: var(--pl-red);
+    font-style: normal;
+}
+
+.pl-brand-text small {
+    align-self: flex-start;
+    padding: 2px 6px;
+    color: #ffb4b8;
+    background: var(--pl-red-soft);
+    border: 1px solid var(--pl-red-line);
+    border-radius: 4px;
+    font-size: 8.5px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+}
+
+.pl-sidebar-close {
+    display: none;
+    margin-left: auto;
+    width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: var(--pl-muted);
+    background: transparent;
+    border: 1px solid var(--pl-border);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* ---------- Nav ---------- */
+
+.pl-sidebar-nav {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px 12px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #2e353d transparent;
+}
+
+.pl-nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.pl-nav-section {
+    height: 22px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    overflow: hidden;
+    color: var(--pl-faint);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.pl-nav-item {
+    position: relative;
+    width: 100%;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    color: #b3bac1;
+    background: transparent;
+    border: 0;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.pl-nav-item:hover {
+    color: #fff;
+    background: #151a20;
+}
+
+.pl-nav-item.is-active {
+    color: #fff;
+    background: linear-gradient(90deg, rgba(229, 9, 20, 0.2), rgba(229, 9, 20, 0.04));
+}
+
+.pl-nav-item.is-active::before {
+    content: "";
+    position: absolute;
+    top: 9px;
+    bottom: 9px;
+    left: -12px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--pl-red);
+    box-shadow: 0 0 12px rgba(229, 9, 20, 0.8);
+}
+
+.pl-nav-icon {
+    width: 20px;
+    flex: 0 0 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #8d959d;
+    transition: color 0.15s ease;
+}
+
+.pl-nav-item:hover .pl-nav-icon {
+    color: #fff;
+}
+
+.pl-nav-item.is-active .pl-nav-icon {
+    color: var(--pl-red-hover);
+}
+
+.pl-nav-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pl-nav-badge {
+    margin-left: auto;
+    min-width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    color: #fff;
+    background: var(--pl-red);
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+}
+
+/* ---------- Foot ---------- */
+
+.pl-sidebar-foot {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px;
+    border-top: 1px solid var(--pl-border);
+}
+
+.pl-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 8px 10px;
+    margin-bottom: 4px;
+    border-bottom: 1px dashed var(--pl-border);
+    white-space: nowrap;
+}
+
+.pl-avatar {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: #fff;
+    background: #262d35;
+    border: 1px solid var(--pl-border-strong);
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.pl-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pl-user-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.pl-user-text b {
+    overflow: hidden;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+}
+
+.pl-user-text small {
+    color: var(--pl-faint);
+    font-size: 11px;
+}
+
+.pl-logout:hover {
+    color: #fff;
+    background: rgba(229, 9, 20, 0.12);
+}
+
+.pl-logout:hover .pl-nav-icon {
+    color: var(--pl-red-hover);
+}
+
+.pl-collapse-btn {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    color: var(--pl-faint);
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.pl-collapse-btn:hover {
+    color: #fff;
+    background: #151a20;
+}
+
+.pl-collapse-btn svg {
+    flex: 0 0 20px;
+}
+
+/* ---------- Collapsed (desktop) ---------- */
+
+.pl-shell.is-collapsed .pl-sidebar-brand {
+    justify-content: center;
+    padding: 0;
+}
+
+.pl-shell.is-collapsed :is(.pl-brand-text, .pl-nav-label, .pl-nav-badge, .pl-user-text) {
+    display: none;
+}
+
+.pl-shell.is-collapsed .pl-nav-section {
+    height: 1px;
+    margin: 6px 14px;
+    padding: 0;
+    color: transparent;
+    background: var(--pl-border);
+}
+
+.pl-shell.is-collapsed :is(.pl-nav-item, .pl-collapse-btn) {
+    justify-content: center;
+    padding: 0;
+}
+
+.pl-shell.is-collapsed .pl-user {
+    justify-content: center;
+    padding: 6px 0 10px;
+}
+
+/* Chấm đỏ báo badge khi thu gọn */
+.pl-shell.is-collapsed .pl-nav-item:has(.pl-nav-badge)::after {
+    content: "";
+    position: absolute;
+    top: 9px;
+    right: 14px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--pl-red);
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.pl-header {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    height: var(--pl-header-h);
+    flex: 0 0 var(--pl-header-h);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 24px;
+    background: var(--pl-header-bg);
+    border-bottom: 1px solid var(--pl-border);
+    backdrop-filter: saturate(140%) blur(10px);
+}
+
+.pl-icon-btn {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: var(--pl-text);
+    background: var(--pl-surface);
+    border: 1px solid var(--pl-border);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.pl-icon-btn:hover {
+    border-color: var(--pl-border-strong);
+    background: var(--pl-surface-2);
+}
+
+/* Hamburger + logo header chỉ dùng khi sidebar không hiện cố định */
+.pl-menu-btn,
+.pl-shell.has-sidebar .pl-header-logo {
+    display: none;
+}
+
+.pl-header-logo {
+    flex: 0 0 auto;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: -0.3px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.pl-header-logo span {
+    color: var(--pl-red);
+}
+
+.pl-header-title {
+    min-width: 0;
+    overflow: hidden;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.pl-header-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pl-header-nav a {
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 12px;
+    color: var(--pl-muted);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.pl-header-nav a:hover {
+    color: #fff;
+    background: var(--pl-surface);
+}
+
+.pl-header-nav a.is-active {
+    color: #fff;
+    background: var(--pl-red-soft);
+}
+
+.pl-header-right {
+    margin-left: auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pl-clock {
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 11px;
+    color: var(--pl-muted);
+    background: var(--pl-surface);
+    border: 1px solid var(--pl-border);
+    border-radius: 999px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.pl-clock svg {
+    color: var(--pl-red-hover);
+}
+
+.pl-clock b {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.pl-header-actions {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 12px;
+    overflow: hidden;
+    color: #d5d9dd;
+    border-left: 1px solid var(--pl-border);
+    font-size: 12.5px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* =========================================================
+   FOOTER (gọn cho app nội bộ)
+   ========================================================= */
+
+.pl-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    padding: 14px 24px;
+    color: var(--pl-faint);
+    border-top: 1px solid var(--pl-border);
+    font-size: 11px;
+}
+
+.pl-footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.pl-footer-brand b {
+    color: #d7dce1;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.pl-footer-brand em {
+    color: var(--pl-red);
+    font-style: normal;
+}
+
+.pl-footer-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+}
+
+.pl-footer-nav a {
+    color: var(--pl-faint);
+    text-decoration: none;
+}
+
+.pl-footer-nav a:hover {
+    color: #fff;
+}
+
+.pl-footer-version {
+    padding: 2px 7px;
+    color: var(--pl-muted);
+    background: var(--pl-surface);
+    border: 1px solid var(--pl-border);
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   BACKDROP (mobile)
+   ========================================================= */
+
+.pl-backdrop {
+    display: none;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+    :root {
+        --pl-sidebar-w: 216px;
+    }
+
+    .pl-header {
+        padding: 0 18px;
+    }
+
+    .pl-header-actions {
+        max-width: 220px;
+    }
+}
+
+@media (max-width: 900px) {
+    .pl-shell.has-sidebar,
+    .pl-shell.has-sidebar.is-collapsed {
+        --pl-current-w: 0px;
+    }
+
+    .pl-sidebar {
+        width: min(280px, 86vw);
+        transform: translateX(-100%);
+        box-shadow: none;
+    }
+
+    .pl-shell.is-mobile-open .pl-sidebar {
+        transform: none;
+        box-shadow: 24px 0 60px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Khi là ngăn kéo thì luôn hiện đầy đủ chữ */
+    .pl-shell.is-collapsed .pl-sidebar-brand {
+        justify-content: flex-start;
+        padding: 0 16px;
+    }
+
+    .pl-shell.is-collapsed :is(.pl-brand-text, .pl-nav-label, .pl-user-text) {
+        display: flex;
+    }
+
+    .pl-shell.is-collapsed .pl-nav-label {
+        display: inline;
+    }
+
+    .pl-shell.is-collapsed .pl-nav-badge {
+        display: inline-flex;
+    }
+
+    .pl-shell.is-collapsed .pl-nav-section {
+        height: 22px;
+        margin: 0;
+        padding: 0 12px;
+        color: var(--pl-faint);
+        background: none;
+    }
+
+    .pl-shell.is-collapsed :is(.pl-nav-item, .pl-collapse-btn) {
+        justify-content: flex-start;
+        padding: 0 12px;
+    }
+
+    .pl-shell.is-collapsed .pl-user {
+        justify-content: flex-start;
+        padding: 8px 8px 10px;
+    }
+
+    .pl-shell.is-collapsed .pl-nav-item:has(.pl-nav-badge)::after {
+        display: none;
+    }
+
+    .pl-sidebar-close {
+        display: inline-flex;
+    }
+
+    .pl-collapse-btn {
+        display: none;
+    }
+
+    .pl-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 950;
+        display: block;
+        background: rgba(3, 4, 6, 0.62);
+        backdrop-filter: blur(2px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .pl-shell.is-mobile-open .pl-backdrop {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .pl-shell.has-sidebar .pl-menu-btn,
+    .pl-shell.has-sidebar .pl-header-logo {
+        display: inline-flex;
+    }
+
+    .pl-header-nav {
+        display: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .pl-header {
+        gap: 10px;
+        padding: 0 12px;
+    }
+
+    .pl-clock span,
+    .pl-header-actions {
+        display: none;
+    }
+
+    .pl-footer {
+        padding: 14px 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pl-shell *,
+    .pl-shell *::before,
+    .pl-shell *::after {
+        transition: none !important;
+    }
+}
+
+
+@media print {
+    .pl-sidebar,
+    .pl-header,
+    .pl-footer,
+    .pl-backdrop {
+        display: none !important;
+    }
+
+    .pl-main {
+        margin-left: 0 !important;
+    }
+}

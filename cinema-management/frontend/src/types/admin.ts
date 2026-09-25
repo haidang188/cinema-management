@@ -1,6 +1,7 @@
 export interface PageResponse<T> {
   content: T[]
   totalPages: number
+  totalElements: number
 }
 
 export interface ApiRequestError extends Error {
@@ -64,6 +65,20 @@ export interface CinemaRoom {
   totalSeats?: number
   status?: string
   seats?: Seat[]
+}
+
+export interface CinemaRoomPayload {
+  name: string
+  roomType: string
+  rows: number
+  seatsPerRow: number
+  status: string
+}
+
+export interface CinemaRoomUpdatePayload {
+  name: string
+  roomType: string
+  status: string
 }
 
 export interface SeatTypeUpdate {
