@@ -194,14 +194,25 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
           <h1>Chi tiết phòng chiếu</h1>
           <p>Chọn ghế để thay đổi loại ghế hoặc trạng thái, sau đó lưu một lần.</p>
         </div>
-        <button
-          type="button"
-          className="secondary-button room-back-button"
-          aria-label="Quay lại danh sách phòng chiếu"
-          onClick={handleBack}
-        >
-          Quay lại
-        </button>
+        <div className="room-header-actions">
+          <button
+            type="button"
+            className="secondary-button room-back-button"
+            aria-label="Quay lại danh sách phòng chiếu"
+            onClick={handleBack}
+          >
+            Quay lại
+          </button>
+          {room && (
+            <button
+              type="button"
+              className="secondary-button room-edit-header-button"
+              onClick={() => onNavigate(`/admin/cinema-rooms/${room.id}/edit`)}
+            >
+              Chỉnh sửa
+            </button>
+          )}
+        </div>
       </header>
 
       {loading && <div className="room-alert">Đang tải sơ đồ ghế...</div>}
@@ -236,23 +247,19 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
               <p className="room-page-eyebrow">Sơ đồ ghế</p>
               <h2>Sơ đồ ghế</h2>
             </div>
-            <div className="seat-stats" aria-label="Thống kê ghế">
-              <span>Tổng số ghế: {seatStats.actualTotal}</span>
-              <span>Ghế thường: {seatStats.normal}</span>
-              <span>Ghế VIP: {seatStats.vip}</span>
-              <span>Ghế không hoạt động: {seatStats.inactive}</span>
-            </div>
           </section>
 
-          <div className="seat-editor-layout">
-            <SeatMap
-              seats={room.seats || []}
-              pendingSeats={pendingSeats}
-              selectedSeatIds={selectedSeatIds}
-              onSelectSeat={toggleSelectedSeat}
-            />
+          <div className="seat-editor-layout room-detail-seat-layout">
+            <div className="room-detail-map-column">
+              <SeatMap
+                seats={room.seats || []}
+                pendingSeats={pendingSeats}
+                selectedSeatIds={selectedSeatIds}
+                onSelectSeat={toggleSelectedSeat}
+              />
+            </div>
 
-            <aside className="seat-editor-panel" aria-label="Chỉnh sửa ghế">
+            <aside className="seat-editor-panel room-detail-info-panel" aria-label="Thông tin ghế">
               {selectedSeats.length > 0 ? (
                 <>
                   <div>
@@ -265,45 +272,19 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
                     </small>
                   </div>
 
-                  <label className="room-form-field">
+                  <div className="room-seat-info-list">
                     <span>Loại ghế</span>
-                    <select
-                      value={selectedSeatType}
-                      disabled={saving}
-                      onChange={(event) => updateSelectedSeats("seatType", event.target.value)}
-                    >
-                      {selectedSeatType === "MIXED" && (
-                        <option value="MIXED" disabled>
-                          Nhiều giá trị
-                        </option>
-                      )}
-                      {Object.entries(SEAT_TYPE_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                    <strong>{selectedSeatType === "MIXED" ? "Nhiều giá trị" : SEAT_TYPE_LABELS[selectedSeatType] || selectedSeatType}</strong>
+                  </div>
 
-                  <label className="room-form-field">
+                  <div className="room-seat-info-list">
                     <span>Trạng thái ghế</span>
-                    <select
-                      value={selectedSeatStatus}
-                      disabled={saving}
-                      onChange={(event) => updateSelectedSeats("status", event.target.value)}
-                    >
-                      {selectedSeatStatus === "MIXED" && (
-                        <option value="MIXED" disabled>
-                          Nhiều giá trị
-                        </option>
-                      )}
-                      {Object.entries(SEAT_STATUS_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                    <strong>
+                      {selectedSeatStatus === "MIXED"
+                        ? "Nhiều giá trị"
+                        : SEAT_STATUS_LABELS[selectedSeatStatus] || selectedSeatStatus}
+                    </strong>
+                  </div>
 
                   <button
                     type="button"
@@ -317,25 +298,28 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
               ) : (
                 <div className="seat-editor-empty">
                   <strong>Chọn ghế</strong>
-                  <span>Thông tin chỉnh sửa sẽ hiển thị tại đây.</span>
+                  <span>Chọn một hoặc nhiều ghế trên sơ đồ để xem thông tin chi tiết.</span>
                 </div>
               )}
             </aside>
-          </div>
-
-          <div className="room-action-bar">
-            <span className={hasChanges ? "dirty-note active" : "dirty-note"}>
-              {hasChanges ? `${Object.keys(pendingSeats).length} ghế có thay đổi chưa lưu` : "Chưa có thay đổi"}
-            </span>
-            <button
-              type="button"
-              className="primary-button"
-              disabled={!hasChanges || saving}
-              aria-label="Lưu thay đổi ghế"
-              onClick={handleSave}
-            >
-              {saving ? "Đang lưu..." : "Lưu thay đổi"}
-            </button>
+            <section className="seat-stat-grid room-detail-seat-stats" aria-label="Thống kê ghế">
+              <div>
+                <strong>{seatStats.actualTotal}</strong>
+                <span>Tổng số ghế</span>
+              </div>
+              <div>
+                <strong>{seatStats.normal}</strong>
+                <span>Ghế thường</span>
+              </div>
+              <div>
+                <strong>{seatStats.vip}</strong>
+                <span>Ghế VIP</span>
+              </div>
+              <div>
+                <strong>{seatStats.inactive}</strong>
+                <span>Ghế không hoạt động</span>
+              </div>
+            </section>
           </div>
         </>
       )}
@@ -345,6 +329,9 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
           title="Có thay đổi chưa lưu"
           message={LEAVE_WARNING_MESSAGE}
           variant="warning"
+          size="sm"
+          closeOnOverlay
+          onClose={() => setShowLeaveModal(false)}
           actions={[
             {
               label: "Ở lại",
