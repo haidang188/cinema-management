@@ -10,6 +10,9 @@ import { promotionRoutes } from "./PromotionRoutes"
 import { AdminShell, CustomerShell } from "./RouteShells"
 import { showtimeRoutes } from "./showtimeRoutes"
 import { ticketPriceRoutes } from "./ticketPriceRoutes"
+import { counterSaleRoutes } from "./counterSaleRoutes"
+
+
 
 function AppRouteContent() {
   const navigate = useNavigate()
@@ -73,15 +76,15 @@ function AppRouteContent() {
         const Shell = currentUser?.role === "ADMIN" ? AdminShell : CustomerShell
 
         return (
-        <Route
-          key={route.path}
-          path={route.path}
-          element={
-            <Shell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
-              {route.element}
-            </Shell>
-          }
-        />
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <Shell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
+                {route.element}
+              </Shell>
+            }
+          />
         )
       })}
 
@@ -94,6 +97,14 @@ function AppRouteContent() {
               {route.element}
             </AdminShell>
           }
+        />
+      ))}
+
+      {counterSaleRoutes.map((route) => (
+        <Route
+          key={route.path}
+          path={route.path}
+          element={route.element}
         />
       ))}
 

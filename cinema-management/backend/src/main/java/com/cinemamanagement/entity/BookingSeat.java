@@ -2,15 +2,23 @@ package com.cinemamanagement.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "booking_seats")
+@Table(name = "booking_seats", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_booking_seat", columnNames = {
+                "booking_id", "seat_id"
+        }
+        )
+}
+)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookingSeat {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,9 +31,9 @@ public class BookingSeat {
     @JoinColumn(name = "seat_id", nullable = false)
     private Seat seat;
 
-    @Column(precision = 10, scale = 2)
+    @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal price;
 
     @Column(length = 30)
-    private String status;
+    private String status = "ACTIVE";
 }

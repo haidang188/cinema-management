@@ -1,0 +1,913 @@
+
+
+.cs-seats-page {
+    --red: #e50914;
+    --red-hover: #ff1f2b;
+    --red-soft: rgba(229, 9, 20, 0.14);
+    --red-line: rgba(229, 9, 20, 0.45);
+    --gold: #d4a44c;
+    --bg: #0b0e12;
+    --panel: #14181d;
+    --panel-2: #1a1f25;
+    --border: #2b3139;
+    --border-soft: #22282f;
+    --text: #f5f7f8;
+    --muted: #9ca5af;
+    --faint: #6c757e;
+
+    /* Kích thước ghế: chỉnh ở đây, cả sơ đồ co theo */
+    --seat-w: 36px;
+    --seat-h: 32px;
+    --seat-gap: 6px;
+
+    width: min(1320px, calc(100% - 24px));
+    margin: 12px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    color: var(--text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.cs-seats-page *,
+.cs-seats-page *::before,
+.cs-seats-page *::after {
+    box-sizing: border-box;
+}
+
+.cs-seats-page h1,
+.cs-seats-page h2,
+.cs-seats-page p,
+.cs-seats-page ul {
+    margin: 0;
+    padding: 0;
+    font-family: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.cs-seats-page ul {
+    list-style: none;
+}
+
+.cs-seats-page button {
+    font-family: inherit;
+}
+
+.cs-seats-page button:focus-visible {
+    outline: 2px solid var(--red-hover);
+    outline-offset: 2px;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.cs-seats-page .cs-btn {
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 14px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.cs-seats-page .cs-btn-ghost {
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--border);
+}
+
+.cs-seats-page .cs-btn-ghost:hover {
+    background: var(--panel-2);
+    border-color: #4a525b;
+}
+
+.cs-seats-page .cs-btn-primary {
+    color: #fff;
+    background: var(--red);
+    border: 0;
+}
+
+.cs-seats-page .cs-btn-primary:hover:not(:disabled) {
+    background: var(--red-hover);
+}
+
+.cs-seats-page .cs-btn-primary:disabled {
+    color: rgba(255, 255, 255, 0.5);
+    background: #3a1215;
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.cs-seats-page .cs-seats-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.cs-seats-page .cs-seats-title {
+    flex: 0 0 auto;
+}
+
+.cs-seats-page .cs-eyebrow {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--red);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.cs-seats-page .cs-seats-title h1 {
+    color: #fff;
+    font-size: 22px;
+    line-height: 1.1;
+    font-weight: 800;
+}
+
+.cs-seats-page .cs-showtime-card {
+    min-width: 0;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px 8px 8px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.cs-seats-page .cs-showtime-poster {
+    width: 34px;
+    height: 48px;
+    flex: 0 0 34px;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #262c33;
+}
+
+.cs-seats-page .cs-showtime-poster img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.cs-seats-page img.is-broken {
+    visibility: hidden;
+}
+
+.cs-seats-page .cs-showtime-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cs-seats-page .cs-showtime-info strong {
+    overflow: hidden;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.cs-seats-page .cs-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.cs-seats-page .cs-chip {
+    padding: 3px 8px;
+    color: #c9d0d6;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.cs-seats-page .cs-chip-strong {
+    color: #fff;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-seats-page .cs-chip-red {
+    color: #fff;
+    background: var(--red-soft);
+    border-color: var(--red-line);
+    font-weight: 800;
+}
+
+/* =========================================================
+   BODY LAYOUT
+   ========================================================= */
+
+.cs-seats-page .cs-seats-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+    gap: 14px;
+}
+
+/* =========================================================
+   SEAT MAP CARD
+   ========================================================= */
+
+.cs-seats-page .cs-seatmap-card {
+    position: relative;
+    min-width: 0;
+    padding: 14px 16px 18px;
+    background:
+            radial-gradient(ellipse 60% 220px at 50% 0, rgba(229, 9, 20, 0.1), transparent 70%),
+            var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+}
+
+.cs-seats-page .cs-seatmap-toolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+}
+
+.cs-seats-page .cs-seatmap-toolbar h2 {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.cs-seats-page .cs-seatmap-toolbar p {
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-seats-page .cs-refresh {
+    padding: 0;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cs-seats-page .cs-refresh:hover {
+    color: #fff;
+}
+
+/* ---------- Legend ---------- */
+
+.cs-seats-page .cs-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+}
+
+.cs-seats-page .cs-legend li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+.cs-seats-page .cs-legend-seat {
+    width: 16px;
+    height: 14px;
+    display: inline-block;
+    border: 1px solid;
+    border-radius: 4px 4px 3px 3px;
+}
+
+.cs-seats-page .cs-legend-seat.is-couple {
+    width: 26px;
+}
+
+/* ---------- Scroll + canvas ---------- */
+
+.cs-seats-page .cs-seatmap-scroll {
+    margin-top: 12px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: #3a424b transparent;
+}
+
+.cs-seats-page .cs-seatmap {
+    width: max-content;
+    min-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ---------- Màn hình: đường cong đỏ + vùng sáng hắt xuống ---------- */
+
+.cs-seats-page .cs-screen {
+    position: relative;
+    width: min(560px, 90%);
+    height: 46px;
+    margin: 4px auto 14px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.cs-seats-page .cs-screen::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 26px;
+    border-top: 3px solid var(--red);
+    border-radius: 50% / 100% 100% 0 0;
+    filter: drop-shadow(0 -2px 10px rgba(229, 9, 20, 0.75));
+}
+
+.cs-seats-page .cs-screen::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    left: 6%;
+    right: 6%;
+    height: 34px;
+    background: linear-gradient(to bottom, rgba(229, 9, 20, 0.16), transparent);
+    clip-path: polygon(4% 0, 96% 0, 100% 100%, 0 100%);
+    pointer-events: none;
+}
+
+.cs-seats-page .cs-screen span {
+    position: relative;
+    z-index: 1;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+}
+
+/* ---------- Rows ---------- */
+
+.cs-seats-page .cs-rows {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--seat-gap);
+}
+
+.cs-seats-page .cs-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cs-seats-page .cs-row-label {
+    width: 18px;
+    flex: 0 0 18px;
+    color: var(--faint);
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.cs-seats-page .cs-row-seats {
+    display: flex;
+    gap: var(--seat-gap);
+}
+
+.cs-seats-page .cs-seat-gap {
+    width: calc(var(--seat-w) * 0.6);
+    flex: 0 0 auto;
+}
+
+/* ---------- Seat ----------
+   Hình ghế: bo tròn phía trên nhiều hơn + viền đáy dày (tựa lưng). */
+
+.cs-seats-page .cs-seat {
+    all: unset;
+    box-sizing: border-box;
+    position: relative;
+    width: var(--seat-w);
+    height: var(--seat-h);
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #c9d0d7;
+    background: #252b32;
+    border: 1px solid #3a424b;
+    border-bottom-width: 3px;
+    border-radius: 9px 9px 5px 5px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.12s ease, background-color 0.12s ease,
+    border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.cs-seats-page .cs-seat::before,
+.cs-seats-page .cs-seat::after {
+    content: none;
+}
+
+.cs-seats-page .cs-seat.is-available:hover {
+    color: #fff;
+    background: #2f363e;
+    border-color: var(--red);
+    transform: translateY(-2px);
+}
+
+.cs-seats-page .cs-seat.is-available:active {
+    transform: translateY(0) scale(0.95);
+}
+
+.cs-seats-page .cs-seat:focus-visible {
+    outline: 2px solid var(--red-hover);
+    outline-offset: 2px;
+}
+
+/* VIP: viền vàng ánh kim */
+.cs-seats-page .cs-seat.is-vip {
+    color: #f0d49a;
+    background: #2a261f;
+    border-color: #7a6232;
+}
+
+/* Ghế đôi: rộng bằng 2 ghế + khe */
+.cs-seats-page .cs-seat.is-couple {
+    width: calc(var(--seat-w) * 2 + var(--seat-gap));
+    color: #f2c4cf;
+    background: #2c2127;
+    border-color: #6e3a4a;
+    border-radius: 12px 12px 6px 6px;
+}
+
+/* Đang chọn: đỏ đặc + quầng sáng */
+.cs-seats-page .cs-seat.is-selected,
+.cs-seats-page .cs-seat.is-selected:hover {
+    color: #fff;
+    background: var(--red);
+    border-color: #ff4d56;
+    border-bottom-color: #9c0610;
+    box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.22), 0 6px 16px rgba(229, 9, 20, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Đã bán: chìm vào nền, gạch chéo */
+.cs-seats-page .cs-seat.is-sold {
+    color: #4b525a;
+    background:
+            linear-gradient(45deg, transparent 47.5%, #30363d 47.5%, #30363d 52.5%, transparent 52.5%),
+            linear-gradient(-45deg, transparent 47.5%, #30363d 47.5%, #30363d 52.5%, transparent 52.5%),
+            #15191d;
+    border-color: #23292f;
+    cursor: not-allowed;
+}
+
+/* Đang giữ (quầy khác / khách online đang thanh toán): sọc đỏ sẫm,
+   tách biệt với đỏ tươi "Đang chọn" và vàng "VIP" */
+.cs-seats-page .cs-seat.is-held {
+    color: #d98a90;
+    background: repeating-linear-gradient(
+            -45deg,
+            #3a1519 0 5px,
+            #1f0f11 5px 10px
+    );
+    border-color: #5c2328;
+    cursor: not-allowed;
+}
+
+/* Không bán (bảo trì...) */
+.cs-seats-page .cs-seat.is-blocked {
+    color: transparent;
+    background: transparent;
+    border-style: dashed;
+    border-color: #2a3037;
+    cursor: not-allowed;
+}
+
+/* Legend dùng lại màu của ghế */
+.cs-seats-page .cs-legend-seat.is-available { background: #252b32; border-color: #3a424b; }
+.cs-seats-page .cs-legend-seat.is-selected { background: var(--red); border-color: #ff4d56; }
+.cs-seats-page .cs-legend-seat.is-sold { background: #15191d; border-color: #3b4249; }
+.cs-seats-page .cs-legend-seat.is-held {
+    background: repeating-linear-gradient(-45deg, #3a1519 0 3px, #1f0f11 3px 6px);
+    border-color: #5c2328;
+}
+.cs-seats-page .cs-legend-seat.is-vip { background: #2a261f; border-color: var(--gold); }
+.cs-seats-page .cs-legend-seat.is-couple { background: #2c2127; border-color: #6e3a4a; }
+
+/* ---------- Loading / error / empty ---------- */
+
+.cs-seats-page .cs-seatmap-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: var(--seat-gap);
+}
+
+.cs-seats-page .cs-seatmap-skeleton > div {
+    display: flex;
+    gap: var(--seat-gap);
+}
+
+.cs-seats-page .cs-seatmap-skeleton i {
+    width: var(--seat-w);
+    height: var(--seat-h);
+    border-radius: 9px 9px 5px 5px;
+    background: linear-gradient(100deg, #1d2228 30%, #272d34 50%, #1d2228 70%);
+    background-size: 300% 100%;
+    animation: cs-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes cs-shimmer {
+    from { background-position: 100% 0; }
+    to { background-position: 0 0; }
+}
+
+.cs-seats-page .cs-seatmap-state {
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.cs-seats-page .cs-seatmap-state strong {
+    color: #fff;
+    font-size: 14px;
+}
+
+.cs-seats-page .cs-seatmap-state.is-error strong {
+    color: #ff6a72;
+}
+
+.cs-seats-page .cs-seatmap-state .cs-btn {
+    margin-top: 6px;
+}
+
+/* ---------- Notice ---------- */
+
+.cs-seats-page .cs-notice {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    z-index: 3;
+    max-width: calc(100% - 32px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 10px 9px 14px;
+    color: #fff;
+    background: #2a0d10;
+    border: 1px solid var(--red-line);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    font-size: 12px;
+    font-weight: 600;
+    transform: translateX(-50%);
+    animation: cs-notice-in 0.2s ease-out;
+}
+
+.cs-seats-page .cs-notice button {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    color: #ffb4b8;
+    background: transparent;
+    border: 0;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+@keyframes cs-notice-in {
+    from { opacity: 0; transform: translate(-50%, 6px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+.cs-seats-page .cs-summary {
+    position: sticky;
+    top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--red);
+    border-radius: 14px;
+}
+
+.cs-seats-page .cs-summary-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cs-seats-page .cs-summary-head h2 {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.cs-seats-page .cs-summary-count {
+    padding: 3px 8px;
+    color: var(--muted);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-seats-page .cs-summary-seats {
+    min-height: 118px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed var(--border);
+}
+
+.cs-seats-page .cs-summary-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.cs-seats-page .cs-link {
+    padding: 0;
+    color: #ff8a90;
+    background: none;
+    border: 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cs-seats-page .cs-link:hover {
+    color: #fff;
+}
+
+.cs-seats-page .cs-summary-empty {
+    color: var(--faint);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.cs-seats-page kbd {
+    padding: 1px 5px;
+    color: var(--muted);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 10.5px;
+}
+
+.cs-seats-page .cs-seat-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.cs-seats-page .cs-seat-chip {
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 4px 0 10px;
+    color: #fff;
+    background: var(--red-soft);
+    border: 1px solid var(--red-line);
+    border-radius: 8px;
+    animation: cs-chip-in 0.15s ease-out;
+}
+
+.cs-seats-page .cs-seat-chip b {
+    font-size: 12.5px;
+    font-weight: 800;
+}
+
+.cs-seats-page .cs-seat-chip small {
+    color: #ffc9cc;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.cs-seats-page .cs-seat-chip.is-vip small {
+    color: var(--gold);
+}
+
+.cs-seats-page .cs-seat-chip button {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    color: #ffb4b8;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.cs-seats-page .cs-seat-chip button:hover {
+    color: #fff;
+    background: rgba(229, 9, 20, 0.35);
+}
+
+@keyframes cs-chip-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* ---------- Price ---------- */
+
+.cs-seats-page .cs-summary-price {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: opacity 0.15s ease;
+}
+
+.cs-seats-page .cs-summary-price.is-loading > div:not(.cs-summary-total) {
+    opacity: 0.5;
+}
+
+.cs-seats-page .cs-summary-price > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: 12.5px;
+}
+
+.cs-seats-page .cs-summary-price span {
+    color: var(--muted);
+}
+
+.cs-seats-page .cs-summary-price strong {
+    color: #fff;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-seats-page .cs-summary-price strong.is-discount {
+    color: #8fd19e;
+}
+
+.cs-seats-page .cs-summary-price .cs-summary-total {
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.cs-seats-page .cs-summary-total span {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.cs-seats-page .cs-summary-total strong {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+}
+
+.cs-seats-page .cs-price-error {
+    color: #ff6a72;
+    font-size: 11.5px;
+}
+
+.cs-seats-page .cs-summary-cta {
+    width: 100%;
+    height: 46px;
+    font-size: 14px;
+}
+
+.cs-seats-page .cs-summary-cta span {
+    font-size: 16px;
+}
+
+/* =========================================================
+   EMPTY PAGE
+   ========================================================= */
+
+.cs-seats-page .cs-seats-empty {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+}
+
+.cs-seats-page .cs-seats-empty-icon {
+    font-size: 34px;
+}
+
+.cs-seats-page .cs-seats-empty h2 {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.cs-seats-page .cs-seats-empty p {
+    color: var(--muted);
+}
+
+.cs-seats-page .cs-seats-empty .cs-btn {
+    margin-top: 8px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1180px) {
+    .cs-seats-page {
+        --seat-w: 32px;
+        --seat-h: 30px;
+        --seat-gap: 5px;
+    }
+
+    .cs-seats-page .cs-seats-body {
+        grid-template-columns: minmax(0, 1fr) 290px;
+    }
+}
+
+@media (max-width: 960px) {
+    .cs-seats-page .cs-seats-header {
+        flex-wrap: wrap;
+    }
+
+    .cs-seats-page .cs-showtime-card {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .cs-seats-page .cs-seats-body {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tablet/mobile: tóm tắt xuống dưới sơ đồ */
+    .cs-seats-page .cs-summary {
+        position: static;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cs-seats-page .cs-seat,
+    .cs-seats-page .cs-seat-chip,
+    .cs-seats-page .cs-notice,
+    .cs-seats-page .cs-seatmap-skeleton i {
+        transition: none;
+        animation: none;
+    }
+}
