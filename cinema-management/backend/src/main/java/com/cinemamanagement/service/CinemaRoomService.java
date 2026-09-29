@@ -18,4 +18,6 @@ public interface CinemaRoomService {
     CinemaRoomDetailResponse getRoomDetail(Long roomId);
 
     CinemaRoomDetailResponse updateSeatTypes(Long roomId, UpdateSeatTypesRequest request);
+
+    void deleteRoom(Long roomId);
 }

@@ -15,4 +15,6 @@ public interface BookingSeatRepository extends JpaRepository<BookingSeat, Long> 
             Long bookingId,
             Long seatId
     );
+
+    boolean existsBySeatId(Long seatId);
 }

@@ -47,6 +47,12 @@ export function updateRoom(id: string, payload: CinemaRoomUpdatePayload): Promis
   })
 }
 
+export function deleteRoom(id: string): Promise<void> {
+  return request<void>(`/api/admin/cinema-rooms/${id}`, {
+    method: "DELETE",
+  })
+}
+
 export function updateSeatTypes(roomId: string, seats: SeatTypeUpdate[]): Promise<CinemaRoom> {
   return request<CinemaRoom>(`/api/admin/cinema-rooms/${roomId}/seats`, {
     method: "PUT",

@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom"
 
-import CinemaRoomDetail from "../pages/admin/rooms/CinemaRoomDetail"
 import CinemaRoomCreate from "../pages/admin/rooms/CinemaRoomCreate"
+import CinemaRoomDetail from "../pages/admin/rooms/CinemaRoomDetail"
 import CinemaRoomEdit from "../pages/admin/rooms/CinemaRoomEdit"
 import CinemaRoomList from "../pages/admin/rooms/CinemaRoomList"
 import MovieCreate from "../pages/admin/movies/MovieCreate"

@@ -56,6 +56,8 @@ export interface Seat {
   seatName: string
   seatType: string
   status: string
+  gridRow?: number | null
+  gridColumn?: number | null
 }
 
 export interface CinemaRoom {
@@ -70,16 +72,20 @@ export interface CinemaRoom {
 export interface CinemaRoomPayload {
   name: string
   roomType: string
-  rows: number
-  seatsPerRow: number
   status: string
+  seats: CinemaRoomSeatPayload[]
 }
 
-export interface CinemaRoomUpdatePayload {
-  name: string
-  roomType: string
+export interface CinemaRoomSeatPayload {
+  rowLabel: string
+  seatNumber: number
+  seatType: string
   status: string
+  gridRow: number
+  gridColumn: number
 }
+
+export type CinemaRoomUpdatePayload = CinemaRoomPayload
 
 export interface SeatTypeUpdate {
   seatId: number
