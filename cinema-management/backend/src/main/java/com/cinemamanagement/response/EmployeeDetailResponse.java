@@ -3,6 +3,7 @@ package com.cinemamanagement.response;
 import com.cinemamanagement.entity.Employee;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record EmployeeDetailResponse(
         Long id,
@@ -17,7 +18,9 @@ public record EmployeeDetailResponse(
         String address,
         String position,
         String avatar,
-        String status
+        String status,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
     public static EmployeeDetailResponse fromEntity(Employee employee) {
         return new EmployeeDetailResponse(
@@ -33,7 +36,9 @@ public record EmployeeDetailResponse(
                 employee.getAddress(),
                 employee.getPosition(),
                 employee.getAvatar(),
-                employee.getStatus()
+                employee.getStatus(),
+                employee.getCreatedAt(),
+                employee.getUpdatedAt()
         );
     }
 }

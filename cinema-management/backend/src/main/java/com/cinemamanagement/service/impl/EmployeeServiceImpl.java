@@ -73,6 +73,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (employeeRepository.existsByEmployeeCodeIgnoreCase(employeeCode)) {
             throw new ConflictException("Mã nhân viên đã tồn tại.");
         }
+        String email = nullableTrim(request.getEmail());
+        if (email != null && employeeRepository.existsByEmailIgnoreCase(email)) {
+            throw new ConflictException("Email đã tồn tại.");
+        }
 
         Role role = roleRepository.findByName(ROLE_EMPLOYEE)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vai trò EMPLOYEE."));
@@ -104,6 +108,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         if (employeeRepository.existsByEmployeeCodeIgnoreCaseAndIdNot(employeeCode, id)) {
             throw new ConflictException("Mã nhân viên đã tồn tại.");
+        }
+        String email = nullableTrim(request.getEmail());
+        if (email != null && employeeRepository.existsByEmailIgnoreCaseAndIdNot(email, id)) {
+            throw new ConflictException("Email đã tồn tại.");
         }
 
         employee.setEmployeeCode(employeeCode);

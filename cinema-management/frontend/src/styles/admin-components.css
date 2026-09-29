@@ -1,0 +1,476 @@
+.admin-content .movie-admin-page,
+.admin-content .room-admin-page,
+.admin-content .employee-admin-page {
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  margin: 0 auto;
+  max-width: 1440px;
+  min-height: 100svh;
+  padding: 24px 28px 40px;
+}
+
+.admin-content .movie-page-header,
+.admin-content .movie-admin-page .page-header,
+.admin-content .room-page-header,
+.admin-content .designer-page-header,
+.admin-content .employee-page-header {
+  align-items: flex-start;
+  border: 0;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  margin: 0 0 22px;
+  padding: 0;
+}
+
+.admin-content .movie-page-header h1,
+.admin-content .movie-admin-page .page-header h1,
+.admin-content .room-page-header h1,
+.admin-content .designer-page-header h1,
+.admin-content .employee-page-header h1 {
+  color: var(--text-primary);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.admin-content .movie-page-header p,
+.admin-content .movie-admin-page .page-subtitle,
+.admin-content .room-page-header p,
+.admin-content .designer-page-header p,
+.admin-content .employee-page-header p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 400;
+  margin: 4px 0 0;
+}
+
+.admin-content .movie-page-eyebrow,
+.admin-content .movie-admin-page .eyebrow,
+.admin-content .room-page-eyebrow,
+.admin-content .employee-page-eyebrow {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  margin: 0 0 4px;
+  text-transform: none;
+}
+
+.admin-content .movie-toolbar,
+.admin-content .room-toolbar,
+.admin-content .employee-toolbar {
+  align-items: end;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(320px, 1fr) 190px 190px auto;
+  margin: 0 0 18px;
+  padding: 0;
+}
+
+.admin-content .movie-search-field,
+.admin-content .movie-filter-field,
+.admin-content .room-search-field,
+.admin-content .room-filter-field,
+.admin-content .employee-search-field,
+.admin-content .employee-filter-field,
+.admin-content .movie-field,
+.admin-content .room-form-field,
+.employee-field {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-content .movie-field > span,
+.admin-content .room-form-field span,
+.employee-field span {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-content .movie-search-field span,
+.admin-content .movie-filter-field span,
+.admin-content .room-search-field span,
+.admin-content .room-filter-field span {
+  display: none;
+}
+
+.admin-content .movie-toolbar input,
+.admin-content .movie-toolbar select,
+.admin-content .room-toolbar input,
+.admin-content .room-toolbar select,
+.admin-content .employee-toolbar input,
+.admin-content .employee-toolbar select,
+.admin-content .movie-admin-form input,
+.admin-content .movie-admin-form select,
+.admin-content .movie-admin-form textarea,
+.admin-content .room-form-field input,
+.admin-content .room-form-field select,
+.employee-field input,
+.employee-field select,
+.employee-field textarea {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  min-height: 44px;
+  outline: 0;
+  padding: 0 14px;
+  width: 100%;
+}
+
+.admin-content .movie-admin-form textarea,
+.employee-field textarea {
+  padding: 14px;
+  resize: vertical;
+}
+
+.admin-content .movie-toolbar input::placeholder,
+.admin-content .room-toolbar input::placeholder,
+.admin-content .employee-toolbar input::placeholder,
+.admin-content .movie-admin-form input::placeholder,
+.admin-content .movie-admin-form textarea::placeholder,
+.admin-content .room-form-field input::placeholder,
+.employee-field input::placeholder,
+.employee-field textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.admin-content .movie-toolbar input:focus,
+.admin-content .movie-toolbar select:focus,
+.admin-content .room-toolbar input:focus,
+.admin-content .room-toolbar select:focus,
+.admin-content .employee-toolbar input:focus,
+.admin-content .employee-toolbar select:focus,
+.admin-content .movie-admin-form input:focus,
+.admin-content .movie-admin-form select:focus,
+.admin-content .movie-admin-form textarea:focus,
+.admin-content .room-form-field input:focus,
+.admin-content .room-form-field select:focus,
+.employee-field input:focus,
+.employee-field select:focus,
+.employee-field textarea:focus,
+.employee-search-control:focus-within,
+.employee-password-field:focus-within {
+  border-color: #4b6474;
+  box-shadow: 0 0 0 3px rgba(75, 100, 116, 0.18);
+  outline: 0;
+}
+
+.admin-content .movie-table-card,
+.admin-content .room-table-card,
+.admin-content .employee-table-card,
+.admin-content .movie-preview-panel,
+.admin-content .movie-empty-state,
+.admin-content .room-empty-state,
+.admin-content .employee-empty-state,
+.admin-content .movie-alert,
+.admin-content .room-alert,
+.admin-content .employee-alert,
+.admin-content .movie-admin-form .form-panel,
+.admin-content .room-summary-card,
+.admin-content .room-designer-panel,
+.admin-content .seat-designer-stage,
+.admin-content .seat-map-panel,
+.admin-content .seat-editor-panel,
+.employee-form-section,
+.employee-profile-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+}
+
+.admin-content .movie-table-card,
+.admin-content .room-table-card,
+.admin-content .employee-table-card {
+  overflow-x: auto;
+}
+
+.admin-content .movie-admin-table,
+.admin-content .room-table,
+.admin-content .employee-table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.admin-content .movie-admin-table th,
+.admin-content .room-table th,
+.admin-content .employee-table th {
+  background: #131a1f;
+  color: #8f9ca5;
+  font-size: 12px;
+  font-weight: 700;
+  height: 48px;
+  letter-spacing: 0.04em;
+  padding: 0 16px;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-content .movie-admin-table td,
+.admin-content .room-table td,
+.admin-content .employee-table td {
+  border-top: 1px solid var(--border);
+  border-bottom: 0;
+  color: var(--text-primary);
+  font-size: 14px;
+  height: 64px;
+  padding: 0 16px;
+  vertical-align: middle;
+}
+
+.admin-content .movie-admin-table tbody tr,
+.admin-content .room-table tbody tr,
+.admin-content .employee-table tbody tr {
+  transition: background-color 150ms ease;
+}
+
+.admin-content .movie-admin-table tbody tr:hover,
+.admin-content .movie-admin-table tbody tr.is-selected,
+.admin-content .room-table tbody tr:hover,
+.admin-content .employee-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.admin-content .movie-admin-page .primary-button,
+.admin-content .room-admin-page .primary-button,
+.admin-content .room-add-button,
+.admin-content .employee-admin-page .primary-button,
+.employee-admin-form .primary-button {
+  align-items: center;
+  background: var(--accent);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #ffffff;
+  display: inline-flex;
+  font-weight: 700;
+  min-height: 42px;
+  justify-content: center;
+  padding: 0 18px;
+  text-decoration: none;
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.admin-content .movie-admin-page .primary-button:hover:not(:disabled),
+.admin-content .room-admin-page .primary-button:hover:not(:disabled),
+.admin-content .room-add-button:hover:not(:disabled),
+.admin-content .employee-admin-page .primary-button:hover:not(:disabled),
+.employee-admin-form .primary-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.admin-content .movie-admin-page .secondary-button,
+.admin-content .movie-admin-page .edit-button,
+.admin-content .movie-admin-page .pagination-button,
+.admin-content .room-admin-page .secondary-button,
+.admin-content .room-admin-page .edit-button,
+.admin-content .room-admin-page .pagination-button,
+.admin-content .employee-admin-page .secondary-button,
+.admin-content .employee-admin-page .edit-button,
+.admin-content .employee-admin-page .pagination-button,
+.employee-admin-form .secondary-button {
+  align-items: center;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  display: inline-flex;
+  font-weight: 700;
+  min-height: 42px;
+  justify-content: center;
+  padding: 0 16px;
+  text-decoration: none;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.admin-content .movie-admin-page .secondary-button:hover:not(:disabled),
+.admin-content .movie-admin-page .edit-button:hover:not(:disabled),
+.admin-content .movie-admin-page .pagination-button:hover:not(:disabled),
+.admin-content .room-admin-page .secondary-button:hover:not(:disabled),
+.admin-content .room-admin-page .edit-button:hover:not(:disabled),
+.admin-content .room-admin-page .pagination-button:hover:not(:disabled),
+.admin-content .employee-admin-page .secondary-button:hover:not(:disabled),
+.admin-content .employee-admin-page .edit-button:hover:not(:disabled),
+.admin-content .employee-admin-page .pagination-button:hover:not(:disabled),
+.employee-admin-form .secondary-button:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.admin-content .movie-icon-action,
+.admin-content .room-icon-action,
+.admin-content .employee-actions .edit-button,
+.admin-content .employee-more-button {
+  align-items: center;
+  display: inline-flex;
+  height: 36px;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0;
+  width: 36px;
+}
+
+.admin-content .movie-admin-page .movie-delete-button,
+.admin-content .room-admin-page .room-delete-button,
+.admin-content .employee-admin-page .danger-button,
+.modal__button--danger {
+  background: rgba(229, 57, 53, 0.12);
+  border: 1px solid rgba(229, 57, 53, 0.3);
+  color: #ff7373;
+}
+
+.admin-content .movie-admin-page .status-badge,
+.admin-content .room-admin-page .status-badge,
+.admin-content .employee-admin-page .status-badge,
+.status-badge[class*="employee-status-"] {
+  align-items: center;
+  border: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 700;
+  min-height: 28px;
+  padding: 5px 11px;
+  white-space: nowrap;
+}
+
+.admin-content .movie-admin-page .status-showing,
+.admin-content .room-status-active,
+.employee-status-active {
+  background: rgba(31, 157, 98, 0.15);
+  color: #63d99c;
+}
+
+.admin-content .movie-admin-page .status-upcoming,
+.admin-content .room-status-maintenance {
+  background: rgba(210, 154, 33, 0.15);
+  color: #efc45c;
+}
+
+.admin-content .movie-admin-page .status-ended,
+.admin-content .movie-admin-page .status-inactive,
+.admin-content .movie-admin-page .status-unknown,
+.admin-content .room-status-inactive,
+.admin-content .room-status-unknown,
+.employee-status-inactive,
+.employee-status-unknown {
+  background: rgba(229, 57, 53, 0.13);
+  color: #ff7373;
+}
+
+.admin-content .movie-pagination,
+.admin-content .room-pagination,
+.admin-content .employee-pagination {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding: 0;
+}
+
+.admin-content .movie-pagination .pagination-summary,
+.admin-content .room-pagination .pagination-summary,
+.admin-content .employee-pagination .pagination-summary {
+  color: var(--text-secondary);
+  margin-right: auto;
+}
+
+.admin-content .movie-pagination .pagination-button.is-active,
+.admin-content .room-pagination .pagination-button.is-active,
+.admin-content .employee-pagination .pagination-button.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.employee-stat-card,
+.admin-content .room-summary-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.modal {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+}
+
+.modal__header,
+.modal__footer {
+  background: var(--bg-panel);
+  border-color: var(--border);
+}
+
+.modal__header h2 {
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.modal__header p,
+.modal__body p {
+  color: var(--text-secondary);
+}
+
+.modal__close {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+}
+
+@media (max-width: 1023px) {
+  .admin-content .movie-toolbar,
+  .admin-content .room-toolbar,
+  .admin-content .employee-toolbar {
+    grid-template-columns: minmax(240px, 1fr) 1fr 1fr auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-content .movie-admin-page,
+  .admin-content .room-admin-page,
+  .admin-content .employee-admin-page {
+    padding: 16px;
+  }
+
+  .admin-content .movie-page-header,
+  .admin-content .movie-admin-page .page-header,
+  .admin-content .room-page-header,
+  .admin-content .designer-page-header,
+  .admin-content .employee-page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-content .movie-toolbar,
+  .admin-content .room-toolbar,
+  .admin-content .employee-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-content .movie-admin-page .primary-button,
+  .admin-content .room-add-button,
+  .admin-content .employee-add-button {
+    width: 100%;
+  }
+}
+

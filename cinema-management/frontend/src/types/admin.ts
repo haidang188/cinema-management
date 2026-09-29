@@ -93,4 +93,53 @@ export interface SeatTypeUpdate {
   status: string
 }
 
+export interface EmployeeListItem {
+  id: number
+  employeeCode: string
+  username: string
+  fullName: string
+  email?: string
+  phone?: string
+  dateOfBirth?: string
+  gender?: string
+  address?: string
+  position?: string
+  avatar?: string
+  status?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface Employee extends EmployeeListItem {
+  userId: number
+}
+
+export interface CreateEmployeeRequest {
+  username: string
+  password: string
+  employeeCode: string
+  fullName: string
+  email?: string
+  phone?: string
+  dateOfBirth?: string
+  gender?: string
+  address?: string
+  position?: string
+  avatar?: string
+  status?: string
+}
+
+export interface UpdateEmployeeRequest {
+  employeeCode: string
+  fullName: string
+  email?: string
+  phone?: string
+  dateOfBirth?: string
+  gender?: string
+  address?: string
+  position?: string
+  avatar?: string
+  status?: string
+}
+
 export type NavigateHandler = (path: string) => void

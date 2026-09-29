@@ -7,6 +7,7 @@ import CinemaRoomList from "../pages/admin/rooms/CinemaRoomList"
 import MovieCreate from "../pages/admin/movies/MovieCreate"
 import MovieEdit from "../pages/admin/movies/MovieEdit"
 import MovieList from "../pages/admin/movies/MovieList"
+import EmployeeList from "../pages/admin/employees/EmployeeList"
 import type { NavigateHandler } from "../types/admin"
 
 function useAppNavigate(): NavigateHandler {
@@ -45,6 +46,10 @@ function CinemaRoomDetailRoute() {
   return <CinemaRoomDetail roomId={roomId} onNavigate={useAppNavigate()} />
 }
 
+function EmployeeListRoute() {
+  return <EmployeeList onNavigate={useAppNavigate()} />
+}
+
 export const adminRoutes = [
   {
     path: "/admin",
@@ -77,5 +82,9 @@ export const adminRoutes = [
   {
     path: "/admin/cinema-rooms/:roomId",
     element: <CinemaRoomDetailRoute />,
+  },
+  {
+    path: "/admin/employees",
+    element: <EmployeeListRoute />,
   },
 ]
