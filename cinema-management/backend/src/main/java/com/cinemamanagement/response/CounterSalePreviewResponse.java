@@ -17,4 +17,6 @@ public class CounterSalePreviewResponse {
     private BigDecimal discountAmount;
 
     private BigDecimal finalAmount;
+
+    private PromotionQuote promotion;
 }

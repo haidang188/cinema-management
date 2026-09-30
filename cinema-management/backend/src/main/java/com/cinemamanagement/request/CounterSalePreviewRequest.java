@@ -12,4 +12,6 @@ public class CounterSalePreviewRequest {
     private Long showtimeId;
 
     private List<Long> showtimeSeatIds;
+
+    private String promotionCode;
 }
