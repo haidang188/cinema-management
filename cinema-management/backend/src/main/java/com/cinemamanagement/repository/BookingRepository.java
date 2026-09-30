@@ -13,6 +13,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Optional<Booking> findByBookingCode(String bookingCode);
 
+    boolean existsByBookingCode(String bookingCode);
+
     @Query("""
         select count(booking) > 0
         from Booking booking

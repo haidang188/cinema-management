@@ -45,7 +45,9 @@ export function AdminShell({ children, currentUser, onLogout }: AppShellProps) {
   return (
     <main className="admin-layout">
       <aside className="admin-sidebar">
-        <div className="admin-brand">PREMIERE ADMIN</div>
+        <button type="button" className="admin-brand" onClick={() => navigate("/")}>
+          PREMIERE ADMIN
+        </button>
         <nav aria-label="Điều hướng quản trị">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)

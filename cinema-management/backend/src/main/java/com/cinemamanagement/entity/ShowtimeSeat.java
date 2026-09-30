@@ -39,4 +39,7 @@ public class ShowtimeSeat {
 
     @Column(name = "held_until")
     private LocalDateTime heldUntil;
+
+    @Column(name = "hold_owner", length = 64)
+    private String holdOwner;
 }

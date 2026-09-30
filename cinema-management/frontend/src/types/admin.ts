@@ -84,6 +84,7 @@ export interface CinemaRoomUpdatePayload {
 export interface SeatTypeUpdate {
   seatId: number
   seatType: string
+  status: string
 }
 
 export type NavigateHandler = (path: string) => void

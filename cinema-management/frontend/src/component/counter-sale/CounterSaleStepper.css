@@ -1,0 +1,418 @@
+.cs-stepper,
+.cs-dialog-backdrop {
+    --st-red: #e50914;
+    --st-red-hover: #ff1f2b;
+    --st-red-soft: rgba(229, 9, 20, 0.14);
+    --st-red-line: rgba(229, 9, 20, 0.45);
+    --st-gold: #d4a44c;
+    --st-panel: #14181d;
+    --st-panel-2: #1a1f25;
+    --st-border: #2b3139;
+    --st-muted: #9ca5af;
+    --st-faint: #6c757e;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.cs-stepper *,
+.cs-dialog-backdrop * {
+    box-sizing: border-box;
+}
+
+.cs-stepper {
+    position: sticky;
+    top: calc(var(--pl-header-h, 0px) + 8px);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    padding: 10px 14px;
+    color: #fff;
+    background: rgba(12, 15, 19, 0.92);
+    border: 1px solid var(--st-border);
+    border-radius: 14px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- Các bước ---------- */
+
+.cs-stepper-steps {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    list-style: none;
+}
+
+.cs-step {
+    display: flex;
+    align-items: center;
+}
+
+.cs-step-line {
+    width: 28px;
+    height: 2px;
+    margin: 0 6px;
+    border-radius: 2px;
+    background: var(--st-border);
+}
+
+.cs-step.is-done .cs-step-line,
+.cs-step.is-active .cs-step-line {
+    background: var(--st-red);
+}
+
+.cs-step-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    color: var(--st-faint);
+    background: none;
+    border: 0;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: default;
+}
+
+.cs-step-button:not(:disabled) {
+    cursor: pointer;
+}
+
+.cs-step-button:not(:disabled):hover {
+    background: var(--st-panel-2);
+}
+
+.cs-step-dot {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--st-faint);
+    background: var(--st-panel-2);
+    border: 1px solid var(--st-border);
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.cs-step.is-done .cs-step-button {
+    color: #d7dce1;
+}
+
+.cs-step.is-done .cs-step-dot {
+    color: #fff;
+    background: var(--st-red-soft);
+    border-color: var(--st-red-line);
+}
+
+.cs-step.is-active .cs-step-button {
+    color: #fff;
+}
+
+.cs-step.is-active .cs-step-dot {
+    color: #fff;
+    background: var(--st-red);
+    border-color: var(--st-red);
+    box-shadow: 0 0 0 4px var(--st-red-soft);
+}
+
+/* ---------- Tóm tắt đơn ---------- */
+
+.cs-stepper-summary {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.cs-stepper-movie {
+    min-width: 0;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    line-height: 1.25;
+}
+
+.cs-stepper-movie b {
+    overflow: hidden;
+    font-size: 12.5px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.cs-stepper-movie small {
+    overflow: hidden;
+    color: var(--st-muted);
+    font-size: 11px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.cs-stepper-chip {
+    padding: 4px 9px;
+    color: #c9d0d6;
+    background: var(--st-panel-2);
+    border: 1px solid var(--st-border);
+    border-radius: 999px;
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.cs-stepper-chip.is-group {
+    color: #f0d49a;
+    background: rgba(212, 164, 76, 0.12);
+    border-color: rgba(212, 164, 76, 0.5);
+    font-family: inherit;
+}
+
+.cs-stepper-timer {
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 4px 0 10px;
+    background: var(--st-panel-2);
+    border: 1px solid var(--st-border);
+    border-radius: 999px;
+    font-size: 12px;
+}
+
+.cs-stepper-timer b {
+    font-size: 14px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-stepper-timer button,
+.cs-stepper-park {
+    height: 24px;
+    padding: 0 9px;
+    color: #fff;
+    background: #262d35;
+    border: 1px solid var(--st-border);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.cs-stepper-timer button:hover:not(:disabled),
+.cs-stepper-park:hover {
+    border-color: var(--st-red);
+}
+
+.cs-stepper-timer button:disabled {
+    opacity: 0.5;
+    cursor: progress;
+}
+
+.cs-stepper-park {
+    height: 32px;
+    padding: 0 12px;
+    color: #ffb4b8;
+}
+
+.cs-stepper-timer.is-warning {
+    background: rgba(229, 9, 20, 0.12);
+    border-color: var(--st-red-line);
+}
+
+.cs-stepper-timer.is-warning b {
+    color: #ff6a72;
+}
+
+@media (max-width: 900px) {
+    .cs-step-label {
+        display: none;
+    }
+
+    .cs-step.is-active .cs-step-label {
+        display: inline;
+    }
+
+    .cs-stepper-summary {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+/* =========================================================
+   HỘP THOẠI
+   ========================================================= */
+
+.cs-dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(3, 4, 6, 0.72);
+    backdrop-filter: blur(4px);
+}
+
+.cs-dialog {
+    width: min(440px, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px;
+    color: #fff;
+    background: var(--st-panel);
+    border: 1px solid var(--st-border);
+    border-top: 3px solid var(--st-red);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+.cs-dialog h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.cs-dialog-desc {
+    margin: 0;
+    color: var(--st-muted);
+    font-size: 12.5px;
+    line-height: 1.55;
+}
+
+.cs-dialog-desc b {
+    color: #fff;
+}
+
+.cs-dialog-error {
+    padding: 9px 11px;
+    color: #ff8a90;
+    background: rgba(229, 9, 20, 0.08);
+    border: 1px solid rgba(229, 9, 20, 0.3);
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+.cs-dialog-actions {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 8px;
+}
+
+.cs-dialog-btn {
+    height: 42px;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.cs-dialog-btn.is-ghost {
+    color: #fff;
+    background: transparent;
+    border: 1px solid var(--st-border);
+}
+
+.cs-dialog-btn.is-primary {
+    color: #fff;
+    background: var(--st-red);
+    border: 0;
+}
+
+.cs-dialog-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ---------- Ô nhập khách hàng / PIN ---------- */
+
+.cs-customer-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.cs-customer-fields label,
+.cs-pin-field {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.cs-customer-fields label > span,
+.cs-pin-field > span {
+    color: #9ca5af;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.cs-customer-fields em {
+    color: #ff6a72;
+    font-style: normal;
+}
+
+.cs-customer-fields label > span small {
+    color: #6c757e;
+    font-weight: 600;
+}
+
+.cs-customer-fields input,
+.cs-pin-field input {
+    height: 40px;
+    padding: 0 12px;
+    color: #fff;
+    background: #0f1216;
+    border: 1px solid #2b3139;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    outline: none;
+}
+
+.cs-customer-fields input:focus,
+.cs-pin-field input:focus {
+    border-color: #e50914;
+    box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.14);
+}
+
+.cs-customer-fields input[aria-invalid="true"] {
+    border-color: rgba(229, 9, 20, 0.6);
+}
+
+.cs-customer-fields small.is-error {
+    color: #ff8a90;
+    font-size: 11px;
+}
+
+.cs-customer-fields small.is-hint {
+    color: #8fd19e;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.cs-pin-field input {
+    letter-spacing: 6px;
+    text-align: center;
+    font-size: 20px;
+}
+
+@media (max-width: 520px) {
+    .cs-customer-fields {
+        grid-template-columns: 1fr;
+    }
+}

@@ -34,4 +34,16 @@ public class Payment {
 
     @Column(name = "transaction_code", length = 100)
     private String transactionCode;
+
+    /** Tiền mặt khách đưa. */
+    @Column(name = "cash_received", precision = 12, scale = 0)
+    private BigDecimal cashReceived;
+
+    /** Tiền thối lại khách = cashReceived - amount. */
+    @Column(name = "change_amount", precision = 12, scale = 0)
+    private BigDecimal changeAmount;
+
+    /** CASH để trống; chuyển khoản: MOMO | VNPAY | VIETQR | BANK. */
+    @Column(name = "provider", length = 20)
+    private String provider;
 }
