@@ -8,8 +8,15 @@ import type { ShowtimeData } from "../../types/showtime/showtime";
 import type { ShowtimeSeat } from "../../types/showtimeSeat/showtimeSeat";
 import type { CounterSaleResponse } from "../../service/counterSale/counterSaleService";
 
+import { maskPhone } from "../../service/counterOrder/counterOrderService";
+import CounterSaleStepper from "./CounterSaleStepper";
+
 import "./CounterSaleResult.css";
 
+/*
+ * Class dùng tiền tố "cs-" và scope trong .cs-result-page
+ * để không đụng CSS trang khác (CSS của Vite là global).
+ */
 
 type PaymentInfo = {
     method?: string;
@@ -24,6 +31,8 @@ type ResultLocationState = {
     showtime?: ShowtimeData;
     selectedSeats?: ShowtimeSeat[];
     payment?: PaymentInfo;
+    customer?: { name?: string | null; phone?: string | null };
+    promotion?: { code?: string | null; title?: string | null } | null;
 };
 
 type TicketView = {
@@ -31,6 +40,7 @@ type TicketView = {
     seat?: ShowtimeSeat;
 };
 
+// Một số backend trả kèm danh sách vé có ghế; nếu có thì ưu tiên dùng.
 type ResponseTicket = {
     ticketCode?: string;
     code?: string;
@@ -40,6 +50,9 @@ type ResponseTicket = {
     seatId?: number;
 };
 
+/* ============================================================
+ * HELPERS
+ * ============================================================ */
 
 function formatMoney(value?: number | null): string {
     return `${Math.round(Number(value) || 0).toLocaleString("vi-VN")}đ`;
@@ -137,6 +150,9 @@ async function copyText(text: string): Promise<boolean> {
     }
 }
 
+/* ============================================================
+ * TICKET (dùng chung cho màn hình và bản in)
+ * ============================================================ */
 
 type TicketCardProps = {
     ticket: TicketView;
@@ -229,7 +245,9 @@ function TicketCard({
     );
 }
 
-
+/* ============================================================
+ * PAGE
+ * ============================================================ */
 
 function CounterSaleResult() {
     const navigate = useNavigate();
@@ -240,6 +258,8 @@ function CounterSaleResult() {
     const showtime = state?.showtime;
     const selectedSeats = useMemo(() => state?.selectedSeats ?? [], [state?.selectedSeats]);
     const payment = state?.payment;
+    const customer = state?.customer;
+    const promotion = state?.promotion;
 
     // Thời điểm bán: ưu tiên thời gian backend trả về, nếu không thì lúc mở trang.
     const [soldAt] = useState(() => {
@@ -249,6 +269,12 @@ function CounterSaleResult() {
         return Number.isNaN(date.getTime()) ? new Date() : date;
     });
 
+    /*
+     * Ghép mã vé với ghế.
+     * 1) Nếu response có mảng tickets kèm thông tin ghế -> ghép theo ghế (chính xác).
+     * 2) Nếu chỉ có ticketCodes -> ghép theo thứ tự. Backend tạo vé theo thứ tự
+     *    showtimeSeatIds gửi lên; trang xác nhận gửi đúng thứ tự selectedSeats.
+     */
     const tickets = useMemo<TicketView[]>(() => {
         if (!response) return [];
 
@@ -276,7 +302,7 @@ function CounterSaleResult() {
         }));
     }, [response, selectedSeats]);
 
-
+    /* ---------- Copy ---------- */
 
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -287,7 +313,9 @@ function CounterSaleResult() {
         }
     }
 
+    /* ---------- Print ---------- */
 
+    // null = không in; "all" = in tất cả; mã vé = in 1 vé.
     const [printTarget, setPrintTarget] = useState<string | null>(null);
     const [printedCount, setPrintedCount] = useState(0);
 
@@ -378,13 +406,16 @@ function CounterSaleResult() {
         <div className="cs-result-page">
             {/* ================= SUCCESS ================= */}
 
+            <div className="cs-no-print">
+                <CounterSaleStepper current={4} showtime={showtime} seatCodes={selectedSeats.map(seatCode)} />
+            </div>
+
             <section className="cs-result-hero cs-no-print">
                 <div className="cs-result-check" aria-hidden="true">
                     ✓
                 </div>
 
                 <div className="cs-result-hero-text">
-                    <span className="cs-eyebrow">Giao dịch hoàn tất</span>
                     <h1>Bán vé thành công</h1>
                     <p>
                         {tickets.length} vé · {showtime.movieTitle} · {formatTime(showtime.startTime)}{" "}
@@ -409,14 +440,7 @@ function CounterSaleResult() {
 
                             <div>
                                 <code>{response.bookingCode}</code>
-                                <button
-                                    type="button"
-                                    className="cs-icon-btn"
-                                    onClick={() => handleCopy("booking", response.bookingCode)}
-                                    title="Sao chép mã đặt vé"
-                                >
-                                    {copiedKey === "booking" ? "✓ Đã chép" : "⧉ Sao chép"}
-                                </button>
+
                             </div>
                         </div>
 
@@ -440,6 +464,20 @@ function CounterSaleResult() {
                                     {soldAt.toLocaleDateString("vi-VN")}
                                 </dd>
                             </div>
+                            {(customer?.name || customer?.phone) && (
+                                <div>
+                                    <dt>Khách</dt>
+                                    <dd>
+                                        {[customer.name, maskPhone(customer.phone)].filter(Boolean).join(" · ")}
+                                    </dd>
+                                </div>
+                            )}
+                            {promotion?.code && (
+                                <div>
+                                    <dt>Mã giảm giá</dt>
+                                    <dd className="is-code">{promotion.code}</dd>
+                                </div>
+                            )}
                             {payment?.reference && (
                                 <div>
                                     <dt>Mã GD</dt>
@@ -582,6 +620,10 @@ function CounterSaleResult() {
 
             {/* ================= PRINT AREA (chỉ hiện khi in) ================= */}
 
+            {/*
+             * Portal thẳng vào <body> để khi in có thể ẩn TOÀN BỘ layout
+             * (sidebar, header...) bằng display:none, không sinh trang trắng.
+             */}
             {printTarget &&
                 createPortal(
                     <div className="cs-print-area" aria-hidden="true">

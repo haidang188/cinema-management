@@ -1,4 +1,3 @@
-
 .cs-confirm-page {
     --red: #e50914;
     --red-hover: #ff1f2b;
@@ -1248,4 +1247,264 @@
         animation: none !important;
         transition: none !important;
     }
+}
+
+/* =========================================================
+   GIỮ GHẾ
+   ========================================================= */
+
+.cs-confirm-page .cs-cancel-order {
+    color: #ffb4b8;
+}
+
+.cs-confirm-page .cs-cancel-order:hover:not(:disabled) {
+    color: #fff;
+    border-color: var(--red);
+    background: var(--red-soft);
+}
+
+
+.cs-confirm-page .cs-hold-chip {
+    padding: 4px 9px;
+    color: #fff !important;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-confirm-page .cs-hold-chip.is-warning {
+    color: #ff6a72 !important;
+    background: rgba(229, 9, 20, 0.1);
+    border-color: var(--red-line);
+}
+
+.cs-confirm-page .cs-hold-expired {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    background: rgba(229, 9, 20, 0.1);
+    border: 1px solid var(--red-line);
+    border-radius: 12px;
+}
+
+.cs-confirm-page .cs-hold-expired div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.cs-confirm-page .cs-hold-expired strong {
+    color: #fff;
+    font-size: 14px;
+}
+
+.cs-confirm-page .cs-hold-expired span {
+    color: #ffb4b8;
+    font-size: 12px;
+}
+
+/* =========================================================
+   VIETQR
+   ========================================================= */
+
+.cs-confirm-page .cs-qr-hint {
+    color: var(--muted);
+    font-size: 11.5px;
+    line-height: 1.5;
+}
+
+.cs-confirm-page .cs-qr-image-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    color: #3a3f45;
+    text-align: center;
+    font-size: 12px;
+}
+
+.cs-confirm-page .cs-qr-detail .cs-link:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   KHÁCH HÀNG / MÃ GIẢM GIÁ / THÔNG BÁO
+   ========================================================= */
+
+.cs-confirm-page .cs-order-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.cs-confirm-page .cs-badge-gold {
+    padding: 2px 8px;
+    color: #f0d49a !important;
+    background: rgba(212, 164, 76, 0.12);
+    border: 1px solid rgba(212, 164, 76, 0.5);
+    border-radius: 999px;
+    font-size: 10.5px;
+}
+
+.cs-confirm-page .cs-promo-form {
+    display: flex;
+    gap: 8px;
+}
+
+.cs-confirm-page .cs-promo-form input {
+    min-width: 0;
+    flex: 1;
+    height: 40px;
+    padding: 0 12px;
+    color: #fff;
+    background: #0f1216;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    outline: none;
+}
+
+.cs-confirm-page .cs-promo-form input:focus {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px var(--red-soft);
+}
+
+.cs-confirm-page .cs-promo-form button {
+    height: 40px;
+    padding: 0 16px;
+    color: #fff;
+    background: var(--panel-3);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.cs-confirm-page .cs-promo-form button:hover:not(:disabled) {
+    border-color: var(--red);
+}
+
+.cs-confirm-page .cs-promo-form button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cs-confirm-page .cs-promo-message {
+    color: #ff8a90;
+    font-size: 12px;
+}
+
+.cs-confirm-page .cs-promo-suggest {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.cs-confirm-page .cs-promo-suggest button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 10px;
+    color: #fff;
+    background: var(--panel-2);
+    border: 1px dashed var(--red-line);
+    border-radius: 999px;
+    font-size: 11.5px;
+    cursor: pointer;
+}
+
+.cs-confirm-page .cs-promo-suggest button b {
+    font-family: Consolas, "SFMono-Regular", monospace;
+}
+
+.cs-confirm-page .cs-promo-suggest button span {
+    color: #8fd19e;
+    font-weight: 800;
+}
+
+.cs-confirm-page .cs-promo-suggest button:hover {
+    border-style: solid;
+    background: var(--red-soft);
+}
+
+.cs-confirm-page .cs-promo-applied {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 8px 10px 12px;
+    background: rgba(34, 192, 122, 0.1);
+    border: 1px solid rgba(34, 192, 122, 0.4);
+    border-radius: 10px;
+}
+
+.cs-confirm-page .cs-promo-applied div {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cs-confirm-page .cs-promo-applied b {
+    color: #fff;
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 13.5px;
+}
+
+.cs-confirm-page .cs-promo-applied span {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 11.5px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.cs-confirm-page .cs-promo-applied strong {
+    color: var(--green);
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.cs-confirm-page .cs-promo-applied button {
+    width: 28px;
+    height: 28px;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    border-radius: 7px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.cs-confirm-page .cs-promo-applied button:hover {
+    color: #fff;
+    background: rgba(229, 9, 20, 0.3);
+}
+
+.cs-confirm-page .cs-confirm-notice {
+    padding: 10px 14px;
+    color: #fff;
+    background: #1a1f25;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 12.5px;
+}
+
+.cs-confirm-page .cs-confirm-action .cs-cancel-order {
+    margin-left: auto;
 }
