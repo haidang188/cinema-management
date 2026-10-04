@@ -6,16 +6,16 @@ import type { CinemaRoom, NavigateHandler } from "../../../types/admin"
 const PAGE_SIZE = 10
 
 const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: "Hoat dong",
-  MAINTENANCE: "Bao tri",
-  INACTIVE: "Ngung hoat dong",
+  ACTIVE: "Hoạt động",
+  MAINTENANCE: "Bảo trì",
+  INACTIVE: "Ngừng hoạt động",
 }
 
 const STATUS_FILTERS = [
-  { value: "", label: "Tat ca" },
-  { value: "ACTIVE", label: "Hoat dong" },
-  { value: "MAINTENANCE", label: "Bao tri" },
-  { value: "INACTIVE", label: "Ngung hoat dong" },
+  { value: "", label: "Tất cả trạng thái" },
+  { value: "ACTIVE", label: "Hoạt động" },
+  { value: "MAINTENANCE", label: "Bảo trì" },
+  { value: "INACTIVE", label: "Ngừng hoạt động" },
 ]
 
 interface CinemaRoomListProps {
@@ -117,7 +117,7 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
         await reloadCurrentPage()
       }
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Khong the xoa phong chieu. Vui long thu lai.")
+      setError(requestError instanceof Error ? requestError.message : "Không thể xóa phòng chiếu. Vui lòng thử lại.")
     } finally {
       setDeleting(false)
     }
@@ -128,30 +128,30 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
       <header className="room-page-header">
         <div>
           <p className="room-page-eyebrow">Sprint 2</p>
-          <h1>Quan ly phong chieu</h1>
-          <p>Quan ly danh sach phong va cau hinh so do ghe.</p>
+          <h1>Quản lý phòng chiếu</h1>
+          <p>Quản lý danh sách phòng và cấu hình sơ đồ ghế.</p>
         </div>
         <button type="button" className="primary-button room-add-button" onClick={() => onNavigate("/admin/cinema-rooms/create")}>
-          Them phong chieu
+          Thêm phòng chiếu
         </button>
       </header>
 
-      <section className="room-toolbar" aria-label="Tim kiem va loc phong chieu">
+      <section className="room-toolbar" aria-label="Tìm kiếm và lọc phòng chiếu">
         <label className="room-search-field">
-          <span>Tim kiem</span>
+          <span>Tìm kiếm</span>
           <input
             name="keyword"
             type="search"
-            placeholder="Tim kiem theo ten phong..."
+            placeholder="Tìm kiếm theo tên phòng..."
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
           />
         </label>
 
         <label className="room-filter-field">
-          <span>Trang thai</span>
+          <span>Trạng thái</span>
           <select
-            aria-label="Loc trang thai phong"
+            aria-label="Lọc trạng thái phòng"
             value={status}
             onChange={(event) => {
               setStatus(event.target.value)
@@ -170,17 +170,17 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
           type="button"
           className="secondary-button room-reset-button"
           disabled={!hasActiveFilter}
-          aria-label="Dat lai bo loc phong chieu"
+          aria-label="Đặt lại bộ lọc phòng chiếu"
           onClick={handleResetFilters}
         >
-          Dat lai
+          Đặt lại
         </button>
       </section>
 
       {error && <div className="room-alert room-alert-error">{error}</div>}
 
       {loading && (
-        <div className="room-table-card" aria-label="Dang tai danh sach phong">
+        <div className="room-table-card" aria-label="Đang tải danh sách phòng">
           <div className="room-skeleton-row" />
           <div className="room-skeleton-row" />
           <div className="room-skeleton-row" />
@@ -189,8 +189,8 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
 
       {!loading && !error && rooms.length === 0 && (
         <section className="room-empty-state">
-          <h2>Khong tim thay phong chieu phu hop</h2>
-          <p>Thu doi tu khoa tim kiem hoac bo loc trang thai.</p>
+          <h2>Không tìm thấy phòng chiếu phù hợp</h2>
+          <p>Thử đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái.</p>
         </section>
       )}
 
@@ -201,11 +201,11 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
               <thead>
                 <tr>
                   <th>STT</th>
-                  <th>Ten phong</th>
-                  <th>Loai phong</th>
-                  <th>Tong so ghe</th>
-                  <th>Trang thai</th>
-                  <th className="action-column">Thao tac</th>
+                  <th>Tên phòng</th>
+                  <th>Loại phòng</th>
+                  <th>Tổng số ghế</th>
+                  <th>Trạng thái</th>
+                  <th className="action-column">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -226,7 +226,7 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
                       <button
                         type="button"
                         className="edit-button room-icon-action room-edit-button"
-                        aria-label={`Sua phong ${room.name}`}
+                        aria-label={`Sửa phòng ${room.name}`}
                         onClick={() => onNavigate(`/admin/cinema-rooms/${room.id}/edit`)}
                       >
                         E
@@ -234,7 +234,7 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
                       <button
                         type="button"
                         className="edit-button room-icon-action room-detail-button"
-                        aria-label={`Xem chi tiet ghe cua ${room.name}`}
+                        aria-label={`Xem chi tiết ghế của ${room.name}`}
                         onClick={() => onNavigate(`/admin/cinema-rooms/${room.id}`)}
                       >
                         ...
@@ -242,7 +242,7 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
                       <button
                         type="button"
                         className="edit-button room-icon-action room-delete-button"
-                        aria-label={`Xoa phong ${room.name}`}
+                        aria-label={`Xóa phòng ${room.name}`}
                         disabled={deleting}
                         onClick={() => setRoomToDelete(room)}
                       >
@@ -255,18 +255,18 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
             </table>
           </div>
 
-          <nav className="pagination room-pagination" aria-label="Phan trang phong chieu">
+          <nav className="pagination room-pagination" aria-label="Phân trang phòng chiếu">
             <span className="pagination-summary">
-              Hien thi {firstItemIndex}-{lastItemIndex} trong {totalElements} phong
+              Hiển thị {firstItemIndex}-{lastItemIndex} trong {totalElements} phòng
             </span>
             <button
               type="button"
               className="pagination-button"
               disabled={page === 0}
-              aria-label="Trang truoc"
+              aria-label="Trang trước"
               onClick={() => setPage((current) => Math.max(current - 1, 0))}
             >
-              Truoc
+              Trước
             </button>
             {visiblePages.map((pageNumber) => (
               <button
@@ -295,8 +295,8 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
 
       {roomToDelete && (
         <AppModal
-          title="Xoa phong chieu"
-          message={`Ban co chac muon xoa phong "${roomToDelete.name}"? Thao tac nay se xoa cac ghe cua phong neu phong chua duoc dung boi suat chieu hoac dat ve.`}
+          title="Xóa phòng chiếu"
+          message={`Bạn có chắc muốn xóa phòng "${roomToDelete.name}"? Thao tác này sẽ xóa các ghế của phòng nếu phòng chưa được dùng bởi suất chiếu hoặc đặt vé.`}
           variant="warning"
           size="sm"
           closeOnEsc={!deleting}
@@ -306,13 +306,13 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
           }}
           actions={[
             {
-              label: "Huy",
+              label: "Hủy",
               variant: "secondary",
               disabled: deleting,
               onClick: () => setRoomToDelete(null),
             },
             {
-              label: deleting ? "Dang xoa..." : "Xoa phong",
+              label: deleting ? "Đang xóa..." : "Xóa phòng",
               disabled: deleting,
               onClick: handleDeleteRoom,
             },

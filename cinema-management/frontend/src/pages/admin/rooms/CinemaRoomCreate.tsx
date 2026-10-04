@@ -26,7 +26,6 @@ function CinemaRoomCreate({ onNavigate }: CinemaRoomCreateProps) {
     <main className="app-shell room-admin-page room-form-page room-designer-page">
       <header className="room-page-header designer-page-header">
         <div>
-          <p className="room-page-eyebrow">Quản lý phòng chiếu</p>
           <h1>Thêm phòng chiếu</h1>
           <p>Thiết lập thông tin phòng và sơ đồ ghế.</p>
         </div>
@@ -41,7 +40,7 @@ function CinemaRoomCreate({ onNavigate }: CinemaRoomCreateProps) {
           variant="success"
           actions={[
             {
-              label: "OK",
+              label: "Đóng",
               onClick: () => onNavigate("/admin/cinema-rooms"),
             },
           ]}

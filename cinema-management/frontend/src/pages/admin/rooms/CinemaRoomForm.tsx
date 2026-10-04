@@ -37,7 +37,7 @@ const STATUSES = [
 const TOOLS: Array<{ value: SeatTool; label: string }> = [
   { value: "NORMAL", label: "Ghế thường" },
   { value: "VIP", label: "Ghế VIP" },
-  { value: "INACTIVE", label: "Ghế không hoạt động" },
+  { value: "INACTIVE", label: "Ghế ngừng hoạt động" },
   { value: "DELETE", label: "Khoảng trống" },
 ]
 const MAX_ROWS = 20
@@ -333,7 +333,6 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
           </section>
 
           <section className="room-designer-panel">
-            <h2>Công cụ</h2>
             <div className="seat-tool-bar designer-tools" role="toolbar" aria-label="Công cụ ghế">
               {TOOLS.map((tool) => (
                 <button
@@ -364,9 +363,8 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
           <section className="room-designer-panel room-designer-note">
             <h2>Lưu ý</h2>
             <ul>
-              <li>Chỉ các ghế được chọn mới được lưu vào hệ thống.</li>
-              <li>Ô trống là lối đi hoặc khoảng trống, không tạo ghế.</li>
               <li>Có thể kéo chuột để vẽ hoặc xoá nhiều ghế cùng lúc.</li>
+              <li>Ô trống là lối đi hoặc khoảng trống, không tạo ghế.</li>
             </ul>
           </section>
         </aside>
@@ -374,7 +372,6 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
         <section className="seat-designer-stage">
           <div className="seat-stage-header">
             <div>
-              <h2>Sơ đồ ghế</h2>
               <p>Nhấn và kéo chuột để thêm hoặc xóa ghế.</p>
             </div>
             <strong>Tổng số ghế: {stats.total}</strong>
@@ -391,7 +388,7 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
             </span>
             <span>
               <i className="legend-inactive" aria-hidden="true" />
-              Ghế không hoạt động
+              Ghế ngừng hoạt động
             </span>
             <span>
               <i className="legend-empty" aria-hidden="true" />
@@ -399,7 +396,7 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
             </span>
           </div>
 
-          <div className="screen-line" aria-label="Màn hình">
+          <div className="seat-screen">
             <span>MÀN HÌNH</span>
           </div>
 
@@ -460,7 +457,7 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
             </div>
             <div>
               <strong>{stats.inactive}</strong>
-              <span>Ghế không hoạt động</span>
+              <span>Ghế ngừng hoạt động</span>
             </div>
           </section>
         </section>
@@ -480,7 +477,7 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
           title={confirmAction.type === "resize" ? "Giảm kích thước sơ đồ" : "Xóa toàn bộ ghế"}
           message={
             confirmAction.type === "resize"
-              ? "Việc giảm kích thước sơ đồ sẽ xóa một số ghế nằm ngoài vùng mới. Bạn có muốn tiếp tục?"
+              ? "Một số ghế nằm ngoài kích thước mới sẽ bị xóa. Bạn có chắc muốn tiếp tục?"
               : "Bạn có chắc muốn xóa toàn bộ ghế khỏi sơ đồ?"
           }
           variant="warning"

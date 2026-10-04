@@ -6,7 +6,7 @@ const SEAT_TYPE_LABELS: Record<string, string> = {
 }
 
 const SEAT_STATUS_LABELS: Record<string, string> = {
-  ACTIVE: "Đang hoạt động",
+  ACTIVE: "Hoạt động",
   INACTIVE: "Không hoạt động",
 }
 
@@ -90,7 +90,7 @@ function SeatMap({ seats, pendingSeats, selectedSeatIds, onSelectSeat }: SeatMap
 
   return (
     <section className="seat-map-panel">
-      <div className="screen-line" aria-label="Màn hình">
+      <div className="seat-screen">
         <span>MÀN HÌNH</span>
       </div>
 
@@ -105,7 +105,7 @@ function SeatMap({ seats, pendingSeats, selectedSeatIds, onSelectSeat }: SeatMap
         </span>
         <span className="legend-item">
           <i className="legend-inactive" aria-hidden="true" />
-          Ghế không hoạt động
+          Ghế ngừng hoạt động
         </span>
         <span className="legend-item">
           <i className="legend-changed" aria-hidden="true" />

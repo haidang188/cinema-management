@@ -99,7 +99,7 @@ function validate(values: MovieFormValues, requiresPoster: boolean): Record<stri
     errors.durationMinutes = "Thời lượng phải lớn hơn 0"
   }
 
-  if (values.ageRating.length > 10) errors.ageRating = "Tối đa 10 ký tự"
+  if (values.trailerUrl.length > 255) errors.trailerUrl = "Tối đa 255 ký tự"
   if (values.director.length > 100) errors.director = "Tối đa 100 ký tự"
   if (values.language.length > 50) errors.language = "Tối đa 50 ký tự"
   if (values.trailerUrl.length > 255) errors.trailerUrl = "Tối đa 255 ký tự"
@@ -335,7 +335,7 @@ function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSu
 
       <section className="form-panel movie-form-section">
         <div className="panel-heading">
-          <h2>Media</h2>
+          <h2>Hình ảnh và trailer</h2>
         </div>
 
         <div className="movie-media-grid movie-media-grid-url">
@@ -356,12 +356,12 @@ function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSu
 
           <div className="poster-frame">
             <div className="poster-preview">
-              {posterPreview ? <img src={posterPreview} alt="Poster preview" /> : <span>Xem trước poster</span>}
+              {posterPreview ? <img src={posterPreview} alt="Xem trước poster" /> : <span>Xem trước poster</span>}
             </div>
           </div>
 
           <label className="movie-field movie-field-full">
-            <span>Trailer URL</span>
+            <span>Đường dẫn trailer</span>
             <div className="trailer-input-row">
               <input
                 className={errors.trailerUrl ? "is-invalid" : ""}

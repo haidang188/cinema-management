@@ -3,6 +3,7 @@ import AppRoutes from "./routes/AppRoutes";
 import "./App.css";
 import "./styles/movie-admin.css";
 import "./styles/cinema-room.css";
+import "./styles/member-management.css";
 import "./styles/modal.css";
 
 function App() {

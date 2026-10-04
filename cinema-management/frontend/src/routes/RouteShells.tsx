@@ -35,6 +35,7 @@ export function AdminShell({ children, currentUser, onLogout }: AppShellProps) {
   }
 
   const navItems = [
+    { path: "/admin/members", icon: "TV", label: "Quản lý thành viên" },
     { path: "/admin/movies", icon: "▦", label: "Phim" },
     { path: "/admin/cinema-rooms", icon: "▣", label: "Phòng chiếu" },
     { path: "/admin/promotions", icon: "KM", label: "Khuyến mãi" },
