@@ -32,4 +32,10 @@ public class Seat {
 
     @Column(length = 30)
     private String status;
+
+    @Column(name = "grid_row")
+    private Integer gridRow;
+
+    @Column(name = "grid_column")
+    private Integer gridColumn;
 }

@@ -1,10 +1,12 @@
 package com.cinemamanagement.request;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import java.util.List;
 
 public class CreateCinemaRoomRequest {
     @NotBlank(message = "Room name is required")
@@ -14,18 +16,12 @@ public class CreateCinemaRoomRequest {
     @Size(max = 30, message = "Room type must be at most 30 characters")
     private String roomType;
 
-    @NotNull(message = "Rows are required")
-    @Min(value = 1, message = "Rows must be at least 1")
-    @Max(value = 26, message = "Rows must be at most 26")
-    private Integer rows;
-
-    @NotNull(message = "Seats per row are required")
-    @Min(value = 1, message = "Seats per row must be at least 1")
-    @Max(value = 30, message = "Seats per row must be at most 30")
-    private Integer seatsPerRow;
-
     @Size(max = 30, message = "Status must be at most 30 characters")
     private String status;
+
+    @Valid
+    @NotEmpty(message = "Seats are required")
+    private List<SeatLayoutRequest> seats;
 
     public String getName() {
         return name;
@@ -43,27 +39,87 @@ public class CreateCinemaRoomRequest {
         this.roomType = roomType;
     }
 
-    public Integer getRows() {
-        return rows;
-    }
-
-    public void setRows(Integer rows) {
-        this.rows = rows;
-    }
-
-    public Integer getSeatsPerRow() {
-        return seatsPerRow;
-    }
-
-    public void setSeatsPerRow(Integer seatsPerRow) {
-        this.seatsPerRow = seatsPerRow;
-    }
-
     public String getStatus() {
         return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<SeatLayoutRequest> getSeats() {
+        return seats;
+    }
+
+    public void setSeats(List<SeatLayoutRequest> seats) {
+        this.seats = seats;
+    }
+
+    public static class SeatLayoutRequest {
+        @Size(max = 5, message = "Row label must be at most 5 characters")
+        private String rowLabel;
+
+        @NotNull(message = "Seat number is required")
+        private Integer seatNumber;
+
+        @Size(max = 30, message = "Seat type must be at most 30 characters")
+        private String seatType;
+
+        @Size(max = 30, message = "Seat status must be at most 30 characters")
+        private String status;
+
+        @NotNull(message = "Grid row is required")
+        private Integer gridRow;
+
+        @NotNull(message = "Grid column is required")
+        private Integer gridColumn;
+
+        public String getRowLabel() {
+            return rowLabel;
+        }
+
+        public void setRowLabel(String rowLabel) {
+            this.rowLabel = rowLabel;
+        }
+
+        public Integer getSeatNumber() {
+            return seatNumber;
+        }
+
+        public void setSeatNumber(Integer seatNumber) {
+            this.seatNumber = seatNumber;
+        }
+
+        public String getSeatType() {
+            return seatType;
+        }
+
+        public void setSeatType(String seatType) {
+            this.seatType = seatType;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public Integer getGridRow() {
+            return gridRow;
+        }
+
+        public void setGridRow(Integer gridRow) {
+            this.gridRow = gridRow;
+        }
+
+        public Integer getGridColumn() {
+            return gridColumn;
+        }
+
+        public void setGridColumn(Integer gridColumn) {
+            this.gridColumn = gridColumn;
+        }
     }
 }

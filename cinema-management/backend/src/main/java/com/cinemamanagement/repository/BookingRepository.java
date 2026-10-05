@@ -15,6 +15,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Optional<Booking> findByBookingCode(String bookingCode);
 
+    boolean existsByBookingCode(String bookingCode);
+
     Optional<Booking> findByQrToken(String qrToken);
 
     Optional<Booking> findByHoldToken(String holdToken);

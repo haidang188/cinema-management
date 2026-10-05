@@ -15,5 +15,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     Optional<Ticket> findByBookingSeatId(Long bookingSeatId);
 
+    boolean existsByTicketCode(String ticketCode);
+
     List<Ticket> findAllByBookingSeatBookingIdOrderByIdAsc(Long bookingId);
 }

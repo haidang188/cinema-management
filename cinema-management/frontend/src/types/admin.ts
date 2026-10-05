@@ -56,6 +56,8 @@ export interface Seat {
   seatName: string
   seatType: string
   status: string
+  gridRow?: number | null
+  gridColumn?: number | null
 }
 
 export interface CinemaRoom {
@@ -70,20 +72,109 @@ export interface CinemaRoom {
 export interface CinemaRoomPayload {
   name: string
   roomType: string
-  rows: number
-  seatsPerRow: number
   status: string
+  seats: CinemaRoomSeatPayload[]
 }
 
-export interface CinemaRoomUpdatePayload {
-  name: string
-  roomType: string
+export interface CinemaRoomSeatPayload {
+  rowLabel: string
+  seatNumber: number
+  seatType: string
   status: string
+  gridRow: number
+  gridColumn: number
 }
+
+export type CinemaRoomUpdatePayload = CinemaRoomPayload
 
 export interface SeatTypeUpdate {
   seatId: number
   seatType: string
+  status: string
 }
 
 export type NavigateHandler = (path: string) => void
+
+export interface EmployeeListItem {
+  id: number
+  employeeCode: string
+  username: string
+  fullName: string
+  email?: string
+  phone?: string
+  dateOfBirth?: string
+  gender?: string
+  address?: string
+  position?: string
+  avatar?: string
+  status?: string
+}
+
+export interface Employee extends EmployeeListItem {
+  userId?: number
+}
+
+export interface CreateEmployeeRequest {
+  username: string
+  password: string
+  employeeCode: string
+  fullName: string
+  email?: string
+  phone?: string
+  dateOfBirth?: string
+  gender?: string
+  address?: string
+  position?: string
+  avatar?: string
+  status?: string
+}
+
+export interface UpdateEmployeeRequest {
+  employeeCode: string
+  fullName: string
+  email?: string
+  phone?: string
+  dateOfBirth?: string
+  gender?: string
+  address?: string
+  position?: string
+  avatar?: string
+  status?: string
+}
+
+export interface Member {
+  id: number
+  userId?: number
+  memberCode?: string
+  username: string
+  fullName: string
+  email?: string
+  phone?: string
+  dateOfBirth?: string
+  gender?: string
+  avatar?: string
+  pointBalance?: number
+  membershipLevel?: string
+  status?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export type MemberListItem = Member
+
+export interface UpdateMemberRequest {
+  fullName: string
+  email?: string
+  phone?: string
+  dateOfBirth?: string
+  gender?: string
+  avatar?: string
+  status?: string
+}
+
+export interface MemberStatistics {
+  totalMembers: number
+  activeMembers: number
+  inactiveMembers: number
+  totalPointBalance: number
+}

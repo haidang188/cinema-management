@@ -21,7 +21,7 @@ function MovieCreate({ onNavigate }: MovieCreateProps) {
       <div className="admin-topbar">
         <div className="brand-mark">CB</div>
         <div>
-          <strong>Cinema Booking System</strong>
+          <strong>Hệ thống đặt vé rạp phim</strong>
           <span>Không gian quản trị rạp chiếu</span>
         </div>
         <nav className="module-nav">
@@ -36,7 +36,6 @@ function MovieCreate({ onNavigate }: MovieCreateProps) {
 
       <header className="page-header">
         <div>
-          <p className="eyebrow">Quản lý phim</p>
           <h1>Thêm phim mới</h1>
           <p className="page-subtitle">
             Nhập thông tin phát hành, phân loại và nội dung hiển thị cho phim mới.
@@ -53,7 +52,7 @@ function MovieCreate({ onNavigate }: MovieCreateProps) {
           variant="success"
           actions={[
             {
-              label: "OK",
+              label: "Đóng",
               onClick: () => onNavigate("/admin/movies"),
             },
           ]}

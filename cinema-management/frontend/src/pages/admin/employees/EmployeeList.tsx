@@ -10,7 +10,7 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_FILTERS = [
-  { value: "", label: "Tất cả" },
+  { value: "", label: "Tất cả trạng thái" },
   { value: "ACTIVE", label: "Hoạt động" },
   { value: "INACTIVE", label: "Ngừng hoạt động" },
 ]
@@ -122,9 +122,7 @@ function EmployeeList({ onNavigate }: EmployeeListProps) {
       .finally(() => setDeleting(false))
   }
 
-  const emptyMessage = hasActiveFilter
-    ? "Không tìm thấy nhân viên phù hợp."
-    : "Chưa có nhân viên nào."
+  const emptyMessage = hasActiveFilter ? "Không tìm thấy nhân viên phù hợp." : "Chưa có nhân viên nào."
 
   return (
     <main className="app-shell employee-admin-page employee-list-page">
@@ -292,7 +290,7 @@ function EmployeeList({ onNavigate }: EmployeeListProps) {
       {confirmEmployee && (
         <div className="employee-modal-backdrop" role="presentation">
           <section className="employee-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="employee-delete-title">
-            <h2 id="employee-delete-title">Bạn có chắc muốn xóa nhân viên này?</h2>
+            <h2 id="employee-delete-title">Ngừng hoạt động nhân viên</h2>
             <p>Nhân viên sẽ không thể tiếp tục sử dụng tài khoản.</p>
             <div className="employee-modal-actions">
               <button type="button" className="secondary-button" disabled={deleting} onClick={() => setConfirmEmployee(null)}>

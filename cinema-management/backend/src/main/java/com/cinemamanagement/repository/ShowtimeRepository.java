@@ -30,4 +30,17 @@ public interface ShowtimeRepository extends JpaRepository <Showtime, Long>{
             @Param("endOfDay") LocalDateTime endOfDay
     );
 
+    @Query("""
+            select s from Showtime s
+            join fetch s.movie
+            join fetch s.room
+            where s.startTime >= :from
+              and s.startTime < :to
+            order by s.startTime asc
+            """)
+    List<Showtime> findAllStartingBetween(
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
+
 }

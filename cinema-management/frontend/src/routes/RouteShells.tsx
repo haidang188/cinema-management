@@ -35,8 +35,9 @@ export function AdminShell({ children, currentUser, onLogout }: AppShellProps) {
   }
 
   const navItems = [
-    { path: "/admin/movies", icon: "MV", label: "Quản lý phim" },
-    { path: "/admin/cinema-rooms", icon: "RM", label: "Quản lý phòng chiếu" },
+    { path: "/admin/members", icon: "TV", label: "Quản lý thành viên" },
+    { path: "/admin/movies", icon: "▦", label: "Phim" },
+    { path: "/admin/cinema-rooms", icon: "▣", label: "Phòng chiếu" },
     { path: "/admin/promotions", icon: "KM", label: "Khuyến mãi" },
     { path: "/showtimes", icon: "LC", label: "Lịch chiếu" },
     { path: "/ticket-prices", icon: "GV", label: "Giá vé" },
@@ -45,7 +46,9 @@ export function AdminShell({ children, currentUser, onLogout }: AppShellProps) {
   return (
     <main className="admin-layout">
       <aside className="admin-sidebar">
-        <div className="admin-brand">PREMIERE ADMIN</div>
+        <button type="button" className="admin-brand" onClick={() => navigate("/")}>
+          Cinema Admin
+        </button>
         <nav aria-label="Điều hướng quản trị">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)

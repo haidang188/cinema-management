@@ -46,7 +46,7 @@ function MovieEdit({ movieId, onNavigate }: MovieEditProps) {
       <div className="admin-topbar">
         <div className="brand-mark">CB</div>
         <div>
-          <strong>Cinema Booking System</strong>
+          <strong>Hệ thống đặt vé rạp phim</strong>
           <span>Không gian quản trị rạp chiếu</span>
         </div>
         <nav className="module-nav">
@@ -61,7 +61,6 @@ function MovieEdit({ movieId, onNavigate }: MovieEditProps) {
 
       <header className="page-header">
         <div>
-          <p className="eyebrow">Quản lý phim</p>
           <h1>Chỉnh sửa phim</h1>
           <p className="page-subtitle">Cập nhật thông tin phim.</p>
         </div>
@@ -93,7 +92,7 @@ function MovieEdit({ movieId, onNavigate }: MovieEditProps) {
           variant="success"
           actions={[
             {
-              label: "OK",
+              label: "Đóng",
               onClick: () => onNavigate("/admin/movies"),
             },
           ]}

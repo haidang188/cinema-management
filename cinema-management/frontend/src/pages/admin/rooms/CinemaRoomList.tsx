@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
-import { getRooms } from "../../../service/cinema-room/cinemaRoomService"
+import AppModal from "../../../component/common/AppModal"
+import { deleteRoom, getRooms } from "../../../service/cinema-room/cinemaRoomService"
 import type { CinemaRoom, NavigateHandler } from "../../../types/admin"
 
 const PAGE_SIZE = 10
@@ -11,7 +12,7 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_FILTERS = [
-  { value: "", label: "Tất cả" },
+  { value: "", label: "Tất cả trạng thái" },
   { value: "ACTIVE", label: "Hoạt động" },
   { value: "MAINTENANCE", label: "Bảo trì" },
   { value: "INACTIVE", label: "Ngừng hoạt động" },
@@ -43,7 +44,10 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
   const [totalPages, setTotalPages] = useState(0)
   const [totalElements, setTotalElements] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [roomToDelete, setRoomToDelete] = useState<CinemaRoom | null>(null)
   const [error, setError] = useState("")
+
   const visiblePages = useMemo(() => getVisiblePages(page, totalPages), [page, totalPages])
   const firstItemIndex = totalElements === 0 ? 0 : page * PAGE_SIZE + 1
   const lastItemIndex = Math.min(page * PAGE_SIZE + rooms.length, totalElements)
@@ -70,9 +74,7 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
           setTotalPages(data.totalPages || 0)
           setTotalElements(data.totalElements || 0)
 
-          if (data.totalPages > 0 && page >= data.totalPages) {
-            setPage(data.totalPages - 1)
-          }
+          if (data.totalPages > 0 && page >= data.totalPages) setPage(data.totalPages - 1)
         }
       })
       .catch((requestError: Error) => {
@@ -94,13 +96,40 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
     setPage(0)
   }
 
+  async function reloadCurrentPage() {
+    const data = await getRooms({ page, size: PAGE_SIZE, keyword, status })
+    setRooms(data.content || [])
+    setTotalPages(data.totalPages || 0)
+    setTotalElements(data.totalElements || 0)
+  }
+
+  async function handleDeleteRoom() {
+    if (!roomToDelete || deleting) return
+
+    setDeleting(true)
+    setError("")
+    try {
+      await deleteRoom(String(roomToDelete.id))
+      setRoomToDelete(null)
+      if (rooms.length === 1 && page > 0) {
+        setPage((current) => current - 1)
+      } else {
+        await reloadCurrentPage()
+      }
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Không thể xóa phòng chiếu. Vui lòng thử lại.")
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   return (
     <main className="app-shell room-admin-page room-list-page">
       <header className="room-page-header">
         <div>
           <p className="room-page-eyebrow">Sprint 2</p>
           <h1>Quản lý phòng chiếu</h1>
-          <p>Quản lý danh sách phòng và cấu hình sơ đồ ghế</p>
+          <p>Quản lý danh sách phòng và cấu hình sơ đồ ghế.</p>
         </div>
         <button type="button" className="primary-button room-add-button" onClick={() => onNavigate("/admin/cinema-rooms/create")}>
           Thêm phòng chiếu
@@ -196,19 +225,28 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
                     <td className="action-column">
                       <button
                         type="button"
-                        className="edit-button room-edit-button"
+                        className="edit-button room-icon-action room-edit-button"
                         aria-label={`Sửa phòng ${room.name}`}
                         onClick={() => onNavigate(`/admin/cinema-rooms/${room.id}/edit`)}
                       >
-                        Sửa
+                        E
                       </button>
                       <button
                         type="button"
-                        className="edit-button room-detail-button"
+                        className="edit-button room-icon-action room-detail-button"
                         aria-label={`Xem chi tiết ghế của ${room.name}`}
                         onClick={() => onNavigate(`/admin/cinema-rooms/${room.id}`)}
                       >
-                        Chi tiết ghế
+                        ...
+                      </button>
+                      <button
+                        type="button"
+                        className="edit-button room-icon-action room-delete-button"
+                        aria-label={`Xóa phòng ${room.name}`}
+                        disabled={deleting}
+                        onClick={() => setRoomToDelete(room)}
+                      >
+                        x
                       </button>
                     </td>
                   </tr>
@@ -253,6 +291,33 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
             </button>
           </nav>
         </>
+      )}
+
+      {roomToDelete && (
+        <AppModal
+          title="Xóa phòng chiếu"
+          message={`Bạn có chắc muốn xóa phòng "${roomToDelete.name}"? Thao tác này sẽ xóa các ghế của phòng nếu phòng chưa được dùng bởi suất chiếu hoặc đặt vé.`}
+          variant="warning"
+          size="sm"
+          closeOnEsc={!deleting}
+          closeOnOverlay={!deleting}
+          onClose={() => {
+            if (!deleting) setRoomToDelete(null)
+          }}
+          actions={[
+            {
+              label: "Hủy",
+              variant: "secondary",
+              disabled: deleting,
+              onClick: () => setRoomToDelete(null),
+            },
+            {
+              label: deleting ? "Đang xóa..." : "Xóa phòng",
+              disabled: deleting,
+              onClick: handleDeleteRoom,
+            },
+          ]}
+        />
       )}
     </main>
   )

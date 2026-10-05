@@ -1,7 +1,10 @@
 package com.cinemamanagement.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+import java.util.List;
 
 public class UpdateCinemaRoomRequest {
     @NotBlank(message = "Room name is required")
@@ -13,6 +16,9 @@ public class UpdateCinemaRoomRequest {
 
     @Size(max = 30, message = "Status must be at most 30 characters")
     private String status;
+
+    @Valid
+    private List<CreateCinemaRoomRequest.SeatLayoutRequest> seats;
 
     public String getName() {
         return name;
@@ -36,5 +42,13 @@ public class UpdateCinemaRoomRequest {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<CreateCinemaRoomRequest.SeatLayoutRequest> getSeats() {
+        return seats;
+    }
+
+    public void setSeats(List<CreateCinemaRoomRequest.SeatLayoutRequest> seats) {
+        this.seats = seats;
     }
 }

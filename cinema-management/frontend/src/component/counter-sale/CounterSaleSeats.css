@@ -1,4 +1,12 @@
-
+/* =========================================================
+   COUNTER SALE - CHỌN GHẾ
+   ---------------------------------------------------------
+   - Cùng hệ màu với trang Bán vé tại quầy: đen / xám than / đỏ.
+   - Tiền tố "cs-" + scope trong .cs-seats-page để CSS trang
+     khác (.seat, .screen, .seat-map...) không lọt vào.
+   - Không cố định chiều cao theo viewport: trang cuộn tự nhiên,
+     cột tóm tắt sticky nên nút "Tiếp tục" luôn trong tầm mắt.
+   ========================================================= */
 
 .cs-seats-page {
     --red: #e50914;
@@ -816,9 +824,28 @@
     letter-spacing: -0.3px;
 }
 
-.cs-seats-page .cs-price-error {
-    color: #ff6a72;
+.cs-seats-page .cs-summary-price .cs-price-error {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    color: #ff8a90;
+    background: rgba(229, 9, 20, 0.08);
+    border: 1px solid rgba(229, 9, 20, 0.3);
+    border-radius: 8px;
     font-size: 11.5px;
+    line-height: 1.45;
+}
+
+.cs-seats-page .cs-price-error span {
+    color: #ff8a90;
+    overflow-wrap: anywhere;
+}
+
+.cs-seats-page .cs-price-error .cs-link {
+    flex: 0 0 auto;
+    color: #fff;
 }
 
 .cs-seats-page .cs-summary-cta {
@@ -910,4 +937,184 @@
         transition: none;
         animation: none;
     }
+}
+
+/* =========================================================
+   GIỮ GHẾ REALTIME
+   ========================================================= */
+
+/* Trạng thái kết nối WebSocket */
+.cs-seats-page .cs-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.cs-seats-page .cs-live::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #6c757e;
+}
+
+.cs-seats-page .cs-live.is-online {
+    color: #8fd19e;
+}
+
+.cs-seats-page .cs-live.is-online::before {
+    background: #22c07a;
+    box-shadow: 0 0 0 3px rgba(34, 192, 122, 0.18);
+}
+
+.cs-seats-page .cs-live.is-offline {
+    color: #ffb4b8;
+}
+
+.cs-seats-page .cs-live.is-offline::before {
+    background: var(--red);
+}
+
+/* Ghế đang chờ server xác nhận giữ / nhả */
+.cs-seats-page .cs-seat.is-pending {
+    cursor: progress;
+    animation: cs-seat-pending 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes cs-seat-pending {
+    from { opacity: 1; }
+    to { opacity: 0.55; }
+}
+
+.cs-seats-page .cs-seat-chip.is-pending {
+    opacity: 0.6;
+}
+
+/* Đồng hồ giữ ghế */
+.cs-seats-page .cs-hold-timer {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 2px 10px;
+    padding: 10px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.cs-seats-page .cs-hold-timer span {
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.cs-seats-page .cs-hold-timer strong {
+    grid-row: span 2;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-seats-page .cs-hold-timer small {
+    color: var(--faint);
+    font-size: 10.5px;
+    line-height: 1.35;
+}
+
+.cs-seats-page .cs-hold-timer.is-warning {
+    background: rgba(229, 9, 20, 0.1);
+    border-color: var(--red-line);
+}
+
+.cs-seats-page .cs-hold-timer.is-warning strong {
+    color: #ff6a72;
+    animation: cs-seat-pending 0.6s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cs-seats-page .cs-seat.is-pending,
+    .cs-seats-page .cs-hold-timer.is-warning strong {
+        animation: none;
+    }
+}
+
+/* =========================================================
+   ĐƠN NHÁP / CÔNG CỤ CHỌN NHIỀU GHẾ
+   ========================================================= */
+
+.cs-seats-page .cs-order-error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    color: #ffb4b8;
+    background: rgba(229, 9, 20, 0.1);
+    border: 1px solid var(--red-line);
+    border-radius: 12px;
+    font-size: 12.5px;
+}
+
+.cs-seats-page .cs-seat-tools {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cs-seats-page .cs-seat-tools small {
+    color: var(--faint);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.cs-seats-page .cs-tool-btn {
+    height: 34px;
+    color: #fff;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.cs-seats-page .cs-tool-btn:hover:not(:disabled) {
+    border-color: var(--red);
+}
+
+.cs-seats-page .cs-tool-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cs-seats-page .cs-tool-btn.is-gold {
+    color: #f0d49a;
+    background: rgba(212, 164, 76, 0.12);
+    border-color: rgba(212, 164, 76, 0.5);
+}
+
+/* Nhãn hàng bấm được để chọn cả hàng */
+.cs-seats-page .cs-row-toggle {
+    height: 26px;
+    padding: 0;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.cs-seats-page .cs-row-toggle:hover {
+    color: #fff;
+    border-color: var(--border);
+    background: var(--panel-2);
+}
+
+/* Ghế đang giữ gom theo hàng (đơn đoàn / bao rạp) */
+.cs-seats-page .cs-seat-chip.is-row small {
+    color: #c9d0d6;
+    text-transform: none;
 }
