@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { SyntheticEvent } from "react";
-import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
-import { QRCodeSVG } from "qrcode.react";
 
 import type { ShowtimeData } from "../../types/showtime/showtime";
 import type { ShowtimeSeat } from "../../types/showtimeSeat/showtimeSeat";
@@ -10,6 +8,8 @@ import type { CounterSaleResponse } from "../../service/counterSale/counterSaleS
 
 import { maskPhone } from "../../service/counterOrder/counterOrderService";
 import CounterSaleStepper from "./CounterSaleStepper";
+import { TicketCard, TicketPrintArea, seatKindLabel } from "../../component/ticket-print/TicketPrint";
+import type { PrintableTicket, TicketShowInfo } from "../../component/ticket-print/TicketPrint";
 
 import "./CounterSaleResult.css";
 
@@ -151,101 +151,6 @@ async function copyText(text: string): Promise<boolean> {
 }
 
 /* ============================================================
- * TICKET (dùng chung cho màn hình và bản in)
- * ============================================================ */
-
-type TicketCardProps = {
-    ticket: TicketView;
-    index: number;
-    total: number;
-    showtime: ShowtimeData;
-    bookingCode: string;
-    onPrint?: () => void;
-    onCopy?: () => void;
-    copied?: boolean;
-};
-
-function TicketCard({
-                        ticket,
-                        index,
-                        total,
-                        showtime,
-                        bookingCode,
-                        onPrint,
-                        onCopy,
-                        copied,
-                    }: TicketCardProps) {
-    const kind = getSeatKindLabel(ticket.seat?.seatType);
-
-    return (
-        <article className={`cs-ticket ${kind === "VIP" ? "is-vip" : ""}`}>
-            <div className="cs-ticket-main">
-                <header>
-                    <span className="cs-ticket-brand">
-                        PREMIERE <b>CINEMAS</b>
-                    </span>
-                    <span className="cs-ticket-index">
-                        Vé {index + 1}/{total}
-                    </span>
-                </header>
-
-                <h3 title={showtime.movieTitle}>{showtime.movieTitle}</h3>
-
-                <dl className="cs-ticket-grid">
-                    <div>
-                        <dt>Ngày</dt>
-                        <dd>{formatDate(showtime.startTime, false)}</dd>
-                    </div>
-                    <div>
-                        <dt>Suất</dt>
-                        <dd className="is-big">{formatTime(showtime.startTime)}</dd>
-                    </div>
-                    <div>
-                        <dt>Phòng</dt>
-                        <dd>{getRoomName(showtime)}</dd>
-                    </div>
-                    <div>
-                        <dt>Ghế</dt>
-                        <dd className="is-seat">
-                            {seatCode(ticket.seat)}
-                            {ticket.seat && <small>{kind}</small>}
-                        </dd>
-                    </div>
-                </dl>
-
-                <footer>
-                    <span>{getFormatLabel(showtime)}</span>
-                    <span>Đơn {bookingCode}</span>
-                </footer>
-            </div>
-
-            <div className="cs-ticket-stub">
-                <div className="cs-ticket-qr">
-                    <QRCodeSVG value={ticket.code} size={92} marginSize={1} level="M" />
-                </div>
-
-                <code>{ticket.code}</code>
-
-                {(onPrint || onCopy) && (
-                    <div className="cs-ticket-actions cs-no-print">
-                        {onCopy && (
-                            <button type="button" onClick={onCopy} title="Sao chép mã vé">
-                                {copied ? "✓" : "⧉"}
-                            </button>
-                        )}
-                        {onPrint && (
-                            <button type="button" onClick={onPrint} title="In vé này">
-                                🖨
-                            </button>
-                        )}
-                    </div>
-                )}
-            </div>
-        </article>
-    );
-}
-
-/* ============================================================
  * PAGE
  * ============================================================ */
 
@@ -319,28 +224,18 @@ function CounterSaleResult() {
     const [printTarget, setPrintTarget] = useState<string | null>(null);
     const [printedCount, setPrintedCount] = useState(0);
 
-    useEffect(() => {
-        if (!printTarget) return;
+    // Dạng vé dùng chung cho màn hình và bản in.
+    const printable = useMemo<PrintableTicket[]>(
+        () =>
+            tickets.map((ticket) => ({
+                code: ticket.code,
+                seatLabel: ticket.seat ? seatCode(ticket.seat) : "",
+                seatKind: seatKindLabel(ticket.seat?.seatType),
+            })),
+        [tickets]
+    );
 
-        function handleAfterPrint() {
-            setPrintTarget(null);
-        }
-
-        window.addEventListener("afterprint", handleAfterPrint);
-
-        // Đợi React render vùng in xong rồi mới mở hộp thoại in.
-        const id = window.requestAnimationFrame(() => {
-            window.print();
-            setPrintedCount((value) => value + 1);
-        });
-
-        return () => {
-            window.cancelAnimationFrame(id);
-            window.removeEventListener("afterprint", handleAfterPrint);
-        };
-    }, [printTarget]);
-
-    const printTickets = printTarget === "all" ? tickets : tickets.filter((t) => t.code === printTarget);
+    const printTickets = printTarget === "all" ? printable : printable.filter((t) => t.code === printTarget);
 
     /* ---------- Phím tắt ---------- */
 
@@ -400,6 +295,13 @@ function CounterSaleResult() {
     );
     const isCash = String(response.paymentMethod ?? payment?.method ?? "").toUpperCase() === "CASH";
 
+    const showInfo: TicketShowInfo = {
+        movieTitle: showtime.movieTitle,
+        startTime: showtime.startTime,
+        roomName: getRoomName(showtime),
+        format: getFormatLabel(showtime),
+    };
+
     /* ---------- Render ---------- */
 
     return (
@@ -440,7 +342,6 @@ function CounterSaleResult() {
 
                             <div>
                                 <code>{response.bookingCode}</code>
-
                             </div>
                         </div>
 
@@ -571,13 +472,13 @@ function CounterSaleResult() {
                         </div>
                     ) : (
                         <div className="cs-tickets-list">
-                            {tickets.map((ticket, index) => (
+                            {printable.map((ticket, index) => (
                                 <TicketCard
                                     key={ticket.code || index}
                                     ticket={ticket}
                                     index={index}
-                                    total={tickets.length}
-                                    showtime={showtime}
+                                    total={printable.length}
+                                    show={showInfo}
                                     bookingCode={response.bookingCode}
                                     copied={copiedKey === ticket.code}
                                     onCopy={() => handleCopy(ticket.code, ticket.code)}
@@ -624,30 +525,17 @@ function CounterSaleResult() {
              * Portal thẳng vào <body> để khi in có thể ẩn TOÀN BỘ layout
              * (sidebar, header...) bằng display:none, không sinh trang trắng.
              */}
-            {printTarget &&
-                createPortal(
-                    <div className="cs-print-area" aria-hidden="true">
-                        {printTickets.map((ticket) => {
-                            const index = tickets.indexOf(ticket);
-
-                            return (
-                                <div className="cs-print-page" key={ticket.code}>
-                                    <TicketCard
-                                        ticket={ticket}
-                                        index={index}
-                                        total={tickets.length}
-                                        showtime={showtime}
-                                        bookingCode={response.bookingCode}
-                                    />
-                                    <p className="cs-print-note">
-                                        {methodLabel} · In lúc {new Date().toLocaleString("vi-VN")}
-                                    </p>
-                                </div>
-                            );
-                        })}
-                    </div>,
-                    document.body
-                )}
+            {printTarget && (
+                <TicketPrintArea
+                    tickets={printTickets}
+                    allTickets={printable}
+                    show={showInfo}
+                    bookingCode={response.bookingCode}
+                    note={methodLabel}
+                    onPrinted={() => setPrintedCount((value) => value + 1)}
+                    onDone={() => setPrintTarget(null)}
+                />
+            )}
         </div>
     );
 }
