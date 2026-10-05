@@ -21,6 +21,11 @@ import java.util.List;
 public class ShowtimeController {
     private final ShowtimeService showtimeService;
 
+    @GetMapping("/{showtimeId}")
+    public ShowtimeResponse getShowtimeById(@PathVariable Long showtimeId) {
+        return showtimeService.getShowtimeById(showtimeId);
+    }
+
     @GetMapping
     public List<ShowtimeResponse> getShowtimes(
             @RequestParam

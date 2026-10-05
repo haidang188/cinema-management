@@ -11,5 +11,5 @@ public interface MovieReviewService {
     List<MovieReviewResponse> getReviewsByMovie(Long movieId);
     MovieRatingSummaryResponse getRatingSummary(Long movieId);
     MovieReviewEligibilityResponse getReviewEligibility(Long movieId, Long userId);
-    MovieReviewResponse createOrUpdateReview(Long movieId, Long userId, MovieReviewRequest request);
+    MovieReviewResponse createReview(Long movieId, Long userId, MovieReviewRequest request);
 }
