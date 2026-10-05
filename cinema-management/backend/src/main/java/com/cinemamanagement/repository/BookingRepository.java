@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -15,12 +17,23 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     boolean existsByBookingCode(String bookingCode);
 
+    Optional<Booking> findByQrToken(String qrToken);
+
+    Optional<Booking> findByHoldToken(String holdToken);
+
+    boolean existsByHoldToken(String holdToken);
+
+    List<Booking> findAllByStatusAndPaymentDeadlineLessThanEqual(
+            String status,
+            LocalDateTime paymentDeadline
+    );
+
     @Query("""
         select count(booking) > 0
         from Booking booking
         where booking.member.user.id = :userId
           and booking.showtime.movie.id = :movieId
-          and (booking.status is null or upper(booking.status) <> 'CANCELLED')
+          and upper(booking.status) = 'CONFIRMED'
         """)
     boolean existsValidBookingByUserIdAndMovieId(
             @Param("userId") Long userId,

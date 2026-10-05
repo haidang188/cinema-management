@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import type { Movie } from '../../types/movie'
 
 interface HomeHeroProps {
@@ -42,8 +43,14 @@ function HomeHero({ movies, isLoading, onBookingClick }: HomeHeroProps) {
           >
             <div className="featured-card__content">
               <span className="hero-date">Khởi chiếu: {formatDate(movie.releaseDate)}</span>
-              <h1>{movie.title}</h1>
-              <p>{movie.description}</p>
+              <Link
+                className="featured-copy-link"
+                to={`/movies/${movie.id}`}
+                aria-label={`Xem chi tiết phim ${movie.title}`}
+              >
+                <h1>{movie.title}</h1>
+                <p>{movie.description}</p>
+              </Link>
               <div className="movie-meta">
                 <span>{movie.ageRating}</span>
                 <span>{movie.durationMinutes} phút</span>

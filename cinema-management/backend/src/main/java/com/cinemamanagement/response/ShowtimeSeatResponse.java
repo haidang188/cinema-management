@@ -13,4 +13,5 @@ public class ShowtimeSeatResponse {
     private Integer seatNumber;
     private String seatType;
     private String status;
+    private java.math.BigDecimal price;
 }

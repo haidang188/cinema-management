@@ -24,4 +24,31 @@ public interface SeatHoldRepository extends JpaRepository<SeatHold, Long> {
             Long showtimeSeatId,
             String status
     );
+    List<SeatHold> findAllByHoldTokenOrderByIdAsc(
+            String holdToken
+    );
+
+    List<SeatHold> findAllByHoldTokenAndStatusOrderByIdAsc(
+            String holdToken,
+            String status
+    );
+
+    List<SeatHold>
+    findAllByUserIdAndShowtimeSeatShowtimeIdAndStatus(
+            Long userId,
+            Long showtimeId,
+            String status
+    );
+    List<SeatHold> findAllByExpiresAtLessThanEqualAndStatus(
+            LocalDateTime expiresAt,
+            String status
+    );
+
+    Optional<SeatHold>
+    findFirstByShowtimeSeatIdAndStatus(
+            Long showtimeSeatId,
+            String status
+    );
+
+    boolean existsByHoldToken(String holdToken);
 }
