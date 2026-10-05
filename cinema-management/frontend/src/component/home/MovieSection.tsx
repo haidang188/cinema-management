@@ -44,6 +44,7 @@ function MovieSection({
             value={filters.status}
             onChange={(event) => onFilterChange('status', event.target.value)}
           >
+            <option value="">Phim: Tất cả</option>
             <option value="SHOWING">Phim: Đang chiếu</option>
             <option value="UPCOMING">Phim: Sắp chiếu</option>
           </select>
@@ -59,18 +60,14 @@ function MovieSection({
               </option>
             ))}
           </select>
-          <select
+          <input
+            type="date"
             aria-label="Ngày"
             value={filters.date}
+            min={dateOptions[0]?.value}
+            max={dateOptions[dateOptions.length - 1]?.value}
             onChange={(event) => onFilterChange('date', event.target.value)}
-          >
-            <option value="">Ngày: Tất cả</option>
-            {dateOptions.map((dateOption) => (
-              <option key={dateOption.value} value={dateOption.value}>
-                Ngày: {dateOption.label}
-              </option>
-            ))}
-          </select>
+          />
           <select aria-label="Rạp">
             <option>Rạp: Tất cả</option>
           </select>

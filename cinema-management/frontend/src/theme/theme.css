@@ -1,0 +1,476 @@
+:root {
+  --theme-page: #090e0f;
+  --theme-surface: #171d1f;
+  --theme-surface-soft: #202729;
+  --theme-surface-strong: #0f1517;
+  --theme-text: #f7f8f8;
+  --theme-text-soft: #d5dee1;
+  --theme-muted: #94a3a8;
+  --theme-border: #354044;
+  --theme-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="light"] {
+  --theme-page: #f3f5f6;
+  --theme-surface: #ffffff;
+  --theme-surface-soft: #edf1f2;
+  --theme-surface-strong: #e3e9eb;
+  --theme-text: #172126;
+  --theme-text-soft: #34444b;
+  --theme-muted: #687980;
+  --theme-border: #cfd8dc;
+  --theme-shadow: 0 12px 30px rgba(32, 50, 58, 0.1);
+
+  --cinema-bg: #f3f5f6;
+  --cinema-sidebar: #e9eef0;
+  --cinema-panel: #ffffff;
+  --cinema-panel-soft: #edf1f2;
+  --cinema-border: #cfd8dc;
+  --cinema-text: #172126;
+  --cinema-muted: #687980;
+  --cinema-line: rgba(68, 85, 92, 0.22);
+
+  --admin-bg: #f3f5f6;
+  --admin-panel: #ffffff;
+  --admin-text: #172126;
+  --admin-muted: #687980;
+  --admin-line: #cfd8dc;
+}
+
+html,
+body,
+#root {
+  background: var(--theme-page);
+  color: var(--theme-text);
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.theme-toggle {
+  align-items: center;
+  background: color-mix(in srgb, var(--theme-surface) 94%, transparent);
+  border: 1px solid var(--theme-border);
+  border-radius: 999px;
+  box-shadow: var(--theme-shadow);
+  color: var(--theme-muted);
+  display: grid;
+  grid-template-columns: repeat(2, 30px);
+  height: 38px;
+  padding: 3px;
+  position: fixed;
+  right: 16px;
+  top: 12px;
+  width: 68px;
+  z-index: 5000;
+}
+
+.theme-toggle > span {
+  align-items: center;
+  border-radius: 50%;
+  display: flex;
+  height: 30px;
+  justify-content: center;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+  width: 30px;
+}
+
+.theme-toggle > span.is-active {
+  background: #e11d48;
+  color: #ffffff;
+  transform: scale(1.02);
+}
+
+.theme-toggle:focus-visible {
+  outline: 3px solid rgba(225, 29, 72, 0.28);
+  outline-offset: 2px;
+}
+
+.home-header,
+.admin-content .page-header,
+.promotion-page-header,
+.counter-sale-header,
+.cs-confirm-header,
+.cs-seats-header {
+  padding-right: 100px;
+}
+
+html[data-theme="light"] .home-page,
+html[data-theme="light"] .home-page.customer-shell {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(225, 29, 72, 0.08), transparent 28rem),
+    radial-gradient(circle at 85% 8%, rgba(246, 200, 95, 0.13), transparent 22rem),
+    var(--theme-page);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .home-header,
+html[data-theme="light"] .home-footer {
+  border-color: var(--theme-border);
+}
+
+html[data-theme="light"] .home-logo,
+html[data-theme="light"] .home-nav a,
+html[data-theme="light"] .home-nav button,
+html[data-theme="light"] .user-menu span,
+html[data-theme="light"] .home-footer nav a {
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .home-logo span,
+html[data-theme="light"] .customer-shell .home-logo,
+html[data-theme="light"] .customer-shell .home-logo span {
+  color: #d4153d;
+}
+
+html[data-theme="light"] .home-search input,
+html[data-theme="light"] .movie-filters select,
+html[data-theme="light"] .movie-filters input[type="date"] {
+  background: var(--theme-surface);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+  color-scheme: light;
+}
+
+html[data-theme="light"] .movie-filters select option {
+  background: var(--theme-surface);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .movie-card,
+html[data-theme="light"] .movie-state {
+  background: var(--theme-surface);
+  border-color: var(--theme-border);
+  box-shadow: var(--theme-shadow);
+}
+
+html[data-theme="light"] .movie-card h3,
+html[data-theme="light"] .movie-card__title-button,
+html[data-theme="light"] .section-toolbar h2 {
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .movie-card p,
+html[data-theme="light"] .movie-state,
+html[data-theme="light"] .home-footer p,
+html[data-theme="light"] .breadcrumb {
+  color: var(--theme-muted);
+}
+
+html[data-theme="light"] .auth-page {
+  background: var(--theme-page);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .auth-workspace {
+  background: var(--theme-page);
+}
+
+html[data-theme="light"] .auth-card {
+  background: var(--theme-surface);
+  border-color: var(--theme-border);
+  box-shadow: var(--theme-shadow);
+}
+
+html[data-theme="light"] .auth-card h2,
+html[data-theme="light"] .register-heading h2 {
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .auth-card input,
+html[data-theme="light"] .account-tabs .is-active {
+  background: var(--theme-surface-soft);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .auth-card__brand span,
+html[data-theme="light"] .register-heading p,
+html[data-theme="light"] .auth-switch,
+html[data-theme="light"] .account-tabs button {
+  color: var(--theme-muted);
+}
+
+html[data-theme="light"] .admin-layout,
+html[data-theme="light"] .admin-content .app-shell {
+  background: var(--theme-page);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .admin-sidebar {
+  background: #ffffff;
+  border-color: var(--theme-border);
+}
+
+html[data-theme="light"] .admin-brand {
+  border-color: var(--theme-border);
+  color: #b31135;
+}
+
+html[data-theme="light"] .admin-sidebar button {
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .admin-sidebar button:hover,
+html[data-theme="light"] .admin-sidebar button.is-active {
+  background: #ffe1e5;
+  color: #9f1239;
+}
+
+html[data-theme="light"] .admin-content .page-header,
+html[data-theme="light"] .admin-content .table-wrap,
+html[data-theme="light"] .admin-content .pagination {
+  background: var(--theme-surface);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .admin-content .page-header h1,
+html[data-theme="light"] .admin-content .title-cell,
+html[data-theme="light"] .admin-content .movie-table td {
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .admin-content .movie-table th,
+html[data-theme="light"] .admin-content .toolbar input,
+html[data-theme="light"] .admin-content .toolbar select,
+html[data-theme="light"] .admin-content .pagination-button {
+  background: var(--theme-surface-soft);
+  border-color: var(--theme-border);
+  color: var(--theme-text-soft);
+}
+
+html[data-theme="light"] .movie-detail-page {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(225, 29, 72, 0.07), transparent 22rem),
+    var(--theme-page);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .movie-detail-poster-panel,
+html[data-theme="light"] .movie-detail-showtimes,
+html[data-theme="light"] .movie-review-panel,
+html[data-theme="light"] .rating-summary,
+html[data-theme="light"] .movie-detail-showtime-group,
+html[data-theme="light"] .review-item {
+  background: var(--theme-surface);
+  border-color: var(--theme-border);
+}
+
+html[data-theme="light"] .movie-detail-poster {
+  box-shadow: var(--theme-shadow);
+}
+
+html[data-theme="light"] .movie-detail-showtimes,
+html[data-theme="light"] .movie-review-panel {
+  box-shadow: var(--theme-shadow);
+}
+
+html[data-theme="light"] .movie-detail-info h1,
+html[data-theme="light"] .movie-detail-info h2,
+html[data-theme="light"] .movie-detail-showtimes h2,
+html[data-theme="light"] .movie-review-panel h2,
+html[data-theme="light"] .movie-detail-meta span,
+html[data-theme="light"] .movie-detail-extra span,
+html[data-theme="light"] .rating-score strong,
+html[data-theme="light"] .movie-detail-showtime-group-head strong {
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .detail-back-button,
+html[data-theme="light"] .movie-detail-info > p:not(.movie-detail-genres),
+html[data-theme="light"] .review-item p,
+html[data-theme="light"] .review-empty {
+  color: var(--theme-text-soft);
+}
+
+html[data-theme="light"] .movie-detail-date-tabs button,
+html[data-theme="light"] .movie-detail-showtime-times button,
+html[data-theme="light"] .review-form textarea,
+html[data-theme="light"] .review-star-picker button {
+  background: var(--theme-surface-soft);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .review-form {
+  border-color: var(--theme-border);
+}
+
+html[data-theme="light"] .review-star-field legend {
+  color: var(--theme-muted);
+}
+
+html[data-theme="light"] .review-star-picker button {
+  background: transparent;
+  color: #9aa5a9;
+}
+
+html[data-theme="light"] .review-star-picker button:hover,
+html[data-theme="light"] .review-star-picker button:focus-visible,
+html[data-theme="light"] .review-star-picker button.is-selected {
+  color: #e5a900;
+}
+
+html[data-theme="light"] .movie-detail-date-tabs button strong {
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .movie-detail-date-tabs button.is-active {
+  background: #ffe6ea;
+  box-shadow: inset 0 -3px 0 #e11d48;
+  color: #9f1239;
+}
+
+html[data-theme="light"] .movie-detail-date-tabs button:hover {
+  background: #e5ebed;
+}
+
+html[data-theme="light"] .movie-detail-date-tabs button.is-active:hover {
+  background: #ffe6ea;
+}
+
+html[data-theme="light"] .movie-showtime-empty {
+  color: var(--theme-muted);
+}
+
+html[data-theme="light"] .showtime-page {
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .showtime-header h1,
+html[data-theme="light"] .showtime-movie-info h2,
+html[data-theme="light"] .format-info,
+html[data-theme="light"] .selected-date strong {
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .showtime-header p,
+html[data-theme="light"] .showtime-room-summary,
+html[data-theme="light"] .selected-date,
+html[data-theme="light"] .no-showtime {
+  color: var(--theme-muted);
+}
+
+html[data-theme="light"] .week-arrow,
+html[data-theme="light"] .calendar-button,
+html[data-theme="light"] .date-item,
+html[data-theme="light"] .selected-date,
+html[data-theme="light"] .showtime-search-panel,
+html[data-theme="light"] .showtime-movie-card,
+html[data-theme="light"] .showtime-time,
+html[data-theme="light"] .no-showtime {
+  background: var(--theme-surface);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .showtime-search-panel input,
+html[data-theme="light"] .showtime-movie-meta span {
+  background: var(--theme-surface-soft);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .date-item.active,
+html[data-theme="light"] .showtime-time:hover {
+  background: #ef1b2d;
+  border-color: #ef1b2d;
+  color: #ffffff;
+}
+
+html[data-theme="light"] .ticket-price-card,
+html[data-theme="light"] .ticket-price-empty {
+  background: var(--theme-surface);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .ticket-price-title,
+html[data-theme="light"] .ticket-price-table th {
+  background: var(--theme-surface-soft);
+  border-color: var(--theme-border);
+  color: var(--theme-text-soft);
+}
+
+html[data-theme="light"] .ticket-price-table td,
+html[data-theme="light"] .ticket-price-table td:first-child,
+html[data-theme="light"] .ticket-price-table td:not(:first-child) {
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .ticket-price-table tbody tr:hover {
+  background: #f7f9fa;
+}
+
+html[data-theme="light"] .booking-page {
+  --booking-ink: #f3f5f6;
+  --booking-panel: #ffffff;
+  --booking-panel-2: #edf1f2;
+  --booking-line: #cfd8dc;
+  --booking-muted: #687980;
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .booking-steps span.is-active,
+html[data-theme="light"] .booking-showtime-strip .booking-showtime-movie,
+html[data-theme="light"] .confirm-movie strong,
+html[data-theme="light"] .ticket-info-row strong {
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .booking-showtime-strip,
+html[data-theme="light"] .booking-summary-panel dl > div,
+html[data-theme="light"] .result-card dl > div,
+html[data-theme="light"] .vietqr-payment dl > div {
+  border-color: var(--theme-border);
+}
+
+html[data-theme="light"] .hold-timer,
+html[data-theme="light"] .ticket-chip-list > span,
+html[data-theme="light"] .payment-option,
+html[data-theme="light"] .promotion-code-row input,
+html[data-theme="light"] .promotion-detail-button,
+html[data-theme="light"] .promotion-empty-card,
+html[data-theme="light"] .payment-created-note,
+html[data-theme="light"] .transaction-banner,
+html[data-theme="light"] .eticket-horizontal {
+  background: var(--theme-surface-soft);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .booking-secondary,
+html[data-theme="light"] .booking-state button,
+html[data-theme="light"] .promotion-code-row > button {
+  border-color: var(--theme-border);
+  color: var(--theme-text-soft);
+}
+
+html[data-theme="light"] .premiere-modal,
+html[data-theme="light"] .ticket-modal {
+  background: var(--theme-surface);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+html[data-theme="light"] .promotion-page {
+  background: var(--theme-page);
+}
+
+@media (max-width: 720px) {
+  .theme-toggle {
+    right: 10px;
+    top: 10px;
+    transform: scale(0.92);
+    transform-origin: top right;
+  }
+
+  .home-header,
+  .admin-content .page-header,
+  .promotion-page-header,
+  .counter-sale-header,
+  .cs-confirm-header,
+  .cs-seats-header {
+    padding-right: 82px;
+  }
+}

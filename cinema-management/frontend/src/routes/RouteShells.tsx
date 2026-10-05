@@ -14,7 +14,7 @@ interface AppShellProps {
 
 export function CustomerShell({ children, currentUser, onLogout, onLoginClick }: AppShellProps) {
   return (
-    <main className="home-page">
+    <main className="home-page customer-shell">
       <HomeHeader currentUser={currentUser} onLoginClick={onLoginClick} onLogout={onLogout} />
       <div className="home-content">{children}</div>
       <HomeFooter />

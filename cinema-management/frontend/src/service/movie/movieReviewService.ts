@@ -18,7 +18,7 @@ export function getMovieReviewEligibility(movieId: string, userId: number): Prom
   return request<MovieReviewEligibility>(`/api/movies/${movieId}/reviews/eligibility?userId=${userId}`)
 }
 
-export function createOrUpdateMovieReview(
+export function createMovieReview(
   movieId: string,
   userId: number,
   payload: MovieReviewPayload,

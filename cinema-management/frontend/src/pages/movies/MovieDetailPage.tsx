@@ -1,8 +1,9 @@
 import { useEffect, useState, type FormEvent } from "react"
+import { CalendarX2, Star } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
 import { getPublicMovie } from "../../service/movie/movieService"
 import {
-  createOrUpdateMovieReview,
+  createMovieReview,
   getMovieReviewEligibility,
   getMovieRatingSummary,
   getMovieReviews,
@@ -52,24 +53,13 @@ function formatShowtimeTime(value: string) {
 
 function groupShowtimes(showtimes: ShowtimeData[]) {
   return showtimes.reduce<Record<string, ShowtimeData[]>>((groups, showtime) => {
-    const roomName = showtime.roomName || "Phòng chiếu"
-    const format = showtime.format || "2D"
-    const key = `${roomName}__${format}`
+    const key = showtime.format?.trim() || "Chưa cập nhật định dạng"
 
     groups[key] = groups[key] || []
     groups[key].push(showtime)
 
     return groups
   }, {})
-}
-
-function getRatingDistribution(reviews: MovieReview[]) {
-  return [5, 4, 3, 2, 1].map((star) => {
-    const count = reviews.filter((review) => review.rating === star).length
-    const percent = reviews.length ? Math.round((count / reviews.length) * 100) : 0
-
-    return { star, count, percent }
-  })
 }
 
 interface MovieDetailPageProps {
@@ -149,7 +139,7 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
     setIsSubmittingReview(true)
     setReviewError("")
 
-    createOrUpdateMovieReview(movieId, currentUser.userId, {
+    createMovieReview(movieId, currentUser.userId, {
       rating,
       content,
     })
@@ -159,6 +149,7 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
           ...currentReviews.filter((review) => review.userId !== savedReview.userId),
         ])
         setContent("")
+        setCanReview(false)
 
         return getMovieRatingSummary(movieId).then(setSummary)
       })
@@ -179,22 +170,20 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
   }
 
   const showtimeGroups = groupShowtimes(showtimes)
-  const ratingDistribution = getRatingDistribution(reviews)
   const averageRating = summary?.averageRating ?? 0
-  const totalReviews = summary?.totalReviews ?? 0
 
   return (
     <main className="movie-detail-page">
       <section className="movie-detail-hero movie-detail-shell">
         <div className="movie-detail-poster-panel">
-          <div className="movie-detail-poster-head">
-            <button className="detail-back-button" type="button" onClick={() => navigate("/")}>
-              Chi tiết phim
-            </button>
-            <span>{movie.ageRating}</span>
-          </div>
-          <div className="movie-detail-poster">
-            <img src={movie.posterUrl} alt={movie.title} />
+          <button className="detail-back-button" type="button" onClick={() => navigate("/")}>
+            Chi tiết phim
+          </button>
+          <div className="movie-detail-poster-frame">
+            <span className="movie-age-badge">{movie.ageRating}</span>
+            <div className="movie-detail-poster">
+              <img src={movie.posterUrl} alt={movie.title} />
+            </div>
           </div>
         </div>
 
@@ -259,22 +248,36 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
           {isShowtimeLoading && <p className="movie-state">Đang tải lịch chiếu...</p>}
           {showtimeError && <p className="movie-state movie-state--error">{showtimeError}</p>}
           {!isShowtimeLoading && !showtimeError && showtimes.length === 0 && (
-            <p className="movie-state">Chưa có lịch chiếu cho ngày này.</p>
+            <div className="movie-showtime-empty">
+              <CalendarX2 size={30} aria-hidden="true" />
+              <p>Chưa có lịch chiếu cho ngày này.</p>
+            </div>
           )}
           {!isShowtimeLoading && !showtimeError && showtimes.length > 0 && (
             <div className="movie-detail-showtime-list">
               {Object.entries(showtimeGroups).map(([groupKey, groupShowtimes]) => {
-                const [roomName, format] = groupKey.split("__")
+                const format = groupKey
 
                 return (
                   <article key={groupKey} className="movie-detail-showtime-group">
                     <div className="movie-detail-showtime-group-head">
-                      <strong>{roomName}</strong>
-                      <span>{format}</span>
+                      <strong>{format}</strong>
                     </div>
                     <div className="movie-detail-showtime-times">
                       {groupShowtimes.map((showtime) => (
-                        <button key={showtime.id} type="button">
+                        <button
+                          key={showtime.id}
+                          type="button"
+                          title={showtime.roomName}
+                          onClick={() => {
+                            if (!currentUser) {
+                              onLoginClick()
+                              return
+                            }
+                            if (currentUser.role !== "MEMBER") return
+                            navigate(`/booking/showtimes/${showtime.id}/seats`)
+                          }}
+                        >
                           {formatShowtimeTime(showtime.startTime)}
                         </button>
                       ))}
@@ -289,40 +292,48 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
         <aside className="movie-review-panel">
           <div className="movie-review-head">
             <h2>Đánh Giá Khán Giả</h2>
-            <span>{totalReviews} lượt</span>
           </div>
 
           <div className="rating-summary">
             <div className="rating-score">
               <strong>{averageRating.toFixed(1)}</strong>
-              <span>/5</span>
+              <span>/5.0</span>
             </div>
-            <div className="rating-stars" aria-label={`${averageRating.toFixed(1)} trên 5 sao`}>
-              ★★★★★
-            </div>
-            <p>{totalReviews} lượt đánh giá</p>
-            <div className="rating-bars">
-              {ratingDistribution.map((item) => (
-                <div key={item.star} className="rating-bar-row">
-                  <span>{item.star}</span>
-                  <div>
-                    <i style={{ width: `${item.percent}%` }} />
-                  </div>
-                  <small>{item.percent}%</small>
+          </div>
+
+          <div className="review-list">
+            {reviews.length === 0 && <p className="review-empty">Hiện chưa có đánh giá nào.</p>}
+            {reviews.map((review) => (
+              <article key={review.id} className="review-item">
+                <div>
+                  <strong>{review.reviewerName}</strong>
+                  <span aria-label={`${review.rating} trên 5 sao`}>{"★".repeat(review.rating)}</span>
                 </div>
-              ))}
-            </div>
+                {review.content && <p>{review.content}</p>}
+              </article>
+            ))}
           </div>
 
           {canReview && (
             <form className="review-form" onSubmit={handleSubmitReview}>
-              <select value={rating} onChange={(event) => setRating(Number(event.target.value))}>
-                <option value={5}>5 sao</option>
-                <option value={4}>4 sao</option>
-                <option value={3}>3 sao</option>
-                <option value={2}>2 sao</option>
-                <option value={1}>1 sao</option>
-              </select>
+              <fieldset className="review-star-field">
+                <legend>Chọn số sao</legend>
+                <div className="review-star-picker" role="radiogroup" aria-label="Số sao đánh giá">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      role="radio"
+                      aria-checked={rating === star}
+                      aria-label={`${star} sao`}
+                      className={star <= rating ? "is-selected" : undefined}
+                      onClick={() => setRating(star)}
+                    >
+                      <Star size={24} fill="currentColor" />
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
 
               <textarea
                 value={content}
@@ -337,19 +348,6 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
               </button>
             </form>
           )}
-
-          <div className="review-list">
-            {reviews.length === 0 && <p className="review-empty">Hiện chưa có đánh giá nào.</p>}
-            {reviews.map((review) => (
-              <article key={review.id} className="review-item">
-                <div>
-                  <strong>{review.reviewerName}</strong>
-                  <span>{"★".repeat(review.rating)}</span>
-                </div>
-                {review.content && <p>{review.content}</p>}
-              </article>
-            ))}
-          </div>
         </aside>
       </section>
     </main>

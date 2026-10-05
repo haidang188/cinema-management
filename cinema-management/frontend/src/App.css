@@ -205,10 +205,22 @@ button {
 
 .featured-card__content {
   align-self: flex-end;
-  max-width: 650px;
+  max-width: 680px;
   padding: 54px;
   position: relative;
   z-index: 1;
+}
+
+.featured-copy-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.featured-copy-link:focus-visible {
+  border-radius: 6px;
+  outline: 2px solid var(--cinema-gold);
+  outline-offset: 7px;
 }
 
 .hero-date {
@@ -222,18 +234,27 @@ button {
 
 .featured-card h1 {
   color: #ffffff;
-  font-size: clamp(34px, 5vw, 64px);
+  font-size: clamp(38px, 4.5vw, 58px);
   font-weight: 950;
-  line-height: 1.02;
+  line-height: 1.04;
   margin: 0 0 14px;
+  max-width: 640px;
+  overflow-wrap: anywhere;
 }
 
 .featured-card p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
   color: #cbd5e1;
   font-size: 16px;
+  line-height: 1.55;
   margin: 0 0 18px;
-  max-width: 620px;
+  max-width: 560px;
 }
+
+.featured-copy-link:hover h1 { color: #fff4f5; }
 
 .movie-meta,
 .hero-buttons,
@@ -420,7 +441,7 @@ button {
 
 .movie-poster--button {
   border: 0;
-  border-radius: 0;
+  border-radius: 8px;
   display: block;
   padding: 0;
   text-align: left;
@@ -1026,7 +1047,7 @@ button {
 .auth-card {
   background: transparent;
   border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 0;
+  border-radius: 8px;
   box-shadow: none;
   gap: 18px;
   max-width: 440px;
@@ -1103,7 +1124,7 @@ button {
   background: #10182b;
   border: 0;
   border-bottom: 1px solid rgba(239, 68, 68, 0.32);
-  border-radius: 0;
+  border-radius: 6px;
   color: #ffffff;
   min-height: 36px;
 }
@@ -1115,7 +1136,7 @@ button {
 .account-tabs {
   background: transparent;
   border-bottom: 1px solid rgba(239, 68, 68, 0.28);
-  border-radius: 0;
+  border-radius: 6px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-bottom: 4px;
@@ -1123,7 +1144,7 @@ button {
 }
 
 .account-tabs button {
-  border-radius: 0;
+  border-radius: 6px 6px 0 0;
   color: #d8bcbc;
   min-height: 30px;
   text-transform: uppercase;
@@ -1131,14 +1152,14 @@ button {
 
 .account-tabs .is-active {
   background: #10182b;
-  border-radius: 0;
+  border-radius: 6px 6px 0 0;
   border-top: 2px solid #f20d1d;
   color: #f20d1d;
 }
 
 .primary-action {
   background: #f20d1d;
-  border-radius: 0;
+  border-radius: 6px;
   font-size: 18px;
   min-height: 55px;
   text-transform: uppercase;
@@ -1195,7 +1216,7 @@ button {
   align-items: center;
   background: transparent;
   border: 0;
-  border-radius: 3px;
+  border-radius: 6px;
   color: #f8fafc;
   display: flex;
   gap: 8px;
@@ -1264,7 +1285,7 @@ button {
 .admin-content .toolbar select {
   background: #101515;
   border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 0;
+  border-radius: 6px;
   color: #f8fafc;
   min-height: 30px;
 }
@@ -1275,7 +1296,7 @@ button {
 
 .admin-content .primary-button {
   background: #f20d1d;
-  border-radius: 0;
+  border-radius: 6px;
   font-size: 10px;
   letter-spacing: 0.08em;
   min-height: 28px;
@@ -1285,7 +1306,7 @@ button {
 .admin-content .secondary-button {
   background: transparent;
   border-color: rgba(255, 176, 168, 0.52);
-  border-radius: 0;
+  border-radius: 6px;
   color: #ffd0c8;
   font-size: 10px;
   min-height: 30px;
@@ -1294,7 +1315,7 @@ button {
 .admin-content .table-wrap {
   background: #181d1d;
   border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 0;
+  border-radius: 8px;
   box-shadow: none;
 }
 
@@ -1318,14 +1339,14 @@ button {
 
 .admin-content .poster-cell {
   background: #070b0b;
-  border-radius: 0;
+  border-radius: 6px;
   height: 36px;
   width: 28px;
 }
 
 .admin-content .genre-list span,
 .admin-content .status-badge {
-  border-radius: 0;
+  border-radius: 6px;
   font-size: 9px;
   text-transform: uppercase;
 }
@@ -1448,6 +1469,7 @@ button {
     radial-gradient(circle at 50% 0%, rgba(225, 29, 72, 0.16), transparent 22rem),
     linear-gradient(180deg, #080d0e 0%, #101616 48%, #080d0e 100%);
   color: #f8fafc;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   min-height: 100svh;
   padding: 24px 18px 46px;
 }
@@ -1480,32 +1502,37 @@ button {
 }
 
 .movie-detail-poster-panel {
-  background: rgba(16, 19, 20, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: transparent;
+  border: 0;
   display: grid;
-  gap: 12px;
-  padding: 15px;
+  gap: 10px;
+  padding: 0;
 }
 
-.movie-detail-poster-head {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
+.movie-detail-poster-frame {
+  position: relative;
 }
 
-.movie-detail-poster-head span {
+.movie-age-badge {
   background: #e11d48;
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(225, 29, 72, 0.3);
   color: #ffffff;
   font-size: 11px;
-  font-weight: 950;
-  padding: 4px 8px;
+  font-weight: 850;
+  padding: 5px 9px;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 2;
 }
 
 .movie-detail-poster {
   aspect-ratio: 2 / 3;
   background: #151b1d;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 4px;
+  border: 0;
+  border-radius: 8px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
   overflow: hidden;
 }
 
@@ -1524,11 +1551,10 @@ button {
 
 .movie-detail-info h1 {
   color: #ffffff;
-  font-family: "Times New Roman";
   font-size: clamp(20px, 5vw, 35px);
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  line-height: 0.94;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.08;
   margin: 12px 0 22px;
   text-transform: uppercase;
 }
@@ -1558,7 +1584,7 @@ button {
 .movie-detail-meta span {
   background: transparent;
   border: 0;
-  border-radius: 0;
+  border-radius: 6px;
   color: #f8fafc;
   font-size: 13px;
   font-weight: 950;
@@ -1574,11 +1600,11 @@ button {
 
 .movie-detail-actions a,
 .movie-detail-actions button,
-.review-form button {
+.review-form > button {
   align-items: center;
   background: #e11d48;
   border: 0;
-  border-radius: 0;
+  border-radius: 6px;
   color: #ffffff;
   display: inline-flex;
   font-weight: 900;
@@ -1599,8 +1625,8 @@ button {
 .movie-detail-info > p:not(.movie-detail-genres) {
   color: #ffe5e5;
   font-size: 14px;
-  font-weight: 650;
-  line-height: 1.55;
+  font-weight: 400;
+  line-height: 1.65;
   max-width: 760px;
 }
 
@@ -1628,8 +1654,8 @@ button {
 .movie-detail-extra span {
   color: #ffffff;
   font-size: 14px;
-  font-weight: 750;
-  line-height: 1.35;
+  font-weight: 500;
+  line-height: 1.5;
   overflow-wrap: anywhere;
   white-space: normal;
 }
@@ -1643,9 +1669,10 @@ button {
 
 .movie-detail-showtimes,
 .movie-review-panel {
-  background: #171c1c;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 0;
+  background: #171d1f;
+  border: 0;
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
   padding: 16px;
 }
 
@@ -1659,11 +1686,10 @@ button {
 
 .movie-detail-section-head h2,
 .movie-review-head h2 {
-  font-family: "Times New Roman", Times, serif;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
+  letter-spacing: 0;
+  line-height: 1.15;
   margin: 0;
   text-transform: uppercase;
 }
@@ -1680,7 +1706,9 @@ button {
 
 .movie-detail-section-head span,
 .movie-review-head span {
-  border: 1px solid #e11d48;
+  background: rgba(225, 29, 72, 0.12);
+  border: 0;
+  border-radius: 6px;
   color: #ffd7d7;
   font-size: 11px;
   font-weight: 950;
@@ -1692,11 +1720,15 @@ button {
 }
 
 .rating-summary {
+  align-items: center;
   background: #222727;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 0;
+  border: 0;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
   margin-bottom: 14px;
-  padding: 18px 16px 16px;
+  min-height: 70px;
+  padding: 12px 16px;
   text-align: center;
 }
 
@@ -1708,58 +1740,15 @@ button {
 
 .rating-score strong {
   color: #ffffff;
-  font-size: 44px;
-  font-weight: 900;
+  font-size: 28px;
+  font-weight: 800;
   line-height: 1;
 }
 
 .rating-score span {
   color: #dbe4ef;
-  font-size: 14px;
-  font-weight: 850;
-}
-
-.rating-stars {
-  color: #facc15;
-  font-size: 15px;
-  letter-spacing: 1px;
-  margin-top: 6px;
-}
-
-.rating-summary p {
-  color: #ffb4bc;
   font-size: 12px;
-  margin: 7px 0 10px;
-}
-
-.rating-bars {
-  display: grid;
-  gap: 5px;
-}
-
-.rating-bar-row {
-  align-items: center;
-  display: grid;
-  gap: 8px;
-  grid-template-columns: 12px minmax(0, 1fr) 34px;
-}
-
-.rating-bar-row span,
-.rating-bar-row small {
-  color: #ffd7d7;
-  font-size: 10px;
-  font-weight: 850;
-}
-
-.rating-bar-row div {
-  background: #111717;
-  height: 5px;
-}
-
-.rating-bar-row i {
-  background: #e11d48;
-  display: block;
-  height: 100%;
+  font-weight: 700;
 }
 
 .movie-detail-date-tabs {
@@ -1771,14 +1760,14 @@ button {
 
 .movie-detail-date-tabs button {
   background: #222828;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 0;
+  border: 0;
+  border-radius: 8px;
   color: #dbe4ef;
   display: grid;
-  font-family: "Times New Roman", Times, serif;
   gap: 3px;
   min-height: 64px;
   padding: 7px;
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
 .movie-detail-date-tabs button span {
@@ -1788,16 +1777,24 @@ button {
 
 .movie-detail-date-tabs button strong {
   color: #ffffff;
-  font-family: "Times New Roman", Times, serif;
-  font-size: 26px;
-  font-weight: 900;
+  font-size: 24px;
+  font-weight: 800;
   line-height: 1;
 }
 
 .movie-detail-date-tabs button.is-active {
-  background: #241f20;
-  border-color: #e11d48;
+  background: rgba(225, 29, 72, 0.14);
+  box-shadow: inset 0 -3px 0 #e11d48;
   color: #ffffff;
+}
+
+.movie-detail-date-tabs button:hover {
+  background: #2a3131;
+  transform: translateY(-1px);
+}
+
+.movie-detail-date-tabs button.is-active:hover {
+  background: rgba(225, 29, 72, 0.14);
 }
 
 .movie-detail-showtime-list {
@@ -1807,7 +1804,8 @@ button {
 
 .movie-detail-showtime-group {
   background: #202525;
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border: 0;
+  border-radius: 8px;
   padding: 14px;
 }
 
@@ -1827,7 +1825,6 @@ button {
 
 .movie-detail-showtime-group-head strong {
   color: #ffffff;
-  font-family: "Times New Roman", Times, serif;
   font-size: 14px;
   font-weight: 950;
   text-transform: uppercase;
@@ -1848,28 +1845,94 @@ button {
 
 .movie-detail-showtime-times button {
   background: #111717;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 0;
+  border: 0;
+  border-radius: 6px;
   color: #ffffff;
-  font-family: "Times New Roman", Times, serif;
   font-size: 16px;
-  font-weight: 950;
+  font-weight: 800;
   min-height: 46px;
+}
+
+.movie-showtime-empty {
+  align-content: center;
+  color: #7f8d92;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  min-height: 170px;
+  padding: 24px;
+  text-align: center;
+}
+
+.movie-showtime-empty svg {
+  color: #667579;
+  opacity: 0.72;
+}
+
+.movie-showtime-empty p {
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0;
 }
 
 .review-form {
   display: grid;
   gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
 }
 
-.review-form select,
 .review-form textarea {
   background: #111717;
   border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 0;
+  border-radius: 6px;
   color: #ffffff;
   min-height: 42px;
   padding: 10px;
+}
+
+.review-star-field {
+  border: 0;
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+}
+
+.review-star-field legend {
+  color: #94a3a8;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0;
+}
+
+.review-star-picker {
+  display: flex;
+  gap: 4px;
+}
+
+.review-star-picker button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #526065;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 34px;
+  padding: 4px;
+  transition: color 150ms ease, transform 150ms ease;
+}
+
+.review-star-picker button:hover,
+.review-star-picker button:focus-visible,
+.review-star-picker button.is-selected {
+  color: #facc15;
+}
+
+.review-star-picker button:hover,
+.review-star-picker button:focus-visible {
+  transform: translateY(-1px) scale(1.06);
 }
 
 .review-form textarea {
@@ -1877,13 +1940,14 @@ button {
   resize: vertical;
 }
 
-.review-form button:disabled {
+.review-form > button:disabled {
   cursor: not-allowed;
   opacity: 0.68;
 }
 
 .review-list {
-  margin-top: 14px;
+  display: grid;
+  gap: 10px;
 }
 
 .review-empty {
@@ -1895,8 +1959,8 @@ button {
 
 .review-item {
   background: #111717;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  margin-top: 10px;
+  border: 0;
+  border-radius: 8px;
   padding: 12px;
 }
 
@@ -2484,7 +2548,7 @@ button {
   align-items: center;
   background: transparent;
   border: 0;
-  border-radius: 0;
+  border-radius: 8px;
   box-shadow: none;
   color: #334155;
   display: flex;
