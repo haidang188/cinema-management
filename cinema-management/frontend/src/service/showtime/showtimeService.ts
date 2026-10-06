@@ -32,3 +32,7 @@ export const getShowtimesByDate = async (
 export function getShowtimesByMovieAndDate(movieId: string, date: string): Promise<ShowtimeData[]> {
     return request<ShowtimeData[]>(`/api/showtimes/movie/${movieId}?date=${date}`);
 }
+
+export function getShowtimeById(showtimeId: number): Promise<ShowtimeData> {
+    return request<ShowtimeData>(`/api/showtimes/${showtimeId}`);
+}

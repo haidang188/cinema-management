@@ -5,63 +5,26 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record BookingDetailResponse(
-        Long id,
         String bookingCode,
-        String channel,
-        String status,
-        LocalDateTime createdAt,
-
-        Customer customer,
-        Showtime showtime,
-        List<SeatTicket> tickets,
-        Payment payment,
-
-        BigDecimal subtotalAmount,
+        String bookingStatus,
+        String paymentMethod,
+        String paymentStatus,
+        LocalDateTime paidAt,
+        LocalDateTime paymentDeadline,
+        String customerName,
+        String customerEmail,
+        String customerPhone,
+        String movieTitle,
+        String posterUrl,
+        String ageRating,
+        String roomName,
+        String roomType,
+        String format,
+        LocalDateTime startTime,
+        BigDecimal subtotal,
         BigDecimal discountAmount,
         BigDecimal totalAmount,
-        String promotionCode,
-        String employeeName,
-
-        boolean reprintable,
-        String reprintBlockedReason
+        String bookingQrToken,
+        List<BookingTicketResponse> tickets
 ) {
-
-    public record Customer(String name, String phone) {
-    }
-
-    public record Showtime(
-            Long id,
-            String movieTitle,
-            String posterUrl,
-            LocalDateTime startTime,
-            LocalDateTime endTime,
-            String roomName,
-            String roomType
-    ) {
-    }
-
-    public record SeatTicket(
-            String seat,
-            String seatType,
-            BigDecimal price,
-            String ticketCode,
-            String ticketStatus,
-            LocalDateTime issuedAt,
-
-            int reprintCount,
-            LocalDateTime lastReprintedAt
-    ) {
-    }
-
-    public record Payment(
-            String method,
-            String provider,
-            String status,
-            BigDecimal amount,
-            BigDecimal cashReceived,
-            BigDecimal changeAmount,
-            String transactionCode,
-            LocalDateTime paidAt
-    ) {
-    }
 }

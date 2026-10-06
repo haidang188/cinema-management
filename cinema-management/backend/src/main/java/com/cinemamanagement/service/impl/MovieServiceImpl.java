@@ -11,6 +11,7 @@ import com.cinemamanagement.response.MovieDetailResponse;
 import com.cinemamanagement.response.MovieListResponse;
 import com.cinemamanagement.response.MovieResponse;
 import com.cinemamanagement.service.MovieService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -89,6 +90,19 @@ public class MovieServiceImpl implements MovieService {
         Movie movie = getMovieWithGenres(id);
         applyRequest(movie, request);
         return MovieDetailResponse.fromEntity(movieRepository.save(movie));
+    }
+
+    @Override
+    @Transactional
+    public void deleteMovie(Long id) {
+        Movie movie = getMovieWithGenres(id);
+        try {
+            movie.getGenres().clear();
+            movieRepository.delete(movie);
+            movieRepository.flush();
+        } catch (DataIntegrityViolationException exception) {
+            throw new BadRequestException("Cannot delete movie because it is being used by showtimes or bookings");
+        }
     }
 
     private Movie getMovieWithGenres(Long id) {

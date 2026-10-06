@@ -296,7 +296,7 @@ function EmployeeFormPage({ employeeId, onNavigate }: EmployeeFormPageProps) {
       {pageError && <div className="employee-alert employee-alert-error">{pageError}</div>}
 
       {loading ? (
-        <div className="employee-table-card">
+        <div className="employee-table-card" aria-label="Đang tải thông tin nhân viên">
           <div className="employee-skeleton-row" />
           <div className="employee-skeleton-row" />
         </div>

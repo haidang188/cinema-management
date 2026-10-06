@@ -8,7 +8,9 @@ public record SeatResponse(
         Integer seatNumber,
         String seatName,
         String seatType,
-        String status
+        String status,
+        Integer gridRow,
+        Integer gridColumn
 ) {
     public static SeatResponse fromEntity(Seat seat) {
         return new SeatResponse(
@@ -17,7 +19,9 @@ public record SeatResponse(
                 seat.getSeatNumber(),
                 seat.getRowLabel() + seat.getSeatNumber(),
                 seat.getSeatType(),
-                seat.getStatus()
+                seat.getStatus(),
+                seat.getGridRow(),
+                seat.getGridColumn()
         );
     }
 }

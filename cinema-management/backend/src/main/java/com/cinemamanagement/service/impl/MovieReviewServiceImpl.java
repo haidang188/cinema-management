@@ -72,23 +72,26 @@ public class MovieReviewServiceImpl implements MovieReviewService {
             throw new ResourceNotFoundException("User not found with id " + userId);
         }
 
-        boolean canReview = bookingRepository.existsValidBookingByUserIdAndMovieId(userId, movieId);
+        boolean hasConfirmedBooking = bookingRepository.existsValidBookingByUserIdAndMovieId(userId, movieId);
+        boolean alreadyReviewed = movieReviewRepository.existsByMovieIdAndUserId(movieId, userId);
+        boolean canReview = hasConfirmedBooking && !alreadyReviewed;
         return new MovieReviewEligibilityResponse(movieId, userId, canReview);
     }
 
     @Override
     @Transactional
-    public MovieReviewResponse createOrUpdateReview(Long movieId, Long userId, MovieReviewRequest request) {
+    public MovieReviewResponse createReview(Long movieId, Long userId, MovieReviewRequest request) {
         validateRequest(request);
         Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new ResourceNotFoundException("Phim không tồn tại với id " + movieId));
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại với id " + userId));
         if (!bookingRepository.existsValidBookingByUserIdAndMovieId(userId, movieId)) {
-            throw new BadRequestException("Bạn cần đặt vé phim này trước khi đánh giá");
+            throw new BadRequestException("Bạn cần thanh toán vé phim này trước khi đánh giá");
+        }
+        if (movieReviewRepository.existsByMovieIdAndUserId(movieId, userId)) {
+            throw new BadRequestException("Mỗi tài khoản chỉ được đánh giá phim một lần");
         }
 
-        MovieReview review = movieReviewRepository.findByMovieIdAndUserId(movieId, userId)
-                .orElseGet(MovieReview::new);
-
+        MovieReview review = new MovieReview();
         review.setMovie(movie);
         review.setUser(user);
         review.setRating(request.getRating());

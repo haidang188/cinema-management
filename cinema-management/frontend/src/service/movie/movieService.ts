@@ -86,6 +86,12 @@ export function updateMovie(id: string, payload: MoviePayload): Promise<AdminMov
   })
 }
 
+export function deleteMovie(id: string): Promise<void> {
+  return request<void>(`/api/movies/admin/${id}`, {
+    method: "DELETE",
+  })
+}
+
 export function getGenres(): Promise<Genre[]> {
   return request<Genre[]>("/api/admin/genres")
 }

@@ -14,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ShowtimeSeatServiceImpl implements ShowtimeSeatService {
     private final ShowtimeSeatRepository showtimeSeatRepository;
+    private final com.cinemamanagement.service.TicketPricingService ticketPricingService;
     @Override
     @Transactional(readOnly = true)
     public List<ShowtimeSeatResponse> getSeatsByShowtime(Long showtimeId) {
@@ -25,7 +26,8 @@ public class ShowtimeSeatServiceImpl implements ShowtimeSeatService {
                         showtimeSeat.getSeat().getRowLabel(),
                         showtimeSeat.getSeat().getSeatNumber(),
                         showtimeSeat.getSeat().getSeatType(),
-                        showtimeSeat.getStatus()
+                        showtimeSeat.getStatus(),
+                        ticketPricingService.getPrice(showtimeSeat.getShowtime(), showtimeSeat)
                 ))
                 .toList();
     }

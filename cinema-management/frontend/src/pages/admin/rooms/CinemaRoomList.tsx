@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react"
+import { useEffect, useMemo, useState } from "react"
 import AppModal from "../../../component/common/AppModal"
-import { createRoom, getRoomDetail, getRooms, updateRoom } from "../../../service/cinema-room/cinemaRoomService"
-import type { CinemaRoom, CinemaRoomPayload, CinemaRoomUpdatePayload, NavigateHandler } from "../../../types/admin"
+import { deleteRoom, getRooms } from "../../../service/cinema-room/cinemaRoomService"
+import type { CinemaRoom, NavigateHandler } from "../../../types/admin"
 
 const PAGE_SIZE = 10
 
@@ -12,25 +12,11 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_FILTERS = [
-  { value: "", label: "Tất cả" },
+  { value: "", label: "Tất cả trạng thái" },
   { value: "ACTIVE", label: "Hoạt động" },
   { value: "MAINTENANCE", label: "Bảo trì" },
   { value: "INACTIVE", label: "Ngừng hoạt động" },
 ]
-
-const ROOM_TYPES = ["2D", "3D", "IMAX", "VIP"]
-const MODAL_CLOSE_WARNING = "Bạn có thay đổi chưa được lưu. Bạn có chắc muốn đóng modal?"
-const DELETE_ERROR_MESSAGE = "Không thể xóa phòng chiếu. Vui lòng thử lại."
-
-const EMPTY_ROOM_FORM = {
-  name: "",
-  roomType: "2D",
-  rows: "8",
-  seatsPerRow: "12",
-  status: "ACTIVE",
-}
-
-type RoomFormValues = typeof EMPTY_ROOM_FORM
 
 interface CinemaRoomListProps {
   onNavigate: NavigateHandler
@@ -49,163 +35,6 @@ function getVisiblePages(currentPage: number, totalPages: number) {
   return Array.from({ length: endPage - startPage }, (_, index) => startPage + index)
 }
 
-interface RoomFormProps {
-  mode: "create" | "edit"
-  initialRoom?: CinemaRoom | null
-  onSubmit: (values: RoomFormValues) => Promise<void>
-  onCancel: () => void
-}
-
-function getInitialRoomForm(room?: CinemaRoom | null): RoomFormValues {
-  if (!room) return EMPTY_ROOM_FORM
-
-  return {
-    name: room.name || "",
-    roomType: room.roomType || "2D",
-    rows: "",
-    seatsPerRow: "",
-    status: room.status || "ACTIVE",
-  }
-}
-
-function RoomModalForm({ mode, initialRoom, onSubmit, onCancel }: RoomFormProps) {
-  const [formValues, setFormValues] = useState<RoomFormValues>(() => getInitialRoomForm(initialRoom))
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState("")
-  const isCreate = mode === "create"
-  const totalSeats = isCreate
-    ? Number(formValues.rows || 0) * Number(formValues.seatsPerRow || 0)
-    : initialRoom?.totalSeats || initialRoom?.seats?.length || 0
-
-  useEffect(() => {
-    setFormValues(getInitialRoomForm(initialRoom))
-    setError("")
-  }, [initialRoom])
-
-  function updateField(name: keyof RoomFormValues, value: string) {
-    setFormValues((current) => ({ ...current, [name]: value }))
-    setError("")
-  }
-
-  function validateValues() {
-    const name = formValues.name.trim()
-    const rows = Number(formValues.rows)
-    const seatsPerRow = Number(formValues.seatsPerRow)
-
-    if (!name) {
-      setError("Vui lòng nhập tên phòng chiếu.")
-      return false
-    }
-    if (isCreate && (!Number.isInteger(rows) || rows < 1 || rows > 26)) {
-      setError("Số hàng phải từ 1 đến 26.")
-      return false
-    }
-    if (isCreate && (!Number.isInteger(seatsPerRow) || seatsPerRow < 1 || seatsPerRow > 30)) {
-      setError("Số ghế mỗi hàng phải từ 1 đến 30.")
-      return false
-    }
-
-    return true
-  }
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (saving || !validateValues()) return
-
-    setSaving(true)
-    setError("")
-    try {
-      await onSubmit(formValues)
-    } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Không thể lưu phòng chiếu. Vui lòng thử lại.")
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <form className="room-form-card" onSubmit={handleSubmit}>
-      {error && <div className="room-alert room-alert-error">{error}</div>}
-
-      <div className="room-form-grid">
-        <label className="room-form-field room-form-field-full">
-          <span>Tên phòng</span>
-          <input
-            name="name"
-            placeholder="Ví dụ: Phòng 01"
-            value={formValues.name}
-            onChange={(event) => updateField("name", event.target.value)}
-          />
-        </label>
-
-        <label className="room-form-field">
-          <span>Loại phòng</span>
-          <select value={formValues.roomType} onChange={(event) => updateField("roomType", event.target.value)}>
-            {ROOM_TYPES.map((roomType) => (
-              <option key={roomType} value={roomType}>
-                {roomType}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="room-form-field">
-          <span>Trạng thái</span>
-          <select value={formValues.status} onChange={(event) => updateField("status", event.target.value)}>
-            {STATUS_FILTERS.filter((status) => status.value).map((status) => (
-              <option key={status.value} value={status.value}>
-                {status.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        {isCreate && (
-          <>
-            <label className="room-form-field">
-              <span>Số hàng ghế</span>
-              <input
-                min="1"
-                max="26"
-                name="rows"
-                type="number"
-                value={formValues.rows}
-                onChange={(event) => updateField("rows", event.target.value)}
-              />
-            </label>
-
-            <label className="room-form-field">
-              <span>Số ghế mỗi hàng</span>
-              <input
-                min="1"
-                max="30"
-                name="seatsPerRow"
-                type="number"
-                value={formValues.seatsPerRow}
-                onChange={(event) => updateField("seatsPerRow", event.target.value)}
-              />
-            </label>
-          </>
-        )}
-      </div>
-
-      <div className="room-form-preview">
-        <span>{isCreate ? "Tổng ghế sẽ tạo" : "Tổng ghế hiện có"}</span>
-        <strong>{Number.isFinite(totalSeats) ? totalSeats : 0}</strong>
-      </div>
-
-      <div className="room-action-bar">
-        <button type="button" className="secondary-button" disabled={saving} onClick={onCancel}>
-          Hủy
-        </button>
-        <button type="submit" className="primary-button" disabled={saving}>
-          {saving ? "Đang lưu..." : isCreate ? "Thêm mới" : "Lưu thay đổi"}
-        </button>
-      </div>
-    </form>
-  )
-}
-
 function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
   const [rooms, setRooms] = useState<CinemaRoom[]>([])
   const [searchTerm, setSearchTerm] = useState("")
@@ -215,16 +44,10 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
   const [totalPages, setTotalPages] = useState(0)
   const [totalElements, setTotalElements] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [refreshToken, setRefreshToken] = useState(0)
-  const [toastMessage, setToastMessage] = useState("")
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [editingRoomId, setEditingRoomId] = useState<number | null>(null)
-  const [editingRoom, setEditingRoom] = useState<CinemaRoom | null>(null)
-  const [editLoading, setEditLoading] = useState(false)
-  const [editError, setEditError] = useState("")
-  const [deleteRoomTarget, setDeleteRoomTarget] = useState<CinemaRoom | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [roomToDelete, setRoomToDelete] = useState<CinemaRoom | null>(null)
+  const [error, setError] = useState("")
+
   const visiblePages = useMemo(() => getVisiblePages(page, totalPages), [page, totalPages])
   const firstItemIndex = totalElements === 0 ? 0 : page * PAGE_SIZE + 1
   const lastItemIndex = Math.min(page * PAGE_SIZE + rooms.length, totalElements)
@@ -251,9 +74,7 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
           setTotalPages(data.totalPages || 0)
           setTotalElements(data.totalElements || 0)
 
-          if (data.totalPages > 0 && page >= data.totalPages) {
-            setPage(data.totalPages - 1)
-          }
+          if (data.totalPages > 0 && page >= data.totalPages) setPage(data.totalPages - 1)
         }
       })
       .catch((requestError: Error) => {
@@ -266,40 +87,7 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
     return () => {
       ignore = true
     }
-  }, [keyword, page, refreshToken, status])
-
-  useEffect(() => {
-    if (!toastMessage) return undefined
-    const timeoutId = window.setTimeout(() => setToastMessage(""), 2600)
-    return () => window.clearTimeout(timeoutId)
-  }, [toastMessage])
-
-  useEffect(() => {
-    if (!editingRoomId) {
-      setEditingRoom(null)
-      setEditError("")
-      return undefined
-    }
-
-    let ignore = false
-    setEditLoading(true)
-    setEditError("")
-
-    getRoomDetail(String(editingRoomId))
-      .then((room) => {
-        if (!ignore) setEditingRoom(room)
-      })
-      .catch((requestError: Error) => {
-        if (!ignore) setEditError(requestError.message)
-      })
-      .finally(() => {
-        if (!ignore) setEditLoading(false)
-      })
-
-    return () => {
-      ignore = true
-    }
-  }, [editingRoomId])
+  }, [keyword, page, status])
 
   function handleResetFilters() {
     setSearchTerm("")
@@ -308,58 +96,28 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
     setPage(0)
   }
 
-  function refreshRooms() {
-    setRefreshToken((current) => current + 1)
-  }
-
-  async function handleCreateRoom(values: RoomFormValues) {
-    const payload: CinemaRoomPayload = {
-      name: values.name.trim(),
-      roomType: values.roomType,
-      rows: Number(values.rows),
-      seatsPerRow: Number(values.seatsPerRow),
-      status: values.status,
-    }
-
-    await createRoom(payload)
-    setShowCreateModal(false)
-    setPage(0)
-    refreshRooms()
-    setToastMessage("Thêm phòng chiếu thành công")
-  }
-
-  async function handleUpdateRoom(values: RoomFormValues) {
-    if (!editingRoomId) return
-
-    const payload: CinemaRoomUpdatePayload = {
-      name: values.name.trim(),
-      roomType: values.roomType,
-      status: values.status,
-    }
-
-    await updateRoom(String(editingRoomId), payload)
-    setEditingRoomId(null)
-    refreshRooms()
-    setToastMessage("Cập nhật phòng chiếu thành công")
+  async function reloadCurrentPage() {
+    const data = await getRooms({ page, size: PAGE_SIZE, keyword, status })
+    setRooms(data.content || [])
+    setTotalPages(data.totalPages || 0)
+    setTotalElements(data.totalElements || 0)
   }
 
   async function handleDeleteRoom() {
-    if (!deleteRoomTarget || deleting) return
+    if (!roomToDelete || deleting) return
 
     setDeleting(true)
     setError("")
     try {
-      const room = await getRoomDetail(String(deleteRoomTarget.id))
-      await updateRoom(String(deleteRoomTarget.id), {
-        name: room.name,
-        roomType: room.roomType || "2D",
-        status: "INACTIVE",
-      })
-      setDeleteRoomTarget(null)
-      refreshRooms()
-      setToastMessage("Xóa phòng chiếu thành công")
+      await deleteRoom(String(roomToDelete.id))
+      setRoomToDelete(null)
+      if (rooms.length === 1 && page > 0) {
+        setPage((current) => current - 1)
+      } else {
+        await reloadCurrentPage()
+      }
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : DELETE_ERROR_MESSAGE)
+      setError(requestError instanceof Error ? requestError.message : "Không thể xóa phòng chiếu. Vui lòng thử lại.")
     } finally {
       setDeleting(false)
     }
@@ -373,7 +131,7 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
           <h1>Quản lý phòng chiếu</h1>
           <p>Quản lý danh sách phòng và cấu hình sơ đồ ghế.</p>
         </div>
-        <button type="button" className="primary-button room-add-button" onClick={() => setShowCreateModal(true)}>
+        <button type="button" className="primary-button room-add-button" onClick={() => onNavigate("/admin/cinema-rooms/create")}>
           Thêm phòng chiếu
         </button>
       </header>
@@ -467,28 +225,28 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
                     <td className="action-column">
                       <button
                         type="button"
-                        className="edit-button room-edit-button"
+                        className="edit-button room-icon-action room-edit-button"
                         aria-label={`Sửa phòng ${room.name}`}
-                        onClick={() => setEditingRoomId(room.id)}
+                        onClick={() => onNavigate(`/admin/cinema-rooms/${room.id}/edit`)}
                       >
-                        Sửa
+                        E
                       </button>
                       <button
                         type="button"
-                        className="edit-button room-delete-button"
-                        disabled={room.status === "INACTIVE"}
-                        aria-label={`Xóa phòng ${room.name}`}
-                        onClick={() => setDeleteRoomTarget(room)}
-                      >
-                        Xóa
-                      </button>
-                      <button
-                        type="button"
-                        className="edit-button room-detail-button"
+                        className="edit-button room-icon-action room-detail-button"
                         aria-label={`Xem chi tiết ghế của ${room.name}`}
                         onClick={() => onNavigate(`/admin/cinema-rooms/${room.id}`)}
                       >
-                        Chi tiết ghế
+                        ...
+                      </button>
+                      <button
+                        type="button"
+                        className="edit-button room-icon-action room-delete-button"
+                        aria-label={`Xóa phòng ${room.name}`}
+                        disabled={deleting}
+                        onClick={() => setRoomToDelete(room)}
+                      >
+                        x
                       </button>
                     </td>
                   </tr>
@@ -535,76 +293,31 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
         </>
       )}
 
-      {showCreateModal && (
-        <AppModal
-          title="Thêm phòng chiếu"
-          size="md"
-          className="crud-modal"
-          onClose={() => setShowCreateModal(false)}
-          confirmOnCloseMessage={MODAL_CLOSE_WARNING}
-        >
-          <RoomModalForm
-            mode="create"
-            onSubmit={handleCreateRoom}
-            onCancel={() => setShowCreateModal(false)}
-          />
-        </AppModal>
-      )}
-
-      {editingRoomId && (
-        <AppModal
-          title="Chỉnh sửa phòng chiếu"
-          size="md"
-          className="crud-modal"
-          onClose={() => setEditingRoomId(null)}
-          confirmOnCloseMessage={editingRoom ? MODAL_CLOSE_WARNING : undefined}
-        >
-          {editLoading && <div className="room-alert">Đang tải thông tin phòng chiếu...</div>}
-          {editError && <div className="room-alert room-alert-error">{editError}</div>}
-          {!editLoading && !editError && editingRoom && (
-            <RoomModalForm
-              mode="edit"
-              initialRoom={editingRoom}
-              onSubmit={handleUpdateRoom}
-              onCancel={() => setEditingRoomId(null)}
-            />
-          )}
-        </AppModal>
-      )}
-
-      {deleteRoomTarget && (
+      {roomToDelete && (
         <AppModal
           title="Xóa phòng chiếu"
+          message={`Bạn có chắc muốn xóa phòng "${roomToDelete.name}"? Thao tác này sẽ xóa các ghế của phòng nếu phòng chưa được dùng bởi suất chiếu hoặc đặt vé.`}
           variant="warning"
           size="sm"
-          onClose={() => setDeleteRoomTarget(null)}
+          closeOnEsc={!deleting}
           closeOnOverlay={!deleting}
+          onClose={() => {
+            if (!deleting) setRoomToDelete(null)
+          }}
           actions={[
             {
               label: "Hủy",
               variant: "secondary",
               disabled: deleting,
-              onClick: () => setDeleteRoomTarget(null),
+              onClick: () => setRoomToDelete(null),
             },
             {
-              label: deleting ? "Đang xóa..." : "Xác nhận xóa",
+              label: deleting ? "Đang xóa..." : "Xóa phòng",
               disabled: deleting,
               onClick: handleDeleteRoom,
             },
           ]}
-        >
-          <div className="delete-confirm-copy">
-            <p>Bạn có chắc muốn xóa phòng chiếu này không?</p>
-            <strong>{deleteRoomTarget.name}</strong>
-            <p>Phòng chiếu sẽ được chuyển sang trạng thái ngừng hoạt động.</p>
-          </div>
-        </AppModal>
-      )}
-
-      {toastMessage && (
-        <div className="room-toast" role="status" aria-live="polite">
-          {toastMessage}
-        </div>
+        />
       )}
     </main>
   )

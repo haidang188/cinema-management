@@ -20,6 +20,13 @@ public class SeatHold {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(
+            name = "hold_token",
+            nullable = false,
+            length = 100
+    )
+    private String holdToken;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "showtime_seat_id", nullable = false)
     private ShowtimeSeat showtimeSeat;

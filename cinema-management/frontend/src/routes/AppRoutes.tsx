@@ -1,9 +1,13 @@
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom"
+import type { ReactNode } from "react"
 
 import AuthPage from "../component/auth/AuthPage"
 import HomePage from "../component/home/HomePage"
 import { getHomePath, useAuth } from "../hooks/useAuth"
 import MovieDetailPage from "../pages/movies/MovieDetailPage"
+import BookingSeatsPage from "../pages/booking/BookingSeatsPage"
+import BookingConfirmPage from "../pages/booking/BookingConfirmPage"
+import BookingResultPage from "../pages/booking/BookingResultPage"
 import type { AuthMode } from "../types/auth"
 import { adminRoutes } from "./adminRoutes"
 import { promotionRoutes } from "./PromotionRoutes"
@@ -51,6 +55,17 @@ function AppRouteContent() {
     )
   }
 
+  function renderMemberPage(page: ReactNode) {
+    if (!currentUser) return <Navigate to="/login" replace />
+    if (currentUser.role !== "MEMBER") return <Navigate to={getHomePath(currentUser)} replace />
+
+    return (
+      <CustomerShell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
+        {page}
+      </CustomerShell>
+    )
+  }
+
   return (
     <Routes>
       <Route
@@ -72,6 +87,11 @@ function AppRouteContent() {
 
       <Route path="/login" element={renderAuthPage("login")} />
       <Route path="/register" element={renderAuthPage("register")} />
+
+      <Route path="/booking/showtimes/:showtimeId/seats" element={renderMemberPage(currentUser && <BookingSeatsPage currentUser={currentUser} />)} />
+      <Route path="/booking/confirm" element={renderMemberPage(currentUser && <BookingConfirmPage currentUser={currentUser} />)} />
+      <Route path="/booking/result/:bookingCode" element={renderMemberPage(currentUser && <BookingResultPage currentUser={currentUser} />)} />
+      <Route path="/payment/vnpay-return" element={renderMemberPage(currentUser && <BookingResultPage currentUser={currentUser} />)} />
 
       {[...showtimeRoutes, ...ticketPriceRoutes].map((route) => {
         const Shell = currentUser?.role === "ADMIN" ? AdminShell : CustomerShell

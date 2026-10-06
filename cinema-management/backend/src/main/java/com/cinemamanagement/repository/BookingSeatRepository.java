@@ -19,6 +19,9 @@ public interface BookingSeatRepository extends JpaRepository<BookingSeat, Long> 
             Long seatId
     );
 
+    boolean existsBySeatId(Long seatId);
+
+    /** Quản lý đặt vé: ghế của nhiều đơn trong 1 câu SQL (kèm thông tin ghế). */
     @Query("""
             select bs from BookingSeat bs
             join fetch bs.seat

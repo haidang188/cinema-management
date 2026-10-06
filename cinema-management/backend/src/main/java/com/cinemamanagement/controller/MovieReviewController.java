@@ -30,8 +30,8 @@ public class MovieReviewController {
         return movieReviewService.getReviewEligibility(movieId, userId);
     }
     @PostMapping
-    public MovieReviewResponse createOrUpdateReview(@PathVariable Long movieId, @RequestParam Long userId, @Valid @RequestBody MovieReviewRequest request){
-        return movieReviewService.createOrUpdateReview(movieId,userId,request);
+    public MovieReviewResponse createReview(@PathVariable Long movieId, @RequestParam Long userId, @Valid @RequestBody MovieReviewRequest request){
+        return movieReviewService.createReview(movieId,userId,request);
     }
 
 }

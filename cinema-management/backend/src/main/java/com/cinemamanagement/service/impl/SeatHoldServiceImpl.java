@@ -1,284 +1,412 @@
 package com.cinemamanagement.service.impl;
 
+import com.cinemamanagement.config.properties.BookingProperties;
+import com.cinemamanagement.entity.SeatHold;
 import com.cinemamanagement.entity.Showtime;
 import com.cinemamanagement.entity.ShowtimeSeat;
+import com.cinemamanagement.entity.User;
+import com.cinemamanagement.enums.SeatHoldStatus;
+import com.cinemamanagement.enums.ShowtimeSeatStatus;
+import com.cinemamanagement.exception.BadRequestException;
+import com.cinemamanagement.exception.ConflictException;
+import com.cinemamanagement.exception.ResourceNotFoundException;
 import com.cinemamanagement.exception.SeatConflictException;
 import com.cinemamanagement.repository.CounterOrderRepository;
+import com.cinemamanagement.repository.SeatHoldRepository;
 import com.cinemamanagement.repository.ShowtimeRepository;
 import com.cinemamanagement.repository.ShowtimeSeatRepository;
+import com.cinemamanagement.repository.UserRepository;
+import com.cinemamanagement.request.HoldSeatsRequest;
+import com.cinemamanagement.request.UpdateSeatHoldRequest;
+import com.cinemamanagement.response.SeatHoldActionResponse;
 import com.cinemamanagement.response.SeatHoldResponse;
 import com.cinemamanagement.response.SeatStateResponse;
 import com.cinemamanagement.service.HoldPolicyService;
-import com.cinemamanagement.util.HoldTokens;
 import com.cinemamanagement.service.SeatEventPublisher;
 import com.cinemamanagement.service.SeatHoldService;
+import com.cinemamanagement.util.HoldTokens;
+import com.cinemamanagement.websocket.SeatStatusPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.cinemamanagement.service.SeatHoldService.clearHold;
 import static com.cinemamanagement.service.SeatHoldService.isActiveHold;
 import static com.cinemamanagement.service.SeatHoldService.isFree;
 
-/**
- * GIỮ GHẾ TẠM THỜI
- * - Chọn ghế = giữ ghế ngay (HELD + held_until + hold_owner).
- * - Hạn 5 phút tính từ ghế đầu tiên của phiên; chọn thêm ghế không kéo dài hạn.
- * - Hết hạn: job 5 giây/lần trả ghế về AVAILABLE và báo qua WebSocket.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SeatHoldServiceImpl implements SeatHoldService {
 
-    /** Gia hạn khi khách đã chuyển khoản thành công để nhân viên kịp bấm "Bán vé". */
     public static final Duration PAID_GRACE = Duration.ofMinutes(3);
     private static final int SELLING_CUTOFF_MINUTES = 5;
 
-    private final ShowtimeRepository showtimeRepository;
+    private final SeatHoldRepository seatHoldRepository;
     private final ShowtimeSeatRepository showtimeSeatRepository;
-    private final SeatEventPublisher seatEventPublisher;
-    private final HoldPolicyService holdPolicyService;
+    private final ShowtimeRepository showtimeRepository;
+    private final UserRepository userRepository;
     private final CounterOrderRepository counterOrderRepository;
+    private final BookingProperties bookingProperties;
+    private final HoldPolicyService holdPolicyService;
+    private final SeatStatusPublisher seatStatusPublisher;
+    private final SeatEventPublisher seatEventPublisher;
 
-    /* ============================ GIỮ GHẾ ============================ */
+    /* API giữ ghế của luồng đặt vé online hiện có. */
 
     @Override
     @Transactional
-    public SeatHoldResponse hold(Long showtimeId, String holdToken, List<Long> showtimeSeatIds, boolean allowPartial) {
-
-        String owner = HoldTokens.owner(holdToken);
-        HoldPolicyService.Rule rule = holdPolicyService.resolve(owner, true);
-
-        if (rule.isCounter() && !rule.order().getShowtimeId().equals(showtimeId)) {
-            throw new IllegalArgumentException("Đơn " + rule.order().getCode() + " thuộc suất chiếu khác");
-        }
-        List<Long> ids = normalizeIds(showtimeSeatIds);
-
-        if (ids.isEmpty()) {
-            throw new IllegalArgumentException("Chưa chọn ghế");
-        }
-
-        validateShowtimeForSale(showtimeId);
-
+    public SeatHoldResponse createHold(HoldSeatsRequest request) {
         LocalDateTime now = LocalDateTime.now();
+        User user = getMemberUser(request.getUserId());
+        Showtime showtime = getOpenShowtime(request.getShowtimeId(), now);
+        List<Long> requestedIds = normalizeRequiredIds(request.getShowtimeSeatIds());
 
-        List<ShowtimeSeat> mine = showtimeSeatRepository.lockHeldBy(showtimeId, owner).stream()
-                .filter(seat -> isActiveHold(seat, now))
+        releaseExpiredHoldOfUser(user.getId(), showtime.getId(), now);
+        List<SeatHold> existing = seatHoldRepository
+                .findAllByUserIdAndShowtimeSeatShowtimeIdAndStatus(
+                        user.getId(), showtime.getId(), SeatHoldStatus.ACTIVE.name());
+        if (!existing.isEmpty()) {
+            throw new ConflictException(
+                    "Bạn đã có một lượt giữ ghế đang hoạt động cho suất chiếu này");
+        }
+
+        List<ShowtimeSeat> seats = lockRequestedSeats(requestedIds);
+        validateSeats(seats, requestedIds, showtime.getId());
+        List<String> conflicts = seats.stream()
+                .filter(seat -> !isFree(seat, now))
+                .map(this::seatCode)
                 .toList();
-
-        // Hạn chung của cả phiên: giữ nguyên hạn cũ nếu đã có ghế đang giữ.
-        LocalDateTime expiry = mine.stream()
-                .map(ShowtimeSeat::getHeldUntil)
-                .min(Comparator.naturalOrder())
-                .orElse(now.plus(rule.duration()));
-
-        List<ShowtimeSeat> targets = showtimeSeatRepository.lockByShowtimeAndIds(showtimeId, ids);
-
-        if (targets.size() != ids.size()) {
-            throw new IllegalArgumentException("Có ghế không thuộc suất chiếu này");
+        if (!conflicts.isEmpty()) {
+            throw new SeatConflictException(conflicts);
         }
 
-        Set<Long> mineIds = mine.stream().map(ShowtimeSeat::getId).collect(Collectors.toSet());
-        long newCount = targets.stream().filter(seat -> !mineIds.contains(seat.getId())).count();
+        String token = UUID.randomUUID().toString();
+        String owner = HoldTokens.owner(token);
+        LocalDateTime expiresAt = now.plusMinutes(
+                bookingProperties.getSeatHoldDurationMinutes());
+        List<SeatHold> holds = new ArrayList<>();
 
-        if (rule.maxSeats() != null && mineIds.size() + newCount > rule.maxSeats()) {
-            throw new IllegalArgumentException(rule.isCounter()
-                    ? "Đơn thường tối đa " + rule.maxSeats() + " ghế. Bật \"Đơn đoàn\" để chọn nhiều hơn."
-                    : "Mỗi đơn tối đa " + rule.maxSeats() + " ghế");
+        for (ShowtimeSeat seat : seats) {
+            markHeld(seat, owner, expiresAt);
+            SeatHold hold = new SeatHold();
+            hold.setHoldToken(token);
+            hold.setShowtimeSeat(seat);
+            hold.setUser(user);
+            hold.setHeldAt(now);
+            hold.setExpiresAt(expiresAt);
+            hold.setStatus(SeatHoldStatus.ACTIVE.name());
+            holds.add(hold);
         }
 
-        List<ShowtimeSeat> changed = new ArrayList<>();
-        List<String> conflicts = new ArrayList<>();
+        showtimeSeatRepository.saveAll(seats);
+        seatHoldRepository.saveAll(holds);
+        publishOnlineHeld(showtime.getId(), seats, requestedIds, expiresAt);
+        return oldResponse(token, user.getId(), showtime.getId(), requestedIds,
+                now, expiresAt, SeatHoldStatus.ACTIVE);
+    }
 
-        for (ShowtimeSeat seat : targets) {
-            if (mineIds.contains(seat.getId())) {
-                continue; // đã là của mình
+    @Override
+    @Transactional
+    public SeatHoldResponse updateHold(String token, UpdateSeatHoldRequest request) {
+        List<SeatHold> activeHolds = ownedActiveHolds(token, request.getUserId());
+        SeatHold first = activeHolds.getFirst();
+        LocalDateTime now = LocalDateTime.now();
+        Long showtimeId = first.getShowtimeSeat().getShowtime().getId();
+
+        if (!first.getExpiresAt().isAfter(now)) {
+            releaseHoldRows(activeHolds, SeatHoldStatus.EXPIRED);
+            return oldResponse(token, request.getUserId(), showtimeId, List.of(),
+                    first.getHeldAt(), first.getExpiresAt(), SeatHoldStatus.EXPIRED);
+        }
+
+        String owner = HoldTokens.owner(token);
+        List<Long> desiredIds = normalizeIds(request.getShowtimeSeatIds(), false);
+        Map<Long, SeatHold> currentById = activeHolds.stream().collect(
+                Collectors.toMap(h -> h.getShowtimeSeat().getId(), Function.identity()));
+        LinkedHashSet<Long> allIds = new LinkedHashSet<>(currentById.keySet());
+        allIds.addAll(desiredIds);
+        List<ShowtimeSeat> locked = lockRequestedSeats(
+                allIds.stream().sorted().toList());
+        Map<Long, ShowtimeSeat> lockedById = locked.stream().collect(
+                Collectors.toMap(ShowtimeSeat::getId, Function.identity()));
+
+        List<Long> releasedIds = new ArrayList<>();
+        List<Long> addedIds = new ArrayList<>();
+        List<SeatHold> newHolds = new ArrayList<>();
+
+        for (Map.Entry<Long, SeatHold> entry : currentById.entrySet()) {
+            if (desiredIds.contains(entry.getKey())) {
+                continue;
+            }
+            entry.getValue().setStatus(SeatHoldStatus.RELEASED.name());
+            ShowtimeSeat seat = lockedById.get(entry.getKey());
+            if (seat != null && owner.equals(seat.getHoldOwner())) {
+                clearHold(seat);
+            }
+            releasedIds.add(entry.getKey());
+        }
+
+        for (Long desiredId : desiredIds) {
+            if (currentById.containsKey(desiredId)) {
+                continue;
+            }
+            ShowtimeSeat seat = lockedById.get(desiredId);
+            if (seat == null) {
+                throw new ResourceNotFoundException(
+                        "Không tìm thấy ghế suất chiếu " + desiredId);
+            }
+            if (!seat.getShowtime().getId().equals(showtimeId)) {
+                throw new BadRequestException(
+                        "Ghế không thuộc suất chiếu đã chọn");
+            }
+            if (!isFree(seat, now)) {
+                throw new ConflictException(
+                        "Ghế " + seatCode(seat) + " không còn trống");
             }
 
+            markHeld(seat, owner, first.getExpiresAt());
+            SeatHold hold = new SeatHold();
+            hold.setHoldToken(token);
+            hold.setShowtimeSeat(seat);
+            hold.setUser(first.getUser());
+            hold.setHeldAt(first.getHeldAt());
+            hold.setExpiresAt(first.getExpiresAt());
+            hold.setStatus(SeatHoldStatus.ACTIVE.name());
+            newHolds.add(hold);
+            addedIds.add(desiredId);
+        }
+
+        seatHoldRepository.saveAll(activeHolds);
+        seatHoldRepository.saveAll(newHolds);
+        showtimeSeatRepository.saveAll(locked);
+        publishOnlineChanges(showtimeId, lockedById, releasedIds,
+                addedIds, first.getExpiresAt());
+
+        SeatHoldStatus status = desiredIds.isEmpty()
+                ? SeatHoldStatus.RELEASED : SeatHoldStatus.ACTIVE;
+        return oldResponse(token, request.getUserId(), showtimeId, desiredIds,
+                first.getHeldAt(), first.getExpiresAt(), status);
+    }
+
+    @Override
+    @Transactional
+    public SeatHoldResponse getActiveHold(String token, Long userId) {
+        List<SeatHold> holds = ownedActiveHolds(token, userId);
+        SeatHold first = holds.getFirst();
+        Long showtimeId = first.getShowtimeSeat().getShowtime().getId();
+        if (!first.getExpiresAt().isAfter(LocalDateTime.now())) {
+            releaseHoldRows(holds, SeatHoldStatus.EXPIRED);
+            return oldResponse(token, userId, showtimeId, List.of(),
+                    first.getHeldAt(), first.getExpiresAt(), SeatHoldStatus.EXPIRED);
+        }
+        return oldResponse(token, userId, showtimeId,
+                holds.stream().map(h -> h.getShowtimeSeat().getId()).sorted().toList(),
+                first.getHeldAt(), first.getExpiresAt(), SeatHoldStatus.ACTIVE);
+    }
+
+    @Override
+    @Transactional
+    public void releaseHold(String token, Long userId) {
+        releaseHoldRows(ownedActiveHolds(token, userId),
+                SeatHoldStatus.RELEASED);
+    }
+
+    /* API thời gian thực dùng cho màn bán vé tại quầy. */
+
+    @Override
+    @Transactional
+    public SeatHoldActionResponse hold(
+            Long showtimeId,
+            String token,
+            List<Long> showtimeSeatIds,
+            boolean allowPartial
+    ) {
+        LocalDateTime now = LocalDateTime.now();
+        getOpenShowtime(showtimeId, now);
+        List<Long> requestedIds = normalizeRequiredIds(showtimeSeatIds);
+        String owner = HoldTokens.owner(token);
+        HoldPolicyService.Rule rule = holdPolicyService.resolve(owner, true);
+
+        List<ShowtimeSeat> requested = showtimeSeatRepository
+                .lockByShowtimeAndIds(showtimeId, requestedIds);
+        validateSeats(requested, requestedIds, showtimeId);
+        List<ShowtimeSeat> mine = showtimeSeatRepository
+                .lockHeldBy(showtimeId, owner).stream()
+                .filter(seat -> isActiveHold(seat, now))
+                .toList();
+        Set<Long> mineIds = mine.stream()
+                .map(ShowtimeSeat::getId)
+                .collect(Collectors.toSet());
+
+        List<ShowtimeSeat> available = new ArrayList<>();
+        List<String> conflicts = new ArrayList<>();
+        for (ShowtimeSeat seat : requested) {
+            if (mineIds.contains(seat.getId())) {
+                continue;
+            }
             if (isFree(seat, now)) {
-                seat.setStatus("HELD");
-                seat.setHeldUntil(expiry);
-                seat.setHoldOwner(owner);
-                changed.add(seat);
+                available.add(seat);
             } else {
                 conflicts.add(seatCode(seat));
             }
         }
-
-        // Chọn từng ghế: có xung đột -> ném lỗi, transaction rollback.
-        // Chọn cả hàng / tất cả (allowPartial): bỏ qua ghế đã có người giữ, giữ phần còn lại.
-        if (!conflicts.isEmpty() && !allowPartial) {
+        if (!allowPartial && !conflicts.isEmpty()) {
             throw new SeatConflictException(conflicts);
         }
+        if (rule.maxSeats() != null
+                && mineIds.size() + available.size() > rule.maxSeats()) {
+            throw new BadRequestException(
+                    "Chỉ được giữ tối đa " + rule.maxSeats() + " ghế");
+        }
 
-        showtimeSeatRepository.saveAll(changed);
-        seatEventPublisher.publishAfterCommit(showtimeId, changed);
+        LocalDateTime expiresAt = mine.stream()
+                .map(ShowtimeSeat::getHeldUntil)
+                .min(Comparator.naturalOrder())
+                .orElseGet(() -> now.plus(rule.duration()));
+        available.forEach(seat -> markHeld(seat, owner, expiresAt));
+        if (!available.isEmpty()) {
+            showtimeSeatRepository.saveAll(available);
+            seatEventPublisher.publishAfterCommit(showtimeId, available);
+        }
 
-        List<Long> held = new ArrayList<>(mineIds);
-        changed.forEach(seat -> held.add(seat.getId()));
-        held.sort(Comparator.naturalOrder());
-
-        holdPolicyService.syncOrderExpiry(rule, held.isEmpty() ? null : expiry);
-
-        return new SeatHoldResponse(showtimeId, held, secondsLeft(expiry, now), conflicts);
+        List<Long> heldIds = new ArrayList<>(mineIds);
+        available.stream().map(ShowtimeSeat::getId).forEach(heldIds::add);
+        heldIds = heldIds.stream().distinct().sorted().toList();
+        holdPolicyService.syncOrderExpiry(
+                rule, heldIds.isEmpty() ? null : expiresAt);
+        return actionResponse(showtimeId, heldIds,
+                heldIds.isEmpty() ? null : expiresAt, now, conflicts);
     }
 
-    /* ============================ NHẢ GHẾ ============================ */
-
-    /** showtimeSeatIds rỗng / null = nhả toàn bộ ghế của phiên trong suất này. */
     @Override
     @Transactional
-    public SeatHoldResponse release(Long showtimeId, String holdToken, List<Long> showtimeSeatIds) {
-
-        String owner = HoldTokens.owner(holdToken);
-        HoldPolicyService.Rule rule = holdPolicyService.resolve(owner, false);
-        Set<Long> only = new HashSet<>(normalizeIds(showtimeSeatIds));
+    public SeatHoldActionResponse release(
+            Long showtimeId,
+            String token,
+            List<Long> showtimeSeatIds
+    ) {
+        String owner = HoldTokens.owner(token);
+        Set<Long> selectedIds = new HashSet<>(
+                normalizeNullableIds(showtimeSeatIds));
         LocalDateTime now = LocalDateTime.now();
-
-        List<ShowtimeSeat> mine = showtimeSeatRepository.lockHeldBy(showtimeId, owner);
+        List<ShowtimeSeat> mine = showtimeSeatRepository
+                .lockHeldBy(showtimeId, owner);
         List<ShowtimeSeat> released = new ArrayList<>();
         List<ShowtimeSeat> kept = new ArrayList<>();
 
         for (ShowtimeSeat seat : mine) {
-            if (only.isEmpty() || only.contains(seat.getId())) {
+            if (selectedIds.isEmpty() || selectedIds.contains(seat.getId())) {
                 clearHold(seat);
                 released.add(seat);
             } else if (isActiveHold(seat, now)) {
                 kept.add(seat);
             }
         }
-
-        showtimeSeatRepository.saveAll(released);
-        seatEventPublisher.publishAfterCommit(showtimeId, released);
+        if (!released.isEmpty()) {
+            showtimeSeatRepository.saveAll(released);
+            seatEventPublisher.publishAfterCommit(showtimeId, released);
+        }
 
         LocalDateTime expiry = kept.stream()
                 .map(ShowtimeSeat::getHeldUntil)
                 .min(Comparator.naturalOrder())
-                .orElse(now);
-
-        holdPolicyService.syncOrderExpiry(rule, kept.isEmpty() ? null : expiry);
-
-        return new SeatHoldResponse(
-                showtimeId,
+                .orElse(null);
+        HoldPolicyService.Rule rule = holdPolicyService.resolve(owner, false);
+        holdPolicyService.syncOrderExpiry(rule, expiry);
+        return actionResponse(showtimeId,
                 kept.stream().map(ShowtimeSeat::getId).sorted().toList(),
-                secondsLeft(expiry, now),
-                List.of()
-        );
+                expiry, now, List.of());
     }
-
-    /* ======================= ĐỌC TRẠNG THÁI GHẾ ======================= */
 
     @Override
     @Transactional(readOnly = true)
     public List<SeatStateResponse> getSeatStates(Long showtimeId) {
         LocalDateTime now = LocalDateTime.now();
-
-        return showtimeSeatRepository.findAllByShowtimeIdWithSeat(showtimeId).stream()
+        return showtimeSeatRepository
+                .findAllByShowtimeIdWithSeat(showtimeId).stream()
                 .map(seat -> SeatStateResponse.of(seat, now))
                 .toList();
     }
 
-    /* ================== DÙNG CHO BÁN VÉ / THANH TOÁN ================== */
-
     @Override
     @Transactional(readOnly = true)
-    public LocalDateTime requireActiveHold(Long showtimeId, String holdToken, Collection<Long> showtimeSeatIds) {
-
-        String owner = HoldTokens.owner(holdToken);
+    public LocalDateTime requireActiveHold(
+            Long showtimeId,
+            String token,
+            Collection<Long> showtimeSeatIds
+    ) {
+        String owner = HoldTokens.owner(token);
         LocalDateTime now = LocalDateTime.now();
-
-        Map<Long, ShowtimeSeat> mine = showtimeSeatRepository.findAllByShowtimeIdWithSeat(showtimeId).stream()
-                .filter(seat -> owner.equals(seat.getHoldOwner()) && isActiveHold(seat, now))
-                .collect(Collectors.toMap(ShowtimeSeat::getId, seat -> seat));
-
-        List<Long> missing = normalizeIds(new ArrayList<>(showtimeSeatIds)).stream()
-                .filter(id -> !mine.containsKey(id))
-                .toList();
-
-        if (!missing.isEmpty()) {
-            throw new IllegalStateException("Hết thời gian giữ ghế, vui lòng chọn lại ghế");
+        Map<Long, ShowtimeSeat> mine = showtimeSeatRepository
+                .findAllByShowtimeIdWithSeat(showtimeId).stream()
+                .filter(seat -> owner.equals(seat.getHoldOwner())
+                        && isActiveHold(seat, now))
+                .collect(Collectors.toMap(
+                        ShowtimeSeat::getId, Function.identity()));
+        List<Long> requested = normalizeNullableIds(
+                showtimeSeatIds == null
+                        ? null : new ArrayList<>(showtimeSeatIds));
+        if (requested.isEmpty()
+                || requested.stream().anyMatch(id -> !mine.containsKey(id))) {
+            throw new ConflictException(
+                    "Hết thời gian giữ ghế, vui lòng chọn lại ghế");
         }
-
-        return mine.values().stream()
+        return requested.stream().map(mine::get)
                 .map(ShowtimeSeat::getHeldUntil)
                 .min(Comparator.naturalOrder())
-                .orElse(now);
+                .orElseThrow();
     }
 
     @Override
     @Transactional
     public long extendAfterPayment(Long showtimeId, String owner) {
-
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime until = now.plus(PAID_GRACE);
-
-        List<ShowtimeSeat> mine = showtimeSeatRepository.lockHeldBy(showtimeId, owner);
-
+        List<ShowtimeSeat> mine = showtimeSeatRepository
+                .lockHeldBy(showtimeId, owner);
         mine.forEach(seat -> {
-            if (seat.getHeldUntil() == null || seat.getHeldUntil().isBefore(until)) {
+            if (seat.getHeldUntil() == null
+                    || seat.getHeldUntil().isBefore(until)) {
                 seat.setHeldUntil(until);
             }
         });
-
         showtimeSeatRepository.saveAll(mine);
         seatEventPublisher.publishAfterCommit(showtimeId, mine);
-
         return secondsLeft(until, now);
     }
 
-    /* ======================= THU HỒI GHẾ HẾT HẠN ======================= */
-
-    @Override
-    @Scheduled(fixedDelay = 5_000)
-    @Transactional
-    public void releaseExpiredHolds() {
-
-        LocalDateTime now = LocalDateTime.now();
-
-        // Đơn quầy (nháp / tạm gác) quá hạn -> EXPIRED.
-        counterOrderRepository.expireOverdue(now);
-
-        List<ShowtimeSeat> expired = showtimeSeatRepository.lockExpiredHolds(now);
-
-        if (expired.isEmpty()) {
-            return;
-        }
-
-        // clearHold là hàm static của interface -> không dùng được this::clearHold.
-        expired.forEach(SeatHoldService::clearHold);
-        showtimeSeatRepository.saveAll(expired);
-
-        expired.stream()
-                .collect(Collectors.groupingBy(seat -> seat.getShowtime().getId()))
-                .forEach(seatEventPublisher::publishAfterCommit);
-
-        log.info("Đã trả {} ghế hết hạn giữ về trạng thái trống", expired.size());
-    }
-
-    /* ================== GIA HẠN / TẠM GÁC (dùng cho đơn quầy) ================== */
-
     @Override
     @Transactional
-    public List<Long> setHoldExpiry(Long showtimeId, String owner, LocalDateTime until) {
-
+    public List<Long> setHoldExpiry(
+            Long showtimeId,
+            String owner,
+            LocalDateTime until
+    ) {
         LocalDateTime now = LocalDateTime.now();
-
-        List<ShowtimeSeat> mine = showtimeSeatRepository.lockHeldBy(showtimeId, owner).stream()
+        List<ShowtimeSeat> mine = showtimeSeatRepository
+                .lockHeldBy(showtimeId, owner).stream()
                 .filter(seat -> isActiveHold(seat, now))
                 .toList();
-
         mine.forEach(seat -> seat.setHeldUntil(until));
         showtimeSeatRepository.saveAll(mine);
         seatEventPublisher.publishAfterCommit(showtimeId, mine);
-
         return mine.stream().map(ShowtimeSeat::getId).sorted().toList();
     }
 
@@ -286,48 +414,263 @@ public class SeatHoldServiceImpl implements SeatHoldService {
     @Transactional(readOnly = true)
     public List<Long> heldSeatIds(Long showtimeId, String owner) {
         LocalDateTime now = LocalDateTime.now();
-
-        return showtimeSeatRepository.findAllByShowtimeIdWithSeat(showtimeId).stream()
-                .filter(seat -> owner.equals(seat.getHoldOwner()) && isActiveHold(seat, now))
+        return showtimeSeatRepository
+                .findAllByShowtimeIdWithSeat(showtimeId).stream()
+                .filter(seat -> owner.equals(seat.getHoldOwner())
+                        && isActiveHold(seat, now))
                 .map(ShowtimeSeat::getId)
                 .sorted()
                 .toList();
     }
 
-    /* ============================ HELPERS ============================ */
+    @Override
+    @Transactional
+    public void expireHolds() {
+        LocalDateTime now = LocalDateTime.now();
+        seatHoldRepository.findAllByExpiresAtLessThanEqualAndStatus(
+                        now, SeatHoldStatus.ACTIVE.name()).stream()
+                .collect(Collectors.groupingBy(SeatHold::getHoldToken))
+                .values()
+                .forEach(holds -> releaseHoldRows(
+                        holds, SeatHoldStatus.EXPIRED));
 
-    private void validateShowtimeForSale(Long showtimeId) {
-
-        Showtime showtime = showtimeRepository.findById(showtimeId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy suất chiếu"));
-
-        if (!"OPEN".equalsIgnoreCase(showtime.getStatus())) {
-            throw new IllegalStateException("Suất chiếu không còn mở bán");
+        List<ShowtimeSeat> expired = showtimeSeatRepository
+                .lockExpiredHolds(now);
+        if (!expired.isEmpty()) {
+            expired.forEach(SeatHoldService::clearHold);
+            showtimeSeatRepository.saveAll(expired);
+            expired.stream().collect(Collectors.groupingBy(
+                            seat -> seat.getShowtime().getId()))
+                    .forEach(seatEventPublisher::publishAfterCommit);
+            log.info("Đã trả {} ghế hết hạn giữ về trạng thái trống",
+                    expired.size());
         }
-
-        if (!LocalDateTime.now().isBefore(showtime.getStartTime().minusMinutes(SELLING_CUTOFF_MINUTES))) {
-            throw new IllegalStateException("Suất chiếu đã đóng bán vé");
-        }
+        counterOrderRepository.expireOverdue(now);
     }
 
-    private static List<Long> normalizeIds(List<Long> ids) {
+    private User getMemberUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy người dùng"));
+        if (user.getRole() == null
+                || !"MEMBER".equalsIgnoreCase(user.getRole().getName())) {
+            throw new BadRequestException(
+                    "Chỉ tài khoản thành viên mới được đặt vé online");
+        }
+        return user;
+    }
+
+    private Showtime getOpenShowtime(Long showtimeId, LocalDateTime now) {
+        Showtime showtime = showtimeRepository.findById(showtimeId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy suất chiếu"));
+        if (!"OPEN".equalsIgnoreCase(showtime.getStatus())) {
+            throw new BadRequestException("Suất chiếu không còn mở bán");
+        }
+        if (!now.isBefore(showtime.getStartTime()
+                .minusMinutes(SELLING_CUTOFF_MINUTES))) {
+            throw new BadRequestException("Suất chiếu đã đóng bán vé");
+        }
+        return showtime;
+    }
+
+    private List<Long> normalizeRequiredIds(List<Long> ids) {
+        List<Long> normalized = normalizeIds(ids, true);
+        if (normalized.isEmpty()) {
+            throw new BadRequestException("Vui lòng chọn ít nhất một ghế");
+        }
+        return normalized;
+    }
+
+    private List<Long> normalizeIds(List<Long> ids, boolean rejectNull) {
         if (ids == null) {
+            if (rejectNull) {
+                throw new BadRequestException(
+                        "Danh sách ghế không được để trống");
+            }
             return List.of();
         }
-
-        return ids.stream().filter(Objects::nonNull).distinct().sorted().toList();
+        return ids.stream().filter(Objects::nonNull)
+                .distinct().sorted().toList();
     }
 
-    /**
-     * Làm tròn LÊN theo giây: 299.8s -> 300 (hiện 5:00).
-     * toSeconds() cắt phần lẻ nên luôn ra 299 -> quầy thấy 4:59 ngay khi vừa bấm.
-     */
-    private static long secondsLeft(LocalDateTime until, LocalDateTime now) {
+    private List<Long> normalizeNullableIds(List<Long> ids) {
+        return normalizeIds(ids, false);
+    }
+
+    private List<ShowtimeSeat> lockRequestedSeats(List<Long> ids) {
+        return ids.isEmpty()
+                ? new ArrayList<>()
+                : new ArrayList<>(
+                        showtimeSeatRepository.findAllByIdsForUpdate(ids));
+    }
+
+    private void validateSeats(
+            List<ShowtimeSeat> seats,
+            List<Long> requestedIds,
+            Long showtimeId
+    ) {
+        if (seats.size() != requestedIds.size()) {
+            throw new ResourceNotFoundException(
+                    "Một hoặc nhiều ghế không tồn tại");
+        }
+        if (seats.stream().anyMatch(
+                seat -> !seat.getShowtime().getId().equals(showtimeId))) {
+            throw new BadRequestException(
+                    "Một hoặc nhiều ghế không thuộc suất chiếu đã chọn");
+        }
+    }
+
+    private List<SeatHold> ownedActiveHolds(String token, Long userId) {
+        List<SeatHold> holds = seatHoldRepository
+                .findAllByHoldTokenAndStatusOrderByIdAsc(
+                        token, SeatHoldStatus.ACTIVE.name());
+        if (holds.isEmpty()) {
+            if (seatHoldRepository.existsByHoldToken(token)) {
+                throw new ConflictException(
+                        "Lượt giữ ghế không còn hoạt động");
+            }
+            throw new ResourceNotFoundException(
+                    "Không tìm thấy lượt giữ ghế");
+        }
+        if (holds.stream().anyMatch(
+                hold -> !hold.getUser().getId().equals(userId))) {
+            throw new BadRequestException(
+                    "Lượt giữ ghế không thuộc người dùng này");
+        }
+        return holds;
+    }
+
+    private void releaseExpiredHoldOfUser(
+            Long userId,
+            Long showtimeId,
+            LocalDateTime now
+    ) {
+        List<SeatHold> holds = seatHoldRepository
+                .findAllByUserIdAndShowtimeSeatShowtimeIdAndStatus(
+                        userId, showtimeId, SeatHoldStatus.ACTIVE.name());
+        if (!holds.isEmpty()
+                && !holds.getFirst().getExpiresAt().isAfter(now)) {
+            releaseHoldRows(holds, SeatHoldStatus.EXPIRED);
+        }
+    }
+
+    private void releaseHoldRows(
+            List<SeatHold> holds,
+            SeatHoldStatus finalStatus
+    ) {
+        if (holds.isEmpty()) {
+            return;
+        }
+        List<Long> ids = holds.stream()
+                .map(hold -> hold.getShowtimeSeat().getId())
+                .distinct().sorted().toList();
+        List<ShowtimeSeat> seats = lockRequestedSeats(ids);
+        SeatHold first = holds.getFirst();
+        Long showtimeId = first.getShowtimeSeat()
+                .getShowtime().getId();
+        String owner = HoldTokens.owner(first.getHoldToken());
+
+        holds.forEach(hold -> hold.setStatus(finalStatus.name()));
+        List<ShowtimeSeat> released = new ArrayList<>();
+        for (ShowtimeSeat seat : seats) {
+            boolean legacyOwned = seat.getHoldOwner() == null
+                    && Objects.equals(
+                            seat.getHeldUntil(), first.getExpiresAt());
+            if (owner.equals(seat.getHoldOwner()) || legacyOwned) {
+                clearHold(seat);
+                released.add(seat);
+            }
+        }
+        seatHoldRepository.saveAll(holds);
+        showtimeSeatRepository.saveAll(released);
+        List<Long> releasedIds = released.stream()
+                .map(ShowtimeSeat::getId).toList();
+        if (!releasedIds.isEmpty()) {
+            seatStatusPublisher.publishReleased(
+                    showtimeId, releasedIds);
+            seatEventPublisher.publishAfterCommit(
+                    showtimeId, released);
+        }
+    }
+
+    private SeatHoldResponse oldResponse(
+            String token,
+            Long userId,
+            Long showtimeId,
+            List<Long> ids,
+            LocalDateTime heldAt,
+            LocalDateTime expiresAt,
+            SeatHoldStatus status
+    ) {
+        return new SeatHoldResponse(token, userId, showtimeId,
+                List.copyOf(ids), heldAt, expiresAt, status.name());
+    }
+
+    private SeatHoldActionResponse actionResponse(
+            Long showtimeId,
+            List<Long> ids,
+            LocalDateTime expiresAt,
+            LocalDateTime now,
+            List<String> skipped
+    ) {
+        return new SeatHoldActionResponse(showtimeId, List.copyOf(ids),
+                expiresAt == null ? 0 : secondsLeft(expiresAt, now),
+                List.copyOf(skipped));
+    }
+
+    private void publishOnlineHeld(
+            Long showtimeId,
+            List<ShowtimeSeat> seats,
+            List<Long> ids,
+            LocalDateTime expiresAt
+    ) {
+        seatStatusPublisher.publishHeld(showtimeId, ids, expiresAt);
+        seatEventPublisher.publishAfterCommit(showtimeId, seats);
+    }
+
+    private void publishOnlineChanges(
+            Long showtimeId,
+            Map<Long, ShowtimeSeat> byId,
+            List<Long> released,
+            List<Long> added,
+            LocalDateTime expiresAt
+    ) {
+        if (!released.isEmpty()) {
+            seatStatusPublisher.publishReleased(showtimeId, released);
+        }
+        if (!added.isEmpty()) {
+            seatStatusPublisher.publishHeld(
+                    showtimeId, added, expiresAt);
+        }
+        List<ShowtimeSeat> changed = new ArrayList<>();
+        released.stream().map(byId::get).filter(Objects::nonNull)
+                .forEach(changed::add);
+        added.stream().map(byId::get).filter(Objects::nonNull)
+                .forEach(changed::add);
+        seatEventPublisher.publishAfterCommit(showtimeId, changed);
+    }
+
+    private void markHeld(
+            ShowtimeSeat seat,
+            String owner,
+            LocalDateTime expiresAt
+    ) {
+        seat.setStatus(ShowtimeSeatStatus.HELD.name());
+        seat.setHoldOwner(owner);
+        seat.setHeldUntil(expiresAt);
+    }
+
+    private String seatCode(ShowtimeSeat seat) {
+        return seat.getSeat().getRowLabel()
+                + seat.getSeat().getSeatNumber();
+    }
+
+    private static long secondsLeft(
+            LocalDateTime until,
+            LocalDateTime now
+    ) {
         long millis = Duration.between(now, until).toMillis();
         return millis <= 0 ? 0 : (millis + 999) / 1000;
-    }
-
-    private static String seatCode(ShowtimeSeat seat) {
-        return seat.getSeat().getRowLabel() + seat.getSeat().getSeatNumber();
     }
 }

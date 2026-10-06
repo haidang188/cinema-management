@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface MovieReviewRepository extends JpaRepository<MovieReview, Long> {
     @Query("""
@@ -16,7 +15,7 @@ public interface MovieReviewRepository extends JpaRepository<MovieReview, Long> 
         where review.movie.id = :movieId order by review.createdAt desc
         """)
     List<MovieReview> findByMovieIdOrderByCreatedAtDesc(@Param("movieId") Long movieId);
-    Optional<MovieReview> findByMovieIdAndUserId(Long movieId, Long userId);
+    boolean existsByMovieIdAndUserId(Long movieId, Long userId);
 
     @Query("""
         select new com.cinemamanagement.response.MovieRatingSummaryResponse(

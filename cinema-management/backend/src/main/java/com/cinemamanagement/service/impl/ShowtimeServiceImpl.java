@@ -68,6 +68,16 @@ public class ShowtimeServiceImpl implements ShowtimeService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public ShowtimeResponse getShowtimeById(Long showtimeId) {
+        Showtime showtime = showtimeRepository.findById(showtimeId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy suất chiếu " + showtimeId
+                ));
+        return toResponse(showtime);
+    }
+
     private ShowtimeResponse toResponse(Showtime showtime) {
 
         long totalSeats =

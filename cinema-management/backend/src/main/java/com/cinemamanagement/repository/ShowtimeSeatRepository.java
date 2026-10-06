@@ -53,6 +53,18 @@ public interface ShowtimeSeatRepository extends JpaRepository<ShowtimeSeat, Long
             @Param("showtimeId") Long showtimeId
     );
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select showtimeSeat
+        from ShowtimeSeat showtimeSeat
+        join fetch showtimeSeat.showtime showtime
+        join fetch showtimeSeat.seat seat
+        where showtimeSeat.id in :ids
+        order by showtimeSeat.id asc
+        """)
+    List<ShowtimeSeat> findAllByIdsForUpdate(
+            @Param("ids") List<Long> ids
+    );
     @Query("""
             select ss.showtime.id as showtimeId,
                    count(ss) as total,

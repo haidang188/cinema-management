@@ -1,102 +1,155 @@
-import { useEffect, type ReactNode } from "react"
+import { useEffect, useId, type MouseEvent, type ReactNode } from "react"
+import { createPortal } from "react-dom"
 
 interface AppModalAction {
   label: string
   onClick: () => void
-  variant?: "primary" | "secondary"
+  variant?: "primary" | "secondary" | "danger"
   disabled?: boolean
 }
 
 interface AppModalProps {
+  open?: boolean
   title: string
+  subtitle?: string
   message?: ReactNode
   children?: ReactNode
+  footer?: ReactNode
   variant?: "success" | "warning"
   actions?: AppModalAction[]
-  className?: string
-  size?: "sm" | "md" | "lg"
-  onClose?: () => void
+  size?: "sm" | "md" | "lg" | "xl"
   closeOnOverlay?: boolean
-  confirmOnCloseMessage?: string
+  closeOnEsc?: boolean
+  onClose?: () => void
+}
+
+let openModalCount = 0
+let originalBodyOverflow = ""
+let originalBodyPaddingRight = ""
+
+function lockBodyScroll() {
+  if (openModalCount === 0) {
+    originalBodyOverflow = document.body.style.overflow
+    originalBodyPaddingRight = document.body.style.paddingRight
+
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+    document.body.style.overflow = "hidden"
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`
+    }
+  }
+
+  openModalCount += 1
+}
+
+function unlockBodyScroll() {
+  openModalCount = Math.max(0, openModalCount - 1)
+  if (openModalCount === 0) {
+    document.body.style.overflow = originalBodyOverflow
+    document.body.style.paddingRight = originalBodyPaddingRight
+  }
 }
 
 function AppModal({
+  open = true,
   title,
+  subtitle,
   message,
   children,
+  footer,
   variant = "success",
   actions = [],
-  className = "",
-  size = "md",
+  size,
+  closeOnOverlay = false,
+  closeOnEsc = true,
   onClose,
-  closeOnOverlay = true,
-  confirmOnCloseMessage,
 }: AppModalProps) {
+  const titleId = useId()
+  const subtitleId = useId()
+  const modalSize = size || (variant === "warning" ? "sm" : "md")
+  const bodyContent = children || (typeof message === "string" ? <p>{message}</p> : message)
+  const footerContent =
+    footer ||
+    (actions.length > 0
+      ? actions.map((action, index) => {
+          const actionVariant =
+            action.variant || (variant === "warning" && index === actions.length - 1 ? "danger" : "primary")
+          const className = [
+            actionVariant === "secondary" ? "secondary-button" : "primary-button",
+            "modal__button",
+            `modal__button--${actionVariant}`,
+          ].join(" ")
+
+          return (
+            <button
+              key={action.label}
+              type="button"
+              className={className}
+              disabled={action.disabled}
+              onClick={action.onClick}
+            >
+              {action.label}
+            </button>
+          )
+        })
+      : null)
+
   useEffect(() => {
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = "hidden"
+    if (!open) return undefined
+
+    lockBodyScroll()
+    return unlockBodyScroll
+  }, [open])
+
+  useEffect(() => {
+    if (!open || !closeOnEsc || !onClose) return undefined
 
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        requestClose()
-      }
+      if (event.key === "Escape") onClose?.()
     }
 
     window.addEventListener("keydown", handleKeyDown)
-    return () => {
-      document.body.style.overflow = previousOverflow
-      window.removeEventListener("keydown", handleKeyDown)
-    }
-  })
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [closeOnEsc, onClose, open])
 
-  function requestClose() {
-    if (!onClose) return
-    if (confirmOnCloseMessage && !window.confirm(confirmOnCloseMessage)) return
-    onClose()
+  function handleOverlayClick() {
+    if (closeOnOverlay) onClose?.()
   }
 
-  function handleBackdropClick() {
-    if (closeOnOverlay) {
-      requestClose()
-    }
+  function stopModalClick(event: MouseEvent<HTMLElement>) {
+    event.stopPropagation()
   }
 
-  return (
-    <div className="modal-backdrop" role="presentation" onMouseDown={handleBackdropClick}>
+  if (!open) return null
+
+  return createPortal(
+    <div className="modal-overlay modal-backdrop" role="presentation" onMouseDown={handleOverlayClick}>
       <section
-        className={["app-modal", `modal-${variant}`, `modal-${size}`, className].filter(Boolean).join(" ")}
+        className={`modal app-modal modal--${modalSize} modal-${variant}`}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="app-modal-title"
-        onMouseDown={(event) => event.stopPropagation()}
+        aria-labelledby={titleId}
+        aria-describedby={subtitle ? subtitleId : undefined}
+        onMouseDown={stopModalClick}
       >
-        {onClose && (
-          <button type="button" className="modal-close-button" aria-label="Đóng modal" onClick={requestClose}>
-            ×
-          </button>
-        )}
-        <div className="modal-body">
-          <h2 id="app-modal-title">{title}</h2>
-          {typeof message === "string" ? <p>{message}</p> : message}
-          {children}
-        </div>
-        {actions.length > 0 && (
-          <div className="modal-actions">
-            {actions.map((action) => (
-              <button
-                key={action.label}
-                type="button"
-                className={action.variant === "secondary" ? "secondary-button" : "primary-button"}
-                disabled={action.disabled}
-                onClick={action.onClick}
-              >
-                {action.label}
-              </button>
-            ))}
+        <header className="modal__header">
+          <div>
+            <h2 id={titleId}>{title}</h2>
+            {subtitle && <p id={subtitleId}>{subtitle}</p>}
           </div>
-        )}
+          {onClose && (
+            <button type="button" className="modal__close" aria-label="Dong modal" onClick={onClose}>
+              x
+            </button>
+          )}
+        </header>
+
+        {bodyContent && <div className="modal__body modal-body">{bodyContent}</div>}
+
+        {footerContent && <footer className="modal__footer modal-actions">{footerContent}</footer>}
       </section>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
