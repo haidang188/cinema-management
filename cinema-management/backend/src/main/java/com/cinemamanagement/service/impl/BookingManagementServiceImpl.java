@@ -10,7 +10,7 @@ import com.cinemamanagement.repository.PaymentRepository;
 import com.cinemamanagement.repository.TicketRepository;
 import com.cinemamanagement.repository.specification.BookingSpecifications;
 import com.cinemamanagement.request.BookingSearchRequest;
-import com.cinemamanagement.response.BookingDetailResponse;
+import com.cinemamanagement.response.BookingManagementDetailResponse;
 import com.cinemamanagement.response.BookingListItemResponse;
 import com.cinemamanagement.response.PageResponse;
 import com.cinemamanagement.service.BookingManagementService;
@@ -34,6 +34,7 @@ public class BookingManagementServiceImpl implements BookingManagementService {
     private static final int DEFAULT_PAGE_SIZE = 20;
     private static final int MAX_PAGE_SIZE = 100;
 
+
     private static final Set<String> PAID_STATUSES = Set.of("CONFIRMED", "PAID", "COMPLETED", "CHECKED_IN", "PICKED_UP");
     private static final Set<String> CLOSED_STATUSES = Set.of("CANCELLED", "CANCELED", "REFUNDED", "EXPIRED");
 
@@ -45,7 +46,6 @@ public class BookingManagementServiceImpl implements BookingManagementService {
     private final BookingSeatRepository bookingSeatRepository;
     private final PaymentRepository paymentRepository;
     private final TicketRepository ticketRepository;
-
 
 
     @Override
@@ -72,7 +72,6 @@ public class BookingManagementServiceImpl implements BookingManagementService {
             return PageResponse.of(page, List.of());
         }
 
-
         Map<Long, List<String>> seatsByBooking = bookingSeatRepository.findAllWithSeatByBookingIds(ids).stream()
                 .collect(Collectors.groupingBy(
                         bs -> bs.getBooking().getId(),
@@ -89,10 +88,9 @@ public class BookingManagementServiceImpl implements BookingManagementService {
     }
 
 
-
     @Override
     @Transactional(readOnly = true)
-    public BookingDetailResponse getDetail(Long bookingId) {
+    public BookingManagementDetailResponse getDetail(Long bookingId) {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn đặt vé #" + bookingId));
@@ -102,12 +100,12 @@ public class BookingManagementServiceImpl implements BookingManagementService {
         Map<Long, Ticket> ticketBySeat = ticketRepository.findAllByBookingId(bookingId).stream()
                 .collect(Collectors.toMap(t -> t.getBookingSeat().getId(), t -> t, (a, b) -> a));
 
-        List<BookingDetailResponse.SeatTicket> tickets = seats.stream()
+        List<BookingManagementDetailResponse.SeatTicket> tickets = seats.stream()
                 .sorted(Comparator.comparing(BookingManagementServiceImpl::seatCode, SEAT_ORDER))
                 .map(bs -> {
                     Ticket ticket = ticketBySeat.get(bs.getId());
 
-                    return new BookingDetailResponse.SeatTicket(
+                    return new BookingManagementDetailResponse.SeatTicket(
                             seatCode(bs),
                             bs.getSeat().getSeatType(),
                             bs.getPrice(),
@@ -130,14 +128,14 @@ public class BookingManagementServiceImpl implements BookingManagementService {
         BigDecimal total = nz(booking.getTotalAmount());
         String reprintBlocked = reprintBlockedReason(booking, LocalDateTime.now());
 
-        return new BookingDetailResponse(
+        return new BookingManagementDetailResponse(
                 booking.getId(),
                 booking.getBookingCode(),
                 booking.getBookingType(),
                 booking.getStatus(),
                 booking.getCreatedAt(),
-                new BookingDetailResponse.Customer(customerName(booking), customerPhone(booking)),
-                new BookingDetailResponse.Showtime(
+                new BookingManagementDetailResponse.Customer(customerName(booking), customerPhone(booking)),
+                new BookingManagementDetailResponse.Showtime(
                         showtime.getId(),
                         movie.getTitle(),
                         movie.getPosterUrl(),
@@ -147,7 +145,7 @@ public class BookingManagementServiceImpl implements BookingManagementService {
                         room.getRoomType()
                 ),
                 tickets,
-                payment == null ? null : new BookingDetailResponse.Payment(
+                payment == null ? null : new BookingManagementDetailResponse.Payment(
                         payment.getPaymentMethod(),
                         payment.getProvider(),
                         payment.getStatus(),
@@ -168,10 +166,9 @@ public class BookingManagementServiceImpl implements BookingManagementService {
         );
     }
 
-
     @Override
     @Transactional
-    public BookingDetailResponse reprint(Long bookingId, List<String> ticketCodes, Long employeeId) {
+    public BookingManagementDetailResponse reprint(Long bookingId, List<String> ticketCodes, Long employeeId) {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn đặt vé #" + bookingId));
@@ -301,12 +298,11 @@ public class BookingManagementServiceImpl implements BookingManagementService {
 
     private static boolean isUpcomingSort(String sort) {
         String value = sort == null ? "" : sort.trim().toUpperCase(Locale.ROOT);
-        // SHOWTIME: tên cũ, giữ để không lỗi nếu frontend cũ còn gửi.
+
         return value.equals("UPCOMING") || value.equals("SHOWTIME");
     }
 
     private static Sort sortOf(String sort) {
-        // UPCOMING sắp xếp bằng CASE WHEN trong Specification -> Pageable không được có Sort.
         if (isUpcomingSort(sort)) {
             return Sort.unsorted();
         }

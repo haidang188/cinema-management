@@ -2,14 +2,13 @@ package com.cinemamanagement.controller;
 
 import com.cinemamanagement.request.BookingSearchRequest;
 import com.cinemamanagement.request.ReprintTicketsRequest;
-import com.cinemamanagement.response.BookingDetailResponse;
+import com.cinemamanagement.response.BookingManagementDetailResponse;
 import com.cinemamanagement.response.BookingListItemResponse;
 import com.cinemamanagement.response.PageResponse;
 import com.cinemamanagement.service.BookingManagementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/api/booking-management")
@@ -26,12 +25,12 @@ public class BookingManagementController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BookingDetailResponse> detail(@PathVariable Long id) {
+    public ResponseEntity<BookingManagementDetailResponse> detail(@PathVariable Long id) {
         return ResponseEntity.ok(bookingManagementService.getDetail(id));
     }
 
     @PostMapping("/{id}/reprint")
-    public ResponseEntity<BookingDetailResponse> reprint(
+    public ResponseEntity<BookingManagementDetailResponse> reprint(
             @PathVariable Long id,
             @RequestBody(required = false) ReprintTicketsRequest request
     ) {
