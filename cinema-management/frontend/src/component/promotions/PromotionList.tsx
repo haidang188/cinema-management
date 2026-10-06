@@ -21,13 +21,19 @@ import type {
   PromotionStatistics
 } from '../../service/promotion/promotionService'
 
-// The stylesheet is handled by the bundler; TypeScript has no declaration for
-// this side-effect-only import.
-// @ts-expect-error Missing declaration is expected for the CSS asset.
+
 import './promotion.css'
 
 interface PromotionLocationState {
   toast?: string
+}
+
+function readSavedFilters(): Record<string, unknown> {
+  try {
+    return JSON.parse(window.sessionStorage.getItem('promotion-list-filters') || '{}') as Record<string, unknown>
+  } catch {
+    return {}
+  }
 }
 
 function formatDate(
@@ -46,7 +52,9 @@ function formatDate(
     {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     }
   ).format(date)
 }
@@ -102,7 +110,8 @@ function getStatusLabel(
     ACTIVE: 'ĐANG ÁP DỤNG',
     UPCOMING: 'SẮP DIỄN RA',
     EXPIRED: 'ĐÃ HẾT HẠN',
-    INACTIVE: 'ĐÃ TẮT'
+    INACTIVE: 'ĐÃ TẮT',
+    FULL: 'HẾT LƯỢT'
   }
 
   if (!status) {
@@ -115,38 +124,15 @@ function getStatusLabel(
   )
 }
 
-function getVisiblePages(
-  currentPage: number,
-  totalPages: number
-): number[] {
-  if (totalPages <= 1) {
-    return [0]
-  }
-
-  const start = Math.max(
-    0,
-    Math.min(
-      currentPage - 2,
-      totalPages - 5
-    )
-  )
-
-  const end = Math.min(
-    totalPages,
-    start + 5
-  )
-
-  return Array.from(
-    {
-      length:
-        end - start
-    },
-    (_, index) =>
-      start + index
-  )
+function getVisiblePages(currentPage: number, totalPages: number): number[] {
+  if (totalPages <= 0) return []
+  const count = Math.min(3, totalPages)
+  const start = Math.max(0, Math.min(currentPage - 1, totalPages - count))
+  return Array.from({ length: count }, (_, index) => start + index)
 }
 
 export function PromotionList() {
+  const [savedFilters] = useState(readSavedFilters)
   const navigate =
     useNavigate()
 
@@ -172,42 +158,55 @@ export function PromotionList() {
   const [
     keyword,
     setKeyword
-  ] = useState('')
+  ] = useState(typeof savedFilters.keyword === 'string' ? savedFilters.keyword : '')
 
   const [
     status,
     setStatus
-  ] = useState('')
+  ] = useState(typeof savedFilters.status === 'string' ? savedFilters.status : '')
 
   const [
     discountType,
     setDiscountType
-  ] = useState('')
+  ] = useState(typeof savedFilters.discountType === 'string' ? savedFilters.discountType : '')
 
   const [
     fromDate,
     setFromDate
-  ] = useState('')
+  ] = useState(typeof savedFilters.fromDate === 'string' ? savedFilters.fromDate : '')
 
   const [
     toDate,
     setToDate
-  ] = useState('')
+  ] = useState(typeof savedFilters.toDate === 'string' ? savedFilters.toDate : '')
 
   const [
     page,
     setPage
-  ] = useState(0)
+  ] = useState(typeof savedFilters.page === 'number' && savedFilters.page >= 0 ? savedFilters.page : 0)
 
   const [
     pageSize,
     setPageSize
-  ] = useState(8)
+  ] = useState([10, 20, 50, 100].includes(Number(savedFilters.pageSize)) ? Number(savedFilters.pageSize) : 10)
+
+  useEffect(() => {
+    window.sessionStorage.setItem('promotion-list-filters', JSON.stringify({
+      keyword, status, discountType, fromDate, toDate, page, pageSize
+    }))
+  }, [keyword, status, discountType, fromDate, toDate, page, pageSize])
 
   const [
     loading,
     setLoading
   ] = useState(false)
+
+  const [debouncedKeyword, setDebouncedKeyword] = useState(keyword)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedKeyword(keyword), 400)
+    return () => window.clearTimeout(timer)
+  }, [keyword])
 
   const [
     error,
@@ -273,73 +272,26 @@ export function PromotionList() {
   }, [toast])
 
   useEffect(() => {
-    const timer =
-      window.setTimeout(
-        () => {
-          setLoading(true)
-          setError('')
-
-          getPromotions({
-            page,
-            size: pageSize,
-            keyword,
-            status,
-            discountType,
-            fromDate,
-            toDate
-          })
-            .then(
-              (result) => {
-                setData(result)
-
-                if (
-                  result.totalPages >
-                  0 &&
-                  page >=
-                  result.totalPages
-                ) {
-                  setPage(
-                    result.totalPages -
-                    1
-                  )
-                }
-              }
-            )
-            .catch(
-              (
-                err: unknown
-              ) => {
-                setError(
-                  err instanceof
-                    Error
-                    ? err.message
-                    : 'Không thể tải dữ liệu'
-                )
-              }
-            )
-            .finally(
-              () =>
-                setLoading(
-                  false
-                )
-            )
-        },
-        250
-      )
-
-    return () =>
-      window.clearTimeout(
-        timer
-      )
-  }, [
-    keyword,
-    status,
-    discountType,
-    fromDate,
-    toDate,
-    page,
-    pageSize
-  ])
+    let current = true
+    if (keyword !== debouncedKeyword) return () => { current = false }
+    setLoading(true)
+    setError('')
+    getPromotions({
+      page, size: pageSize, keyword: debouncedKeyword,
+      status, discountType, fromDate, toDate
+    }).then(result => {
+      if (!current) return
+      setData(result)
+      if (result.totalPages > 0 && page >= result.totalPages) {
+        setPage(result.totalPages - 1)
+      }
+    }).catch((err: unknown) => {
+      if (current) setError(err instanceof Error ? err.message : 'Không thể tải dữ liệu')
+    }).finally(() => {
+      if (current) setLoading(false)
+    })
+    return () => { current = false }
+  }, [keyword, debouncedKeyword, status, discountType, fromDate, toDate, page, pageSize])
 
   const visiblePages =
     useMemo(
@@ -371,14 +323,9 @@ export function PromotionList() {
       )
       : 0
 
-  const lastVisiblePage =
-    visiblePages[
-    visiblePages.length -
-    1
-    ] ?? 0
-
   function resetFilters(): void {
     setKeyword('')
+    setDebouncedKeyword('')
     setStatus('')
     setDiscountType('')
     setFromDate('')
@@ -600,6 +547,7 @@ export function PromotionList() {
                 <option value="INACTIVE">
                   Đã tắt
                 </option>
+                <option value="FULL">Hết lượt</option>
               </select>
             </div>
 
@@ -640,7 +588,7 @@ export function PromotionList() {
 
             <div className="promotion-filter-field">
               <label>
-                TỪ NGÀY
+                GIAO VỚI KHOẢNG TỪ
               </label>
 
               <input
@@ -691,12 +639,8 @@ export function PromotionList() {
         </div>
 
         <div className="promotion-table-panel premium-table-panel">
-          {loading && (
-            <div className="promotion-state">
-              Đang tải dữ
-              liệu...
-            </div>
-          )}
+          {loading && <div className="promotion-loading-bar" role="status" aria-label="Đang cập nhật kết quả" />}
+          {loading && !data && <div className="promotion-state">Đang tải dữ liệu...</div>}
 
           {error && (
             <div className="promotion-state error">
@@ -713,16 +657,16 @@ export function PromotionList() {
                 chương trình
                 khuyến mãi phù
                 hợp.
+                <button type="button" className="promotion-btn promotion-btn-secondary promotion-empty-reset"
+                  onClick={resetFilters}>Xóa bộ lọc</button>
               </div>
             )}
 
-          {!loading &&
-            !error &&
-            data &&
+          {data &&
             data.content.length >
             0 && (
               <>
-                <div className="promotion-table-wrapper">
+                <div className={`promotion-table-wrapper${loading ? ' is-updating' : ''}`} aria-busy={loading}>
                   <table className="promotion-table promotion-table-modern">
                     <thead>
                       <tr>
@@ -749,7 +693,7 @@ export function PromotionList() {
                           THÁI
                         </th>
 
-                        <th />
+                        <th>THAO TÁC</th>
                       </tr>
                     </thead>
 
@@ -775,7 +719,7 @@ export function PromotionList() {
                                 item.id
                               }
                             >
-                              <td>
+                              <td data-label="Khuyến mãi">
                                 <div className="promotion-main-cell">
                                   <div className="promotion-image-box promotion-image-box-wide">
                                     {item.imageUrl ? (
@@ -812,35 +756,19 @@ export function PromotionList() {
                                       }
                                     </strong>
 
-                                    <small>
-                                      {item.description ||
-                                        'Chưa có mô tả chương trình.'}
-                                    </small>
+
                                   </div>
                                 </div>
                               </td>
 
-                              <td>
+                              <td data-label="Thời gian">
                                 <div className="promotion-date-cell promotion-date-cell-modern">
-                                  <span>
-                                    {formatDate(
-                                      item.startDate
-                                    )}
-                                  </span>
-
-                                  <i>
-                                    →
-                                  </i>
-
-                                  <span>
-                                    {formatDate(
-                                      item.endDate
-                                    )}
-                                  </span>
+                                  <span><small>Bắt đầu</small>{formatDate(item.startDate)}</span>
+                                  <span><small>Kết thúc</small>{formatDate(item.endDate)}</span>
                                 </div>
                               </td>
 
-                              <td>
+                              <td data-label="Ưu đãi">
                                 <div className="promotion-discount-cell promotion-discount-cell-modern">
                                   <strong className="discount-value">
                                     {formatDiscount(
@@ -860,7 +788,7 @@ export function PromotionList() {
                                 </div>
                               </td>
 
-                              <td>
+                              <td data-label="Sử dụng">
                                 <div className="promotion-usage-cell promotion-usage-cell-modern">
                                   <div className="promotion-usage-copy">
                                     <strong>
@@ -888,7 +816,7 @@ export function PromotionList() {
                                 </div>
                               </td>
 
-                              <td>
+                              <td data-label="Trạng thái">
                                 <span
                                   className={`promotion-status ${String(
                                     item.status ||
@@ -903,10 +831,10 @@ export function PromotionList() {
                                 </span>
                               </td>
 
-                              <td>
+                              <td data-label="Thao tác">
                                 <button
-                                  className="promotion-view-link"
-                                  title="Xem chi tiết"
+                                  className="promotion-view-link promotion-detail-link"
+                                  aria-label={`Xem chi tiết ${item.title}`}
                                   type="button"
                                   onClick={() =>
                                     navigate(
@@ -914,7 +842,7 @@ export function PromotionList() {
                                     )
                                   }
                                 >
-                                  XEM{' '}
+                                  Xem chi tiết{' '}
                                   <span>
                                     →
                                   </span>
@@ -971,8 +899,8 @@ export function PromotionList() {
                         )
                       }}
                     >
-                      <option value="8">
-                        8 / trang
+                      <option value="10">
+                        10 / trang
                       </option>
 
                       <option value="20">
@@ -982,126 +910,27 @@ export function PromotionList() {
                       <option value="50">
                         50 / trang
                       </option>
+                      <option value="100">100 / trang</option>
                     </select>
                   </div>
 
-                  <div className="pagination-buttons">
-                    <button
-                      type="button"
-                      disabled={
-                        data.first
-                      }
-                      onClick={() =>
-                        setPage(
-                          (
-                            current
-                          ) =>
-                            Math.max(
-                              0,
-                              current -
-                              1
-                            )
-                        )
-                      }
-                    >
-                      ‹
-                    </button>
-
-                    {visiblePages[0] >
-                      0 && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setPage(
-                                0
-                              )
-                            }
-                          >
-                            1
-                          </button>
-
-                          {visiblePages[0] >
-                            1 && (
-                              <span className="pagination-ellipsis">
-                                …
-                              </span>
-                            )}
-                        </>
-                      )}
-
-                    {visiblePages.map(
-                      (
-                        pageNumber
-                      ) => (
-                        <button
-                          type="button"
-                          key={
-                            pageNumber
-                          }
-                          className={
-                            pageNumber ===
-                              data.page
-                              ? 'current'
-                              : ''
-                          }
-                          onClick={() =>
-                            setPage(
-                              pageNumber
-                            )
-                          }
-                        >
-                          {pageNumber +
-                            1}
-                        </button>
-                      )
-                    )}
-
-                    {lastVisiblePage <
-                      data.totalPages -
-                      1 && (
-                        <>
-                          {lastVisiblePage <
-                            data.totalPages -
-                            2 && (
-                              <span className="pagination-ellipsis">
-                                …
-                              </span>
-                            )}
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setPage(
-                                data.totalPages -
-                                1
-                              )
-                            }
-                          >
-                            {
-                              data.totalPages
-                            }
-                          </button>
-                        </>
-                      )}
-
-                    <button
-                      type="button"
-                      disabled={
-                        data.last
-                      }
-                      onClick={() =>
-                        setPage(
-                          (
-                            current
-                          ) =>
-                            current +
-                            1
-                        )
-                      }
-                    >
-                      ›
-                    </button>
+                  <div className="pagination-buttons" aria-label="Phân trang">
+                    <button type="button" aria-label="Trang đầu" title="Trang đầu"
+                      disabled={loading || data.first} onClick={() => setPage(0)}>«</button>
+                    <button type="button" aria-label="Trang trước" title="Trang trước"
+                      disabled={loading || data.first} onClick={() => setPage(Math.max(0, data.page - 1))}>‹</button>
+                    {visiblePages.map(pageNumber => (
+                      <button type="button" key={pageNumber}
+                        aria-label={`Trang ${pageNumber + 1}`}
+                        aria-current={pageNumber === data.page ? 'page' : undefined}
+                        className={pageNumber === data.page ? 'current' : ''}
+                        disabled={loading}
+                        onClick={() => setPage(pageNumber)}>{pageNumber + 1}</button>
+                    ))}
+                    <button type="button" aria-label="Trang sau" title="Trang sau"
+                      disabled={loading || data.last} onClick={() => setPage(data.page + 1)}>›</button>
+                    <button type="button" aria-label="Trang cuối" title="Trang cuối"
+                      disabled={loading || data.last} onClick={() => setPage(data.totalPages - 1)}>»</button>
                   </div>
                 </div>
               </>

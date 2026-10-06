@@ -1,6 +1,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState
 } from 'react'
 
@@ -13,10 +14,13 @@ import {
 } from 'react-router-dom'
 
 import {
-  createPromotion
+  createPromotion,
+  updatePromotion,
+  toAssetUrl
 } from '../../service/promotion/promotionService'
 
 import type {
+  Promotion,
   DiscountType,
   PromotionForm,
   PromotionFormErrors
@@ -103,6 +107,27 @@ function formatPreviewDate(
 }
 
 export function PromotionCreate() {
+  return <PromotionEditor />
+}
+
+function initialForm(item?: Promotion): PromotionForm {
+  return {
+    title: item?.title ?? '', code: item?.code ?? '',
+    discountType: item?.discountType ?? 'FIXED',
+    startDate: item?.startDate ?? '', endDate: item?.endDate ?? '',
+    discountValue: item?.discountValue?.toString() ?? '',
+    minOrderAmount: item?.minOrderAmount?.toString() ?? '',
+    maxDiscountAmount: item?.maxDiscountAmount?.toString() ?? '',
+    usageLimit: item?.usageLimit?.toString() ?? '',
+    description: item?.description ?? '', image: null
+  }
+}
+
+export function PromotionEditor({ promotion }: { promotion?: Promotion }) {
+  const editing = Boolean(promotion)
+  const termsLocked = Boolean(promotion?.hasUsage)
+  const submittingRef = useRef(false)
+  const originalForm = useMemo(() => initialForm(promotion), [promotion])
   const navigate =
     useNavigate()
 
@@ -110,20 +135,7 @@ export function PromotionCreate() {
     form,
     setForm
   ] =
-    useState<PromotionForm>({
-      title: '',
-      code: '',
-      discountType:
-        'FIXED',
-      startDate: '',
-      endDate: '',
-      discountValue: '',
-      minOrderAmount: '',
-      maxDiscountAmount: '',
-      usageLimit: '',
-      description: '',
-      image: null
-    })
+    useState<PromotionForm>(() => originalForm)
 
   const [
     errors,
@@ -146,17 +158,17 @@ export function PromotionCreate() {
   const previewUrl =
     useMemo(() => {
       if (!form.image) {
-        return null
+        return toAssetUrl(promotion?.imageUrl) || null
       }
 
       return URL.createObjectURL(
         form.image
       )
-    }, [form.image])
+    }, [form.image, promotion?.imageUrl])
 
   useEffect(() => {
     return () => {
-      if (previewUrl) {
+      if (previewUrl?.startsWith('blob:')) {
         URL.revokeObjectURL(
           previewUrl
         )
@@ -164,21 +176,7 @@ export function PromotionCreate() {
     }
   }, [previewUrl])
 
-  const isDirty =
-    useMemo(() => {
-      return Boolean(
-        form.title ||
-        form.code ||
-        form.startDate ||
-        form.endDate ||
-        form.discountValue ||
-        form.minOrderAmount ||
-        form.maxDiscountAmount ||
-        form.usageLimit ||
-        form.description ||
-        form.image
-      )
-    }, [form])
+  const isDirty = JSON.stringify(form) !== JSON.stringify(originalForm) || form.image !== null
 
   useEffect(() => {
     function handleBeforeUnload(
@@ -232,6 +230,7 @@ export function PromotionCreate() {
   }
 
   function leaveForm(): void {
+    if (submittingRef.current) return
     if (
       isDirty &&
       !submittedSuccessfully
@@ -255,14 +254,15 @@ export function PromotionCreate() {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> {
     event.preventDefault()
+    if (submittingRef.current) return
+    submittingRef.current = true
 
     setSubmitting(true)
     setErrors({})
 
     try {
-      await createPromotion(
-        form
-      )
+      if (promotion) await updatePromotion(promotion.id, form)
+      else await createPromotion(form)
 
       setSubmittedSuccessfully(
         true
@@ -273,7 +273,7 @@ export function PromotionCreate() {
         {
           replace: true,
           state: {
-            toast: `Khuyến mãi "${form.title.trim()}" đã được tạo thành công.`
+            toast: editing ? 'Chỉnh sửa thành công' : `Khuyến mãi "${form.title.trim()}" đã được tạo thành công.`
           }
         }
       )
@@ -288,26 +288,25 @@ export function PromotionCreate() {
             errors?: PromotionFormErrors
           }
 
-        setErrors(
-          requestError.errors ?? {
-            system:
-              requestError.message ||
-              'Không thể thêm khuyến mãi'
-          }
-        )
+        setErrors({
+          ...requestError.errors,
+          system: `${editing ? 'Chỉnh sửa thất bại' : 'Không thể thêm khuyến mãi'}: ${requestError.message}`
+        })
       } else {
         setErrors({
           system:
-            'Không thể thêm khuyến mãi'
+            editing ? 'Chỉnh sửa thất bại' : 'Không thể thêm khuyến mãi'
         })
       }
     } finally {
+      submittingRef.current = false
       setSubmitting(false)
     }
   }
 
   return (
     <section className="promotion-page">
+      {termsLocked && <p role="status" className="promotion-state">Khuyến mãi đã được sử dụng. Chỉ được sửa tiêu đề, mô tả và ảnh. Để thay đổi điều kiện ưu đãi, hãy tạo chương trình mới.</p>}
       <div className="promotion-page-header premium-header create-header">
         <div className="promotion-header-copy">
           <button
@@ -323,20 +322,15 @@ export function PromotionCreate() {
 
           <span className="promotion-eyebrow">
             PREMIERE CINEMAS /
-            CREATE PROMOTION
+            {editing ? 'EDIT PROMOTION' : 'CREATE PROMOTION'}
           </span>
 
           <h1>
-            Thêm khuyến mãi
-            mới
+            {editing ? 'Sửa đợt khuyến mãi' : 'Thêm khuyến mãi mới'}
           </h1>
 
           <p>
-            Thiết lập nội
-            dung, điều kiện
-            áp dụng và hình
-            ảnh cho chương
-            trình ưu đãi mới.
+            {editing ? 'Cập nhật thông tin chương trình. Không chọn ảnh mới để giữ ảnh hiện tại.' : 'Thiết lập nội dung, điều kiện áp dụng và hình ảnh cho chương trình ưu đãi mới.'}
           </p>
         </div>
       </div>
@@ -377,6 +371,8 @@ export function PromotionCreate() {
                 </label>
 
                 <input
+
+                  disabled={submitting}
                   type="text"
                   maxLength={
                     150
@@ -413,6 +409,8 @@ export function PromotionCreate() {
                 </label>
 
                 <input
+
+                  disabled={submitting || termsLocked}
                   type="text"
                   maxLength={50}
                   placeholder="VD: WEEKEND50"
@@ -451,6 +449,7 @@ export function PromotionCreate() {
                 </label>
 
                 <select
+                  disabled={submitting || termsLocked}
                   value={
                     form.discountType
                   }
@@ -504,6 +503,7 @@ export function PromotionCreate() {
                 </label>
 
                 <textarea
+                  disabled={submitting}
                   rows={6}
                   maxLength={
                     2000
@@ -576,6 +576,7 @@ export function PromotionCreate() {
 
                 <div className="money-input">
                   <input
+                    disabled={submitting || termsLocked}
                     type="number"
                     min="0.01"
                     step={
@@ -635,6 +636,7 @@ export function PromotionCreate() {
 
                 <div className="money-input">
                   <input
+                    disabled={submitting || termsLocked}
                     type="number"
                     min="0"
                     step="1"
@@ -676,6 +678,7 @@ export function PromotionCreate() {
 
                     <div className="money-input">
                       <input
+                        disabled={submitting || termsLocked}
                         type="number"
                         min="0"
                         step="1"
@@ -716,6 +719,8 @@ export function PromotionCreate() {
                 </label>
 
                 <input
+
+                  disabled={submitting || termsLocked}
                   type="number"
                   min="1"
                   step="1"
@@ -778,7 +783,10 @@ export function PromotionCreate() {
                 </label>
 
                 <input
+
+                  disabled={submitting || termsLocked}
                   type="datetime-local"
+                  step="1"
                   value={
                     form.startDate
                   }
@@ -810,7 +818,10 @@ export function PromotionCreate() {
                 </label>
 
                 <input
+
+                  disabled={submitting || termsLocked}
                   type="datetime-local"
+                  step="1"
                   value={
                     form.endDate
                   }
@@ -847,11 +858,7 @@ export function PromotionCreate() {
           <div className="promotion-form-actions premium-form-actions">
             <div>
               <small>
-                Các thay đổi
-                chỉ được lưu
-                sau khi bạn
-                nhấn “Thêm
-                khuyến mãi”.
+                {editing ? 'Các thay đổi chỉ được lưu sau khi bạn nhấn Lưu thay đổi.' : 'Các thay đổi chỉ được lưu sau khi bạn nhấn Thêm khuyến mãi.'}
               </small>
             </div>
 
@@ -874,8 +881,8 @@ export function PromotionCreate() {
                 }
               >
                 {submitting
-                  ? 'ĐANG THÊM...'
-                  : '+ THÊM KHUYẾN MÃI'}
+                  ? 'ĐANG LƯU...'
+                  : editing ? 'LƯU THAY ĐỔI' : '+ THÊM KHUYẾN MÃI'}
               </button>
             </div>
           </div>
@@ -931,6 +938,8 @@ export function PromotionCreate() {
                 )}
 
                 <input
+
+                  disabled={submitting}
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   onChange={(

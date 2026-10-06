@@ -1,10 +1,18 @@
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom"
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom"
 
 import AuthPage from "../component/auth/AuthPage"
 import HomePage from "../component/home/HomePage"
 import { getHomePath, useAuth } from "../hooks/useAuth"
 import type { AuthMode } from "../types/auth"
+
 import { adminRoutes } from "./adminRoutes"
+import { customerPromotionRoutes } from "./CustomerPromotionRoutes"
 import { promotionRoutes } from "./PromotionRoutes"
 import { AdminShell, CustomerShell } from "./RouteShells"
 import { showtimeRoutes } from "./showtimeRoutes"
@@ -12,6 +20,7 @@ import { ticketPriceRoutes } from "./ticketPriceRoutes"
 
 function AppRouteContent() {
   const navigate = useNavigate()
+
   const {
     authFieldErrors,
     authLoading,
@@ -27,7 +36,12 @@ function AppRouteContent() {
 
   function renderAuthPage(mode: AuthMode) {
     if (currentUser) {
-      return <Navigate to={getHomePath(currentUser)} replace />
+      return (
+        <Navigate
+          to={getHomePath(currentUser)}
+          replace
+        />
+      )
     }
 
     return (
@@ -38,7 +52,12 @@ function AppRouteContent() {
         isLoading={authLoading}
         onModeChange={(nextMode) => {
           clearAuthFeedback()
-          navigate(nextMode === "login" ? "/login" : "/register")
+
+          navigate(
+            nextMode === "login"
+              ? "/login"
+              : "/register",
+          )
         }}
         onLogin={loginUser}
         onRegister={registerUser}
@@ -60,34 +79,64 @@ function AppRouteContent() {
         }
       />
 
-      <Route path="/login" element={renderAuthPage("login")} />
-      <Route path="/register" element={renderAuthPage("register")} />
+      <Route
+        path="/login"
+        element={renderAuthPage("login")}
+      />
 
-      {[...showtimeRoutes, ...ticketPriceRoutes].map((route) => (
+      <Route
+        path="/register"
+        element={renderAuthPage("register")}
+      />
+
+      {[
+        ...showtimeRoutes,
+        ...ticketPriceRoutes,
+        ...customerPromotionRoutes,
+      ].map((route) => (
         <Route
           key={route.path}
           path={route.path}
           element={
-            <CustomerShell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
+            <CustomerShell
+              currentUser={currentUser}
+              onLogout={logout}
+              onLoginClick={goToLogin}
+            >
               {route.element}
             </CustomerShell>
           }
         />
       ))}
 
-      {[...adminRoutes, ...promotionRoutes].map((route) => (
+      {[
+        ...adminRoutes,
+        ...promotionRoutes,
+      ].map((route) => (
         <Route
           key={route.path}
           path={route.path}
           element={
-            <AdminShell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
+            <AdminShell
+              currentUser={currentUser}
+              onLogout={logout}
+              onLoginClick={goToLogin}
+            >
               {route.element}
             </AdminShell>
           }
         />
       ))}
 
-      <Route path="*" element={<Navigate to={getHomePath(currentUser)} replace />} />
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to={getHomePath(currentUser)}
+            replace
+          />
+        }
+      />
     </Routes>
   )
 }
