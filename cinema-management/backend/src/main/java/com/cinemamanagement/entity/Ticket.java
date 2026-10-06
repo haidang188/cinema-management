@@ -44,4 +44,13 @@ public class Ticket {
 
     @Column(name = "issued_at", nullable = false)
     private LocalDateTime issuedAt;
+
+    @Column(name = "reprint_count", nullable = false)
+    private int reprintCount;
+
+    @Column(name = "last_reprinted_at")
+    private LocalDateTime lastReprintedAt;
+
+    @Column(name = "last_reprinted_by")
+    private Long lastReprintedBy;
 }

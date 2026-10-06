@@ -15,6 +15,7 @@ import { AdminShell, CustomerShell } from "./RouteShells"
 import { showtimeRoutes } from "./showtimeRoutes"
 import { ticketPriceRoutes } from "./ticketPriceRoutes"
 import { counterSaleRoutes } from "./counterSaleRoutes"
+import { bookingManagementRoutes } from "./bookingManagementRoutes"
 
 
 
@@ -120,7 +121,7 @@ function AppRouteContent() {
         />
       ))}
 
-      {counterSaleRoutes.map((route) => (
+      {[...counterSaleRoutes, ...bookingManagementRoutes].map((route) => (
         <Route
           key={route.path}
           path={route.path}
