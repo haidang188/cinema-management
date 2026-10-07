@@ -12,6 +12,18 @@ INSERT INTO genres (id, name) VALUES
 (9, 'Khoa học viễn tưởng'),
 (10, 'Giật gân'),
 (11, 'Gia đình'),
+
+
+
+
+
+
+
+
+
+
+
+
 (12, 'Bí ẩn');
 
 INSERT INTO movies (

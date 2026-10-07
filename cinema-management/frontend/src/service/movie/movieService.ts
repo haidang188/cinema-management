@@ -11,18 +11,15 @@ interface MovieSearchParams {
   status?: string
 }
 
-function buildMovieFormData(payload: MoviePayload, posterFile: File | null): FormData {
-  const formData = new FormData()
-  const { posterUrl: _posterUrl, ...moviePayload } = payload
-
-  formData.append("movie", new Blob([JSON.stringify(moviePayload)], { type: "application/json" }))
-  if (posterFile) {
-    formData.append("poster", posterFile)
-  }
-
-  return formData
+interface HomeMovieSearchParams {
+  status?: string
+  genreId?: string
+  date?: string
 }
 
+export function getPublicMovie(id: string): Promise<Movie> {
+  return request<Movie>(`/api/movies/${id}`)
+}
 export async function getNowShowingMovies(): Promise<Movie[]> {
   const response = await fetch(`${MOVIE_API_BASE_URL}/now-showing`)
 
@@ -31,6 +28,23 @@ export async function getNowShowingMovies(): Promise<Movie[]> {
   }
 
   return response.json()
+}
+
+export function getHomeMovies({ status = "SHOWING", genreId = "", date = "" }: HomeMovieSearchParams = {}): Promise<Movie[]> {
+  const params = new URLSearchParams()
+
+  if (status) {
+    params.set("status", status)
+  }
+  if (genreId) {
+    params.set("genreId", genreId)
+  }
+  if (date) {
+    params.set("date", date)
+  }
+
+  const query = params.toString()
+  return request<Movie[]>(`/api/movies${query ? `?${query}` : ""}`)
 }
 
 export function getMovies({
@@ -58,17 +72,23 @@ export function getMovie(id: string): Promise<AdminMovie> {
   return request<AdminMovie>(`/api/movies/admin/${id}`)
 }
 
-export function createMovie(payload: MoviePayload, posterFile: File | null): Promise<AdminMovie> {
+export function createMovie(payload: MoviePayload): Promise<AdminMovie> {
   return request<AdminMovie>("/api/movies/admin", {
     method: "POST",
-    body: buildMovieFormData(payload, posterFile),
+    body: JSON.stringify(payload),
   })
 }
 
-export function updateMovie(id: string, payload: MoviePayload, posterFile: File | null): Promise<AdminMovie> {
+export function updateMovie(id: string, payload: MoviePayload): Promise<AdminMovie> {
   return request<AdminMovie>(`/api/movies/admin/${id}`, {
     method: "PUT",
-    body: buildMovieFormData(payload, posterFile),
+    body: JSON.stringify(payload),
+  })
+}
+
+export function deleteMovie(id: string): Promise<void> {
+  return request<void>(`/api/movies/admin/${id}`, {
+    method: "DELETE",
   })
 }
 

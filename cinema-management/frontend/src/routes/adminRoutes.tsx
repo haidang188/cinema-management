@@ -1,7 +1,10 @@
 import { useNavigate, useParams } from "react-router-dom"
 
+import CinemaRoomCreate from "../pages/admin/rooms/CinemaRoomCreate"
 import CinemaRoomDetail from "../pages/admin/rooms/CinemaRoomDetail"
+import CinemaRoomEdit from "../pages/admin/rooms/CinemaRoomEdit"
 import CinemaRoomList from "../pages/admin/rooms/CinemaRoomList"
+import MemberList from "../pages/admin/members/MemberList"
 import MovieCreate from "../pages/admin/movies/MovieCreate"
 import MovieEdit from "../pages/admin/movies/MovieEdit"
 import MovieList from "../pages/admin/movies/MovieList"
@@ -29,9 +32,22 @@ function CinemaRoomListRoute() {
   return <CinemaRoomList onNavigate={useAppNavigate()} />
 }
 
+function CinemaRoomCreateRoute() {
+  return <CinemaRoomCreate onNavigate={useAppNavigate()} />
+}
+
+function CinemaRoomEditRoute() {
+  const { roomId = "" } = useParams()
+  return <CinemaRoomEdit roomId={roomId} onNavigate={useAppNavigate()} />
+}
+
 function CinemaRoomDetailRoute() {
   const { roomId = "" } = useParams()
   return <CinemaRoomDetail roomId={roomId} onNavigate={useAppNavigate()} />
+}
+
+function MemberListRoute() {
+  return <MemberList />
 }
 
 export const adminRoutes = [
@@ -56,7 +72,19 @@ export const adminRoutes = [
     element: <CinemaRoomListRoute />,
   },
   {
+    path: "/admin/cinema-rooms/create",
+    element: <CinemaRoomCreateRoute />,
+  },
+  {
+    path: "/admin/cinema-rooms/:roomId/edit",
+    element: <CinemaRoomEditRoute />,
+  },
+  {
     path: "/admin/cinema-rooms/:roomId",
     element: <CinemaRoomDetailRoute />,
+  },
+  {
+    path: "/admin/members",
+    element: <MemberListRoute />,
   },
 ]

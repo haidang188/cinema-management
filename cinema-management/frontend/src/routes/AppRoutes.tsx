@@ -1,14 +1,13 @@
-import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes,
-  useNavigate,
-} from "react-router-dom"
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom"
+import type { ReactNode } from "react"
 
 import AuthPage from "../component/auth/AuthPage"
 import HomePage from "../component/home/HomePage"
 import { getHomePath, useAuth } from "../hooks/useAuth"
+import MovieDetailPage from "../pages/movies/MovieDetailPage"
+import BookingSeatsPage from "../pages/booking/BookingSeatsPage"
+import BookingConfirmPage from "../pages/booking/BookingConfirmPage"
+import BookingResultPage from "../pages/booking/BookingResultPage"
 import type { AuthMode } from "../types/auth"
 
 import { adminRoutes } from "./adminRoutes"
@@ -17,6 +16,10 @@ import { promotionRoutes } from "./PromotionRoutes"
 import { AdminShell, CustomerShell } from "./RouteShells"
 import { showtimeRoutes } from "./showtimeRoutes"
 import { ticketPriceRoutes } from "./ticketPriceRoutes"
+import { counterSaleRoutes } from "./counterSaleRoutes"
+import { bookingManagementRoutes } from "./bookingManagementRoutes"
+
+
 
 function AppRouteContent() {
   const navigate = useNavigate()
@@ -62,6 +65,17 @@ function AppRouteContent() {
         onLogin={loginUser}
         onRegister={registerUser}
       />
+    )
+  }
+
+  function renderMemberPage(page: ReactNode) {
+    if (!currentUser) return <Navigate to="/login" replace />
+    if (currentUser.role !== "MEMBER") return <Navigate to={getHomePath(currentUser)} replace />
+
+    return (
+      <CustomerShell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
+        {page}
+      </CustomerShell>
     )
   }
 
@@ -125,6 +139,14 @@ function AppRouteContent() {
               {route.element}
             </AdminShell>
           }
+        />
+      ))}
+
+      {[...counterSaleRoutes, ...bookingManagementRoutes].map((route) => (
+        <Route
+          key={route.path}
+          path={route.path}
+          element={route.element}
         />
       ))}
 

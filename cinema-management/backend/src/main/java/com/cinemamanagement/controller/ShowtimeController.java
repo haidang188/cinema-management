@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +21,11 @@ import java.util.List;
 public class ShowtimeController {
     private final ShowtimeService showtimeService;
 
+    @GetMapping("/{showtimeId}")
+    public ShowtimeResponse getShowtimeById(@PathVariable Long showtimeId) {
+        return showtimeService.getShowtimeById(showtimeId);
+    }
+
     @GetMapping
     public List<ShowtimeResponse> getShowtimes(
             @RequestParam
@@ -28,5 +34,15 @@ public class ShowtimeController {
     ) {
         return showtimeService.getShowtimeByDate(date);
 
+    }
+
+    @GetMapping("/movie/{movieId}")
+    public List<ShowtimeResponse> getShowtimesByMovie(
+            @PathVariable Long movieId,
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate date
+    ) {
+        return showtimeService.getShowtimesByMovieAndDate(movieId, date);
     }
 }

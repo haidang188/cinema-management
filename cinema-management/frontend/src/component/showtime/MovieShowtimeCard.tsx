@@ -1,4 +1,5 @@
 import type {ShowtimeData} from "../../types/showtime/showtime";
+import { useNavigate } from "react-router-dom";
 
 interface MovieGroup {
     movieId: number;
@@ -21,6 +22,7 @@ interface MovieShowtimeCardProps {
 function MovieShowtimeCard({
                                movie
                            }: MovieShowtimeCardProps) {
+    const navigate = useNavigate();
 
     const groupByFormat = (
         movieShowtimes: ShowtimeData[]
@@ -164,6 +166,7 @@ function MovieShowtimeCard({
                                             <button
                                                 key={showtime.id}
                                                 className="showtime-time"
+                                                onClick={() => navigate(`/booking/showtimes/${showtime.id}/seats`)}
                                             >
                                                 {formatTime(
                                                     showtime.startTime

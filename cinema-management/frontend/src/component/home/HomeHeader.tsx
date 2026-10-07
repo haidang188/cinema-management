@@ -1,4 +1,8 @@
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
+
+import BookingModal from '../BookingModal'
+import '../../pages/booking/booking.css'
 import type { AuthResponse } from '../../types/auth'
 
 interface HomeHeaderProps {
@@ -19,6 +23,8 @@ function HomeHeader({
   const displayName =
     currentUser?.fullName || currentUser?.email
 
+  const [panel, setPanel] = useState<string | null>(null)
+
   return (
     <header className="home-header">
       <div className="home-logo">
@@ -30,9 +36,19 @@ function HomeHeader({
         aria-label="Điều hướng chính"
       >
         <Link to="/">Phim</Link>
+
         <Link to="/showtimes">Lịch chiếu</Link>
-        <Link to="/ticket-prices">Giá vé</Link>
+
         <Link to="/promotions">Khuyến mãi</Link>
+
+        <button
+          type="button"
+          onClick={() => setPanel('Lịch sử đặt vé')}
+        >
+          Lịch sử đặt vé
+        </button>
+
+        <Link to="/ticket-prices">Giá vé</Link>
 
         {currentUser?.role === 'ADMIN' && (
           <Link to="/admin/promotions">
@@ -81,6 +97,17 @@ function HomeHeader({
           </button>
         )}
       </div>
+
+      {panel && (
+        <BookingModal
+          title={panel}
+          onClose={() => setPanel(null)}
+        >
+          <p>
+            Lịch sử đặt vé đang được hoàn thiện.
+          </p>
+        </BookingModal>
+      )}
     </header>
   )
 }

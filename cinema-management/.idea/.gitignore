@@ -3,11 +3,8 @@
 /workspace.xml
 # Editor-based HTTP Client requests
 /httpRequests/
-<<<<<<< HEAD
-=======
 # Ignored default folder with query files
 /queries/
->>>>>>> 0594784ec9746a7697c56977aa7ff6335768b4d3
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml

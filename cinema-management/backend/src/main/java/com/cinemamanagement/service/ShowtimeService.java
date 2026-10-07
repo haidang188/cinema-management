@@ -7,4 +7,8 @@ import java.util.List;
 
 public interface ShowtimeService {
     List<ShowtimeResponse> getShowtimeByDate(LocalDate date);
+
+    List<ShowtimeResponse> getShowtimesByMovieAndDate(Long movieId, LocalDate date);
+
+    ShowtimeResponse getShowtimeById(Long showtimeId);
 }

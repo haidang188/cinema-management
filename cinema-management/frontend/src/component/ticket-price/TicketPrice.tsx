@@ -113,7 +113,7 @@ function TicketPrice() {
             <div className="ticket-price-header">
 
                 <h1>
-                    GIÁ VÉ
+                    GIÁ VÉ THAM KHẢO
                 </h1>
 
                 <p>
