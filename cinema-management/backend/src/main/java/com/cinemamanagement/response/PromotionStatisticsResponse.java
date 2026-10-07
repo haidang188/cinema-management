@@ -6,7 +6,6 @@ public record PromotionStatisticsResponse(
         long upcoming,
         long expired,
         long inactive,
-        long expiringSoon,
-        long full
+        long expiringSoon
 ) {
 }

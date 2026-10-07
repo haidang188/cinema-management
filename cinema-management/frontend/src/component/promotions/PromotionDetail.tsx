@@ -1,7 +1,5 @@
-import './promotion.css'
 import {
   useEffect,
-  useRef,
   useState
 } from 'react'
 
@@ -12,8 +10,6 @@ import {
 
 import {
   getPromotionById,
-  deletePromotion,
-  setPromotionEnabled,
   toAssetUrl
 } from '../../service/promotion/promotionService'
 
@@ -45,7 +41,7 @@ function formatDate(
     {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric', hour: '2-digit', minute: '2-digit'
+      year: 'numeric'
     }
   ).format(date)
 }
@@ -100,8 +96,7 @@ function getStatusLabel(
     ACTIVE: 'ĐANG ÁP DỤNG',
     UPCOMING: 'SẮP DIỄN RA',
     EXPIRED: 'ĐÃ HẾT HẠN',
-    INACTIVE: 'ĐÃ TẮT',
-    FULL: 'HẾT LƯỢT'
+    INACTIVE: 'ĐÃ TẮT'
   }
 
   if (!status) {
@@ -114,10 +109,7 @@ function getStatusLabel(
   )
 }
 
-export function PromotionDetail({ deleteMode = false }: { deleteMode?: boolean }) {
-  const [deleting, setDeleting] = useState(false)
-  const deletingRef = useRef(false)
-  const [deleteError, setDeleteError] = useState('')
+export function PromotionDetail() {
   const navigate =
     useNavigate()
 
@@ -145,8 +137,6 @@ export function PromotionDetail({ deleteMode = false }: { deleteMode?: boolean }
   ] = useState('')
 
   useEffect(() => {
-    let current = true
-    setDeleteError('')
     if (!id) {
       setError(
         'ID khuyến mãi không hợp lệ'
@@ -159,12 +149,13 @@ export function PromotionDetail({ deleteMode = false }: { deleteMode?: boolean }
     setError('')
 
     getPromotionById(id)
-      .then(result => { if (current) setPromotion(result) })
+      .then(
+        setPromotion
+      )
       .catch(
         (
           err: unknown
         ) => {
-          if (!current) return
           setError(
             err instanceof
               Error
@@ -173,42 +164,10 @@ export function PromotionDetail({ deleteMode = false }: { deleteMode?: boolean }
           )
         }
       )
-      .finally(() => { if (current) setLoading(false) })
-    return () => { current = false }
+      .finally(() =>
+        setLoading(false)
+      )
   }, [id])
-
-  async function handleDelete() {
-    if (!id || deletingRef.current) return
-    deletingRef.current = true
-    setDeleting(true)
-    setDeleteError('')
-    try {
-      await deletePromotion(id)
-      navigate('/admin/promotions', { replace: true, state: { toast: 'Xóa đợt khuyến mãi thành công' } })
-    } catch (err: unknown) {
-      setDeleteError(err instanceof Error ? err.message : 'Không thể xóa khuyến mãi')
-    } finally {
-      deletingRef.current = false
-      setDeleting(false)
-    }
-  }
-
-  async function handleToggle() {
-    if (!id || deletingRef.current) return
-    deletingRef.current = true
-    setDeleting(true)
-    setDeleteError('')
-    try {
-      const updated = await setPromotionEnabled(id, promotion?.status === 'INACTIVE')
-      setPromotion(updated)
-      navigate('/admin/promotions', { replace: true, state: { toast: updated.status === 'INACTIVE' ? 'Đã tắt khuyến mãi' : 'Đã bật khuyến mãi' } })
-    } catch (err: unknown) {
-      setDeleteError(err instanceof Error ? err.message : 'Không thể cập nhật trạng thái')
-    } finally {
-      deletingRef.current = false
-      setDeleting(false)
-    }
-  }
 
   if (loading) {
     return (
@@ -257,13 +216,8 @@ export function PromotionDetail({ deleteMode = false }: { deleteMode?: boolean }
   return (
     <section className="promotion-page promotion-detail-simple-page">
       <div className="promotion-detail-simple-card">
-        {deleteMode && <div className="promotion-delete-heading">
-          <h1>{promotion.hasUsage ? 'Ngừng áp dụng khuyến mãi' : 'Xóa đợt khuyến mãi'}</h1>
-          <p>{promotion.hasUsage ? 'Chương trình đã được sử dụng nên không thể xóa. Bạn có thể tắt để ngừng áp dụng.' : 'Kiểm tra thông tin bên dưới trước khi xác nhận xóa. Thao tác này không thể hoàn tác.'}</p>
-        </div>}
         <button
           className="promotion-back-link promotion-detail-simple-back"
-          disabled={deleting}
           type="button"
           onClick={() =>
             navigate(
@@ -393,42 +347,6 @@ export function PromotionDetail({ deleteMode = false }: { deleteMode?: boolean }
               </p>
             </div>
           </div>
-        </div>
-        <div className="promotion-form-actions">
-          {deleteMode ? <div>
-            {deleteError && <p role="alert" className="promotion-form-error">{deleteError}</p>}
-            {promotion.hasUsage && <p>Đã có giao dịch sử dụng chương trình này.{promotion.status === 'INACTIVE' ? ' Chương trình đã tắt.' : ''}</p>}
-            <div className="promotion-action-group">
-              <button type="button" className="promotion-btn promotion-btn-secondary" disabled={deleting}
-                onClick={() => navigate('/admin/promotions')}>QUAY LẠI</button>
-              <button type="button" className="promotion-btn promotion-btn-danger" disabled={deleting || (promotion.hasUsage && promotion.status === 'INACTIVE')}
-                onClick={promotion.hasUsage ? handleToggle : handleDelete}>{deleting ? 'ĐANG XỬ LÝ...' : promotion.hasUsage ? 'TẮT KHUYẾN MÃI' : 'XÁC NHẬN XÓA'}</button>
-            </div>
-          </div> : <div className="promotion-detail-actions">
-            <div className="promotion-action-group">
-              <button type="button" className="promotion-btn promotion-btn-primary"
-                onClick={() => navigate(`/admin/promotions/${id}/edit`)}>Chỉnh sửa</button>
-              {promotion.hasUsage && promotion.status === 'INACTIVE' ? (
-                <button type="button" className="promotion-btn promotion-btn-secondary" disabled={deleting}
-                  onClick={handleToggle}>{deleting ? 'Đang xử lý...' : 'Bật lại'}</button>
-              ) : (
-                <button type="button"
-                  className={`promotion-btn ${promotion.hasUsage ? 'promotion-btn-secondary' : 'promotion-btn-danger'}`}
-                  onClick={() => navigate(`/admin/promotions/${id}/delete`)}>
-                  {promotion.hasUsage ? 'Ngừng áp dụng' : 'Xóa khuyến mãi'}
-                </button>
-              )}
-            </div>
-            {promotion.hasUsage && (
-              <p className="promotion-action-note">
-                Khuyến mãi đã được sử dụng nên không thể xóa.
-                {promotion.status === 'INACTIVE'
-                  ? ' Chương trình hiện đã ngừng áp dụng; bật lại chỉ có hiệu lực nếu còn thời hạn và lượt dùng.'
-                  : ' Ngừng áp dụng sẽ không ảnh hưởng đến các giao dịch trước đó.'}
-              </p>
-            )}
-            {deleteError && <p role="alert" className="promotion-form-error">{deleteError}</p>}
-          </div>}
         </div>
       </div>
     </section>
