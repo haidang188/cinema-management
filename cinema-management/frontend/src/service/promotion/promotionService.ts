@@ -12,6 +12,7 @@ export type PromotionStatus =
   | 'UPCOMING'
   | 'EXPIRED'
   | 'INACTIVE'
+  | 'FULL'
 
 export interface Promotion {
   id: number
@@ -41,6 +42,7 @@ export interface Promotion {
   imageUrl: string | null
 
   status: PromotionStatus
+  hasUsage: boolean
 }
 
 export interface PromotionStatistics {
@@ -51,6 +53,7 @@ export interface PromotionStatistics {
   upcoming: number
 
   expiringSoon: number
+  full: number
 }
 
 export interface PromotionListResponse {
@@ -138,7 +141,7 @@ export function toAssetUrl(
       ? path
       : `/${path}`
 
-  return `${API_URL}${normalizedPath}`
+  return `${API_URL.replace(/\/api$/, '')}${normalizedPath}`
 }
 
 /**
@@ -150,7 +153,7 @@ export function toAssetUrl(
  */
 export async function getPromotions({
   page = 0,
-  size = 8,
+  size = 10,
   keyword = '',
   status = '',
   discountType = '',
@@ -238,9 +241,7 @@ export async function getPromotionById(
  *
  * Dùng FormData vì có upload ảnh.
  */
-export async function createPromotion(
-  payload: PromotionForm
-): Promise<Promotion> {
+function toFormData(payload: PromotionForm): FormData {
   const formData =
     new FormData()
 
@@ -296,7 +297,7 @@ export async function createPromotion(
   }
 
   if (
-    payload.maxDiscountAmount !== ''
+    payload.discountType === 'PERCENTAGE' && payload.maxDiscountAmount !== ''
   ) {
     formData.append(
       'maxDiscountAmount',
@@ -313,11 +314,21 @@ export async function createPromotion(
     )
   }
 
-  return apiRequest<Promotion>(
-    '/admin/promotions',
-    {
-      method: 'POST',
-      body: formData
-    }
-  )
+  return formData
+}
+
+export function createPromotion(payload: PromotionForm): Promise<Promotion> {
+  return apiRequest<Promotion>('/admin/promotions', { method: 'POST', body: toFormData(payload) })
+}
+
+export function updatePromotion(id: string | number, payload: PromotionForm): Promise<Promotion> {
+  return apiRequest<Promotion>(`/admin/promotions/${id}`, { method: 'PUT', body: toFormData(payload) })
+}
+
+export async function deletePromotion(id: string | number): Promise<void> {
+  await apiRequest<void>(`/admin/promotions/${id}`, { method: 'DELETE' })
+}
+
+export function setPromotionEnabled(id: string | number, enabled: boolean): Promise<Promotion> {
+  return apiRequest<Promotion>(`/admin/promotions/${id}/enabled?enabled=${enabled}`, { method: 'PATCH' })
 }

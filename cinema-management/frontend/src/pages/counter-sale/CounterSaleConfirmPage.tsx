@@ -1,42 +1,16 @@
-import CounterSaleConfirm from "../../component/counter-sale/CounterSaleConfirm";
-import Layout from "../../common/layout/Layout";
-import Sidebar from "../../common/layout/Sidebar";
-import Header from "../../common/layout/Header";
-import Footer from "../../common/layout/Footer";
-import { employeeMenu } from "../../common/layout/menu";
-import { useAuth } from "../../hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom"
+import CounterSaleConfirm from "../../component/counter-sale/CounterSaleConfirm"
+import StaffShell from "../../common/layout/StaffShell"
+import { useAuth } from "../../hooks/useAuth"
 
-function CounterSaleConfirmPage() {
-    const { currentUser, logout } = useAuth();
+export default function CounterSaleConfirmPage() {
+    const { currentUser, logout } = useAuth()
 
-    if (!currentUser) {
-        return <Navigate to="/login" replace />;
-    }
-
-    const displayName = currentUser.fullName || currentUser.email;
+    if (!currentUser) return <Navigate to="/login" replace />
 
     return (
-        <Layout
-            sidebar={
-                <Sidebar
-                    brand="PREMIERE STAFF"
-                    items={employeeMenu}
-                    onLogout={logout}
-                />
-            }
-            header={
-                <Header
-                    rightContent={
-                        <span>Xin chào, {displayName}</span>
-                    }
-                />
-            }
-            footer={<Footer />}
-        >
+        <StaffShell currentUser={currentUser} onLogout={logout}>
             <CounterSaleConfirm />
-        </Layout>
-    );
+        </StaffShell>
+    )
 }
-
-export default CounterSaleConfirmPage;
