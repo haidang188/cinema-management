@@ -32,10 +32,10 @@ function getNextSevenDays() {
         index === 0
           ? 'Hôm nay'
           : date.toLocaleDateString('vi-VN', {
-              weekday: 'short',
-              day: '2-digit',
-              month: '2-digit',
-            }),
+            weekday: 'short',
+            day: '2-digit',
+            month: '2-digit',
+          }),
     }
   })
 }
@@ -47,7 +47,12 @@ interface HomePageProps {
   onRegisterClick: () => void
 }
 
-function HomePage({ currentUser, onLogout, onLoginClick, onRegisterClick }: HomePageProps) {
+function HomePage({
+  currentUser,
+  onLogout,
+  onLoginClick,
+  onRegisterClick,
+}: HomePageProps) {
   const [movies, setMovies] = useState<Movie[]>([])
   const [searchKeyword, setSearchKeyword] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -60,18 +65,20 @@ function HomePage({ currentUser, onLogout, onLoginClick, onRegisterClick }: Home
   const normalizedKeyword = searchKeyword.trim().toLowerCase()
   const filteredMovies = normalizedKeyword
     ? movies.filter((movie) =>
-        [
-          movie.title,
-          movie.description,
-          movie.director,
-          movie.cast,
-          movie.language,
-          movie.ageRating,
-          movie.status,
-        ]
-          .filter(Boolean)
-          .some((value) => String(value).toLowerCase().includes(normalizedKeyword)),
-      )
+      [
+        movie.title,
+        movie.description,
+        movie.director,
+        movie.cast,
+        movie.language,
+        movie.ageRating,
+        movie.status,
+      ]
+        .filter(Boolean)
+        .some((value) =>
+          String(value).toLowerCase().includes(normalizedKeyword),
+        ),
+    )
     : movies
 
   useEffect(() => {
@@ -82,7 +89,11 @@ function HomePage({ currentUser, onLogout, onLoginClick, onRegisterClick }: Home
         setErrorMessage('')
       })
       .catch((error) => {
-        setErrorMessage(error instanceof Error ? error.message : 'Không thể tải danh sách phim')
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : 'Không thể tải danh sách phim',
+        )
       })
       .finally(() => setIsLoading(false))
   }, [appliedFilters])
@@ -91,7 +102,10 @@ function HomePage({ currentUser, onLogout, onLoginClick, onRegisterClick }: Home
     getGenres().then(setGenres).catch(() => setGenres([]))
   }, [])
 
-  function updateDraftFilter(name: keyof typeof DEFAULT_FILTERS, value: string) {
+  function updateDraftFilter(
+    name: keyof typeof DEFAULT_FILTERS,
+    value: string,
+  ) {
     setDraftFilters((currentFilters) => ({
       ...currentFilters,
       [name]: value,
@@ -108,12 +122,33 @@ function HomePage({ currentUser, onLogout, onLoginClick, onRegisterClick }: Home
         currentUser={currentUser}
         onLoginClick={onLoginClick}
         onLogout={onLogout}
-        searchValue={searchKeyword}
-        onSearchChange={setSearchKeyword}
       />
+
       <div className="home-content">
-        <p className="breadcrumb">Trang chủ - Premiere Cinemas</p>
-        <HomeHero movies={movies} isLoading={isLoading} onBookingClick={onRegisterClick} />
+        <div className="pc-home-toolbar">
+          <p className="breadcrumb">
+            Trang chủ - Premiere Cinemas
+          </p>
+
+          <label className="pc-movie-search">
+            <span>Tìm kiếm phim</span>
+            <input
+              type="search"
+              placeholder="Nhập tên phim, diễn viên..."
+              value={searchKeyword}
+              onChange={(event) =>
+                setSearchKeyword(event.target.value)
+              }
+            />
+          </label>
+        </div>
+
+        <HomeHero
+          movies={movies}
+          isLoading={isLoading}
+          onBookingClick={onRegisterClick}
+        />
+
         <MovieSection
           movies={filteredMovies}
           isLoading={isLoading}
@@ -126,6 +161,7 @@ function HomePage({ currentUser, onLogout, onLoginClick, onRegisterClick }: Home
           onApplyFilters={applyMovieFilters}
         />
       </div>
+
       <HomeFooter />
     </main>
   )

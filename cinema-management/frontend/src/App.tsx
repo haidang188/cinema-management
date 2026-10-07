@@ -9,6 +9,7 @@ import "./styles/member-management.css";
 import "./styles/modal.css";
 import "./theme/theme.css";
 import "./styles/unified-ui.css";
+import "./styles/shell.css";
 
 function App() {
     return (

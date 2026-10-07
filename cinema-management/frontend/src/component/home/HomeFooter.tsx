@@ -1,17 +1,15 @@
-function HomeFooter() {
+import Footer from "../../common/layout/Footer"
+
+const customerLinks = [
+  { label: "Điều khoản sử dụng", href: "#terms" },
+  { label: "Chính sách bảo mật", href: "#privacy" },
+  { label: "Liên hệ quảng cáo", href: "#contact" },
+]
+
+export default function HomeFooter() {
   return (
-    <footer className="home-footer">
-      <div className="home-logo home-logo--footer">
-        PREMIERE <span>CINEMAS</span>
-      </div>
-      <p>© 2026 Premiere Cinemas. All rights reserved.</p>
-      <nav aria-label="Liên kết cuối trang">
-        <a href="#terms">Điều khoản sử dụng</a>
-        <a href="#privacy">Chính sách bảo mật</a>
-        <a href="#contact">Liên hệ quảng cáo</a>
-      </nav>
-    </footer>
+    <div className="home-footer shell-customer-footer">
+      <Footer links={customerLinks} />
+    </div>
   )
 }
-
-export default HomeFooter
