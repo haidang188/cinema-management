@@ -40,17 +40,28 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
     private final SeatHoldRepository seatHoldRepository;
     private final ShowtimeSeatRepository showtimeSeatRepository;
     private final MemberRepository memberRepository;
+    private final PromotionRepository promotionRepository;
     private final TicketPricingService ticketPricingService;
     private final VnPayService vnPayService;
     private final VietQrProperties vietQrProperties;
     private final VnPayProperties vnPayProperties;
     private final SeatStatusPublisher seatStatusPublisher;
+    private final com.cinemamanagement.service.LoyaltyPointService loyaltyPointService;
+    private final com.cinemamanagement.service.PromotionApplyService promotionApplyService;
 
     @Override
     @Transactional(readOnly = true)
     public BookingPreviewResponse preview(BookingPreviewRequest request) {
         List<SeatHold> holds = getActiveOwnedHolds(request.holdToken(), request.userId());
-        return buildPreview(holds);
+        return buildPreview(holds, request.promotionCode());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PromotionQuote> getApplicablePromotions(Long userId, String holdToken) {
+        List<SeatHold> holds = getActiveOwnedHolds(holdToken, userId);
+        BookingPreviewResponse preview = buildPreview(holds, null);
+        return promotionApplyService.listApplicable(preview.subtotal());
     }
 
     @Override
@@ -73,12 +84,30 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
 
         Member member = memberRepository.findByUserId(request.userId())
                 .orElseThrow(() -> new BadRequestException("Tài khoản chưa có hồ sơ thành viên"));
+        if (!"ACTIVE".equals(member.getStatus())) {
+            throw new ConflictException("Tài khoản không ở trạng thái hoạt động");
+        }
         Showtime showtime = firstHold.getShowtimeSeat().getShowtime();
 
         List<BigDecimal> prices = lockedSeats.stream()
                 .map(seat -> ticketPricingService.getPrice(showtime, seat))
                 .toList();
         BigDecimal subtotal = prices.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+        Promotion promotion = null;
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        BigDecimal finalAmount = subtotal;
+        if (request.promotionCode() != null && !request.promotionCode().isBlank()) {
+            PromotionQuote quoted = promotionApplyService.quote(request.promotionCode(), subtotal);
+            if (!quoted.valid()) throw new BadRequestException(quoted.message());
+            try {
+                PromotionQuote redeemed = promotionApplyService.redeem(request.promotionCode(), subtotal);
+                promotion = promotionRepository.getReferenceById(redeemed.promotionId());
+                discountAmount = redeemed.discountAmount();
+                finalAmount = redeemed.finalAmount();
+            } catch (IllegalStateException exception) {
+                throw new BadRequestException(exception.getMessage());
+            }
+        }
 
         LocalDateTime now = LocalDateTime.now();
         Booking booking = new Booking();
@@ -86,9 +115,9 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
         booking.setHoldToken(request.holdToken());
         booking.setMember(member);
         booking.setShowtime(showtime);
-        booking.setPromotion(null);
-        booking.setTotalAmount(subtotal);
-        booking.setDiscountAmount(BigDecimal.ZERO);
+        booking.setPromotion(promotion);
+        booking.setTotalAmount(finalAmount);
+        booking.setDiscountAmount(discountAmount);
         booking.setBookingType(BookingType.ONLINE.name());
         booking.setStatus(BookingStatus.PENDING_PAYMENT.name());
         booking.setPaymentDeadline(firstHold.getExpiresAt());
@@ -111,7 +140,7 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
         Payment payment = new Payment();
         payment.setBooking(booking);
         payment.setPaymentMethod(method.name());
-        payment.setAmount(subtotal);
+        payment.setAmount(finalAmount);
         payment.setStatus(PaymentStatus.PENDING.name());
         paymentRepository.save(payment);
 
@@ -207,7 +236,7 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
         }
     }
 
-    private BookingPreviewResponse buildPreview(List<SeatHold> holds) {
+    private BookingPreviewResponse buildPreview(List<SeatHold> holds, String promotionCode) {
         SeatHold first = holds.getFirst();
         Showtime showtime = first.getShowtimeSeat().getShowtime();
         List<BookingSeatPriceResponse> seats = holds.stream()
@@ -224,6 +253,11 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
         BigDecimal subtotal = seats.stream()
                 .map(BookingSeatPriceResponse::price)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+        PromotionQuote quote = promotionCode == null || promotionCode.isBlank()
+                ? null : promotionApplyService.quote(promotionCode, subtotal);
+        BigDecimal discount = quote != null && quote.valid() ? quote.discountAmount() : BigDecimal.ZERO;
+        BigDecimal total = subtotal.subtract(discount);
+        String promotionMessage = quote == null ? "Chưa áp dụng mã khuyến mãi" : quote.message();
 
         return new BookingPreviewResponse(
                 first.getHoldToken(),
@@ -236,9 +270,9 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
                 first.getExpiresAt(),
                 seats,
                 subtotal,
-                BigDecimal.ZERO,
-                subtotal,
-                "Hiện chưa có mã khuyến mãi"
+                discount,
+                total,
+                promotionMessage
         );
     }
 
@@ -319,6 +353,7 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
         bookingSeatRepository.saveAll(bookingSeats);
         bookingRepository.save(booking);
         paymentRepository.save(payment);
+        loyaltyPointService.awardForPaidBooking(booking);
         seatStatusPublisher.publishSold(booking.getShowtime().getId(), ids);
     }
 
@@ -331,6 +366,9 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
         booking.setUpdatedAt(LocalDateTime.now());
         Payment payment = getPayment(booking);
         payment.setStatus(PaymentStatus.EXPIRED.name());
+        if (booking.getPromotion() != null) {
+            promotionRepository.decrementUsedCount(booking.getPromotion().getId());
+        }
         bookingSeatRepository.findByBookingId(booking.getId())
                 .forEach(bookingSeat -> bookingSeat.setStatus("CANCELLED"));
         bookingRepository.save(booking);
@@ -392,6 +430,9 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         Member member = booking.getMember();
         Showtime showtime = booking.getShowtime();
+        int pointsEarned = BookingStatus.CONFIRMED.name().equals(booking.getStatus())
+                ? booking.getTotalAmount().divide(BigDecimal.valueOf(10_000), 0, RoundingMode.DOWN).intValue()
+                : 0;
 
         return new BookingDetailResponse(
                 booking.getBookingCode(), booking.getStatus(), payment.getPaymentMethod(), payment.getStatus(),
@@ -399,7 +440,8 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
                 member.getPhone(), showtime.getMovie().getTitle(), showtime.getMovie().getPosterUrl(),
                 showtime.getMovie().getAgeRating(), showtime.getRoom().getName(), showtime.getRoom().getRoomType(),
                 showtime.getFormat(), showtime.getStartTime(), subtotal, booking.getDiscountAmount(),
-                booking.getTotalAmount(), booking.getQrToken(), tickets
+                booking.getTotalAmount(), pointsEarned, member.getPointBalance(), member.getMembershipLevel(),
+                booking.getQrToken(), tickets
         );
     }
 

@@ -438,6 +438,12 @@ function CounterSaleResult() {
                             <span>Tổng thanh toán</span>
                             <strong>{formatMoney(response.finalAmount)}</strong>
                         </div>
+                        {response.memberPointBalance !== null && response.memberPointBalance !== undefined && (
+                            <div>
+                                <span>Điểm thành viên</span>
+                                <strong>+{response.pointsEarned} · Tổng {response.memberPointBalance} ({response.membershipLevel})</strong>
+                            </div>
+                        )}
 
                         {isCash && payment?.cashReceived !== undefined && (
                             <div className="cs-result-cash">

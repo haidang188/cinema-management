@@ -4,10 +4,11 @@ import { useNavigate } from "react-router-dom"
 import {
   confirmVietQr,
   createOnlineBooking,
+  getApplicablePromotions,
   previewBooking,
 } from "../../service/booking/bookingService"
 import type { AuthResponse } from "../../types/auth"
-import type { BookingPreview, OnlineBookingResult, PaymentMethod } from "../../types/booking"
+import type { BookingPreview, OnlineBookingResult, PaymentMethod, PromotionQuote } from "../../types/booking"
 import { BOOKING_DRAFT_KEY } from "./BookingSeatsPage"
 import "./booking.css"
 import BookingModal from "../../component/BookingModal"
@@ -50,6 +51,9 @@ function BookingConfirmPage({ currentUser }: BookingConfirmPageProps) {
   const [agreed, setAgreed] = useState(false)
   const [promotionCode, setPromotionCode] = useState("")
   const [promotionFeedback, setPromotionFeedback] = useState("")
+  const [appliedPromotionCode, setAppliedPromotionCode] = useState("")
+  const [promotions, setPromotions] = useState<PromotionQuote[]>([])
+  const [promotionsLoading, setPromotionsLoading] = useState(false)
 
   useEffect(() => {
     if (!draft || draft.userId !== currentUser.userId) return
@@ -57,6 +61,15 @@ function BookingConfirmPage({ currentUser }: BookingConfirmPageProps) {
       .then(setPreview)
       .catch((requestError: Error) => setError(requestError.message || "Không thể tải thông tin đặt vé"))
   }, [currentUser.userId, draft])
+
+  useEffect(() => {
+    if (!showPromotions || !draft) return
+    setPromotionsLoading(true)
+    getApplicablePromotions(currentUser.userId, draft.holdToken)
+      .then(setPromotions)
+      .catch((requestError: Error) => setPromotionFeedback(requestError.message || "Không thể tải mã khuyến mãi"))
+      .finally(() => setPromotionsLoading(false))
+  }, [showPromotions, currentUser.userId, draft])
 
   useEffect(() => {
     const expiresAt = booking?.paymentDeadline || preview?.expiresAt
@@ -72,7 +85,7 @@ function BookingConfirmPage({ currentUser }: BookingConfirmPageProps) {
     setIsSubmitting(true)
     setError("")
     try {
-      const result = await createOnlineBooking(currentUser.userId, draft.holdToken, method)
+      const result = await createOnlineBooking(currentUser.userId, draft.holdToken, method, appliedPromotionCode)
       setBooking(result)
       if (result.payment.method === "VNPAY" && result.payment.paymentUrl) {
         window.location.assign(result.payment.paymentUrl)
@@ -101,12 +114,27 @@ function BookingConfirmPage({ currentUser }: BookingConfirmPageProps) {
     }
   }
 
-  function applyPromotion() {
-    const normalizedCode = promotionCode.trim().toUpperCase()
+  async function applyPromotion(code = promotionCode) {
+    if (!draft) return
+    const normalizedCode = code.trim().toUpperCase()
     setPromotionCode(normalizedCode)
-    setPromotionFeedback(normalizedCode
-      ? `Mã ${normalizedCode} hiện không khả dụng.`
-      : "Vui lòng nhập mã khuyến mãi.")
+    if (!normalizedCode) {
+      setPromotionFeedback("Vui lòng nhập mã khuyến mãi.")
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const nextPreview = await previewBooking(currentUser.userId, draft.holdToken, normalizedCode)
+      setPreview(nextPreview)
+      setPromotionFeedback(nextPreview.promotionMessage)
+      setAppliedPromotionCode(nextPreview.discountAmount > 0 ? normalizedCode : "")
+      if (nextPreview.discountAmount > 0) setShowPromotions(false)
+    } catch (requestError) {
+      setAppliedPromotionCode("")
+      setPromotionFeedback(requestError instanceof Error ? requestError.message : "Không thể áp dụng mã")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (!draft) {
@@ -177,7 +205,7 @@ function BookingConfirmPage({ currentUser }: BookingConfirmPageProps) {
                 placeholder="Nhập mã khuyến mãi"
                 disabled={Boolean(booking)}
               />
-              <button type="button" onClick={applyPromotion} disabled={Boolean(booking)}>Áp dụng</button>
+              <button type="button" onClick={() => applyPromotion()} disabled={Boolean(booking) || isSubmitting}>Áp dụng</button>
             </div>
             {promotionFeedback && <p className="promotion-feedback">{promotionFeedback}</p>}
             <button type="button" className="promotion-detail-button" onClick={() => setShowPromotions(true)}><BadgePercent size={15} />Xem danh sách mã khuyến mãi</button>
@@ -215,14 +243,18 @@ function BookingConfirmPage({ currentUser }: BookingConfirmPageProps) {
                 onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); applyPromotion() } }}
                 placeholder="Nhập mã voucher khác..."
               />
-              <button type="button" onClick={applyPromotion}>Áp dụng</button>
+              <button type="button" onClick={() => applyPromotion()} disabled={isSubmitting}>Áp dụng</button>
             </div>
             {promotionFeedback && <p className="promotion-feedback">{promotionFeedback}</p>}
-            <div className="promotion-empty-card">
-              <span><BadgePercent size={19} /></span>
-              <div><strong>Hiện chưa có mã khuyến mãi</strong><small>Bạn có thể tiếp tục đặt vé với giá hiện tại.</small></div>
-              <button type="button" disabled>Không có mã</button>
-            </div>
+            {promotionsLoading && <div className="promotion-empty-card"><span><BadgePercent size={19} /></span><div><strong>Đang tải mã khuyến mãi...</strong></div></div>}
+            {!promotionsLoading && promotions.length === 0 && <div className="promotion-empty-card"><span><BadgePercent size={19} /></span><div><strong>Không có mã phù hợp</strong><small>Đơn hàng hiện chưa đủ điều kiện cho mã nào.</small></div><button type="button" disabled>Không có mã</button></div>}
+            {!promotionsLoading && promotions.map((promotion) => (
+              <div className="promotion-empty-card promotion-option-card" key={promotion.promotionId}>
+                <span><BadgePercent size={19} /></span>
+                <div><strong>{promotion.code} · {promotion.title}</strong><small>{promotion.message} · Còn {formatMoney(promotion.finalAmount)}</small></div>
+                <button type="button" onClick={() => applyPromotion(promotion.code)} disabled={isSubmitting}>Chọn mã</button>
+              </div>
+            ))}
           </div>
         </BookingModal>
       )}

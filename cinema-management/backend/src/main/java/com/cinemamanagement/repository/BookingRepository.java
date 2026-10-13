@@ -26,6 +26,29 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
 
     Optional<Booking> findByHoldToken(String holdToken);
 
+    @EntityGraph(attributePaths = {"showtime", "showtime.movie", "showtime.room", "promotion"})
+    @Query("""
+        select booking from Booking booking
+        where booking.member.user.id = :userId
+          and (:fromDate is null or booking.createdAt >= :fromDate)
+          and (:toDate is null or booking.createdAt < :toDate)
+          and (:timeline is null
+               or (:timeline = 'UNPAID' and upper(booking.status) = 'PENDING_PAYMENT')
+               or (:timeline = 'UPCOMING'
+                   and upper(booking.status) = 'CONFIRMED'
+                   and booking.showtime.startTime >= :now)
+               or (:timeline = 'COMPLETED'
+                   and upper(booking.status) = 'CONFIRMED'
+                   and booking.showtime.startTime < :now))
+        """)
+    Page<Booking> findMemberHistory(
+            @Param("userId") Long userId,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
+            @Param("timeline") String timeline,
+            @Param("now") LocalDateTime now,
+            Pageable pageable);
+
     boolean existsByHoldToken(String holdToken);
 
     List<Booking> findAllByStatusAndPaymentDeadlineLessThanEqual(
