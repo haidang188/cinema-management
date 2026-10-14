@@ -1,4 +1,13 @@
-import type { ReactNode } from "react"
+﻿import type { ReactNode } from "react"
+import {
+  CalendarClock,
+  Clapperboard,
+  Percent,
+  Tags,
+  Ticket,
+  UserRound,
+  UsersRound,
+} from "lucide-react"
 import { Navigate, useLocation, useNavigate } from "react-router-dom"
 
 import HomeFooter from "../component/home/HomeFooter"
@@ -11,6 +20,16 @@ interface AppShellProps {
   onLogout: () => void
   onLoginClick: () => void
 }
+
+const navItems = [
+  { path: "/admin/members", icon: UsersRound, label: "Quản lý thành viên" },
+  { path: "/admin/movies", icon: Clapperboard, label: "Phim" },
+  { path: "/admin/cinema-rooms", icon: Ticket, label: "Phòng chiếu" },
+  { path: "/admin/employees", icon: UserRound, label: "Nhân viên" },
+  { path: "/admin/promotions", icon: Percent, label: "Khuyến mãi" },
+  { path: "/showtimes", icon: CalendarClock, label: "Lịch chiếu" },
+  { path: "/ticket-prices", icon: Tags, label: "Giá vé" },
+]
 
 export function CustomerShell({ children, currentUser, onLogout, onLoginClick }: AppShellProps) {
   return (
@@ -34,15 +53,6 @@ export function AdminShell({ children, currentUser, onLogout }: AppShellProps) {
     return <Navigate to="/" replace />
   }
 
-  const navItems = [
-    { path: "/admin/members", icon: "TV", label: "Quản lý thành viên" },
-    { path: "/admin/movies", icon: "▦", label: "Phim" },
-    { path: "/admin/cinema-rooms", icon: "▣", label: "Phòng chiếu" },
-    { path: "/admin/promotions", icon: "KM", label: "Khuyến mãi" },
-    { path: "/showtimes", icon: "LC", label: "Lịch chiếu" },
-    { path: "/ticket-prices", icon: "GV", label: "Giá vé" },
-  ]
-
   return (
     <main className="admin-layout">
       <aside className="admin-sidebar">
@@ -51,6 +61,7 @@ export function AdminShell({ children, currentUser, onLogout }: AppShellProps) {
         </button>
         <nav aria-label="Điều hướng quản trị">
           {navItems.map((item) => {
+            const Icon = item.icon
             const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
 
             return (
@@ -60,8 +71,10 @@ export function AdminShell({ children, currentUser, onLogout }: AppShellProps) {
                 className={isActive ? "is-active" : undefined}
                 onClick={() => navigate(item.path)}
               >
-                <span>{item.icon}</span>
-                {item.label}
+                <span className="admin-nav-icon" aria-hidden="true">
+                  <Icon size={18} strokeWidth={2.25} />
+                </span>
+                <span className="admin-nav-label">{item.label}</span>
               </button>
             )
           })}

@@ -8,6 +8,7 @@ import MemberList from "../pages/admin/members/MemberList"
 import MovieCreate from "../pages/admin/movies/MovieCreate"
 import MovieEdit from "../pages/admin/movies/MovieEdit"
 import MovieList from "../pages/admin/movies/MovieList"
+import EmployeeList from "../pages/admin/employees/EmployeeList"
 import type { NavigateHandler } from "../types/admin"
 
 function useAppNavigate(): NavigateHandler {
@@ -50,6 +51,10 @@ function MemberListRoute() {
   return <MemberList />
 }
 
+function EmployeeListRoute() {
+  return <EmployeeList onNavigate={useAppNavigate()} />
+}
+
 export const adminRoutes = [
   {
     path: "/admin",
@@ -86,5 +91,9 @@ export const adminRoutes = [
   {
     path: "/admin/members",
     element: <MemberListRoute />,
+  },
+  {
+    path: "/admin/employees",
+    element: <EmployeeListRoute />,
   },
 ]
