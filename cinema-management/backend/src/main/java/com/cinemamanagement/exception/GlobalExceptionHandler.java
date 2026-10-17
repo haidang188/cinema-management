@@ -14,9 +14,12 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     @ExceptionHandler(AuthValidationException.class)
     public ResponseEntity<ApiErrorResponse> handleAuthValidation(AuthValidationException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -76,6 +79,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleUnexpected(Exception exception) {
+        log.error("Unexpected API error", exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiErrorResponse.of(500, "Internal Server Error", "An unexpected error occurred"));
     }

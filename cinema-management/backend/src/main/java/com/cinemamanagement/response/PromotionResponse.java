@@ -17,7 +17,6 @@ public record PromotionResponse(
         Integer usedCount,
         LocalDateTime startDate,
         LocalDateTime endDate,
-        String status,
-        boolean hasUsage
+        String status
 ) {
 }

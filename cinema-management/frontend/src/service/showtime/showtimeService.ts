@@ -36,3 +36,7 @@ export function getShowtimesByMovieAndDate(movieId: string, date: string): Promi
 export function getShowtimeById(showtimeId: number): Promise<ShowtimeData> {
     return request<ShowtimeData>(`/api/showtimes/${showtimeId}`);
 }
+
+export function searchUpcomingShowtimes(keyword: string): Promise<ShowtimeData[]> {
+    return request<ShowtimeData[]>(`/api/showtimes/search?keyword=${encodeURIComponent(keyword)}`);
+}

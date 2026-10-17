@@ -24,5 +24,7 @@ export interface AuthResponse {
   email: string
   phone: string | null
   role: AccountType | 'ADMIN'
+  accountStatus: 'ACTIVE' | 'INACTIVE' | 'PENDING_DELETION' | 'DELETED'
+  scheduledDeletionAt: string | null
   message: string
 }

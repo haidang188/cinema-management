@@ -39,27 +39,6 @@ public class PromotionExceptionHandler {
         );
     }
 
-    @ExceptionHandler(PromotionConflictException.class)
-    public ResponseEntity<PromotionErrorResponse> handleConflict(PromotionConflictException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                new PromotionErrorResponse(ex.getMessage(), Map.of("system", ex.getMessage()), LocalDateTime.now()));
-    }
-
-    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
-    public ResponseEntity<PromotionErrorResponse> handleIntegrityConflict() {
-        String message = "Không thể lưu hoặc xóa: mã khuyến mãi bị trùng hoặc khuyến mãi đang được tham chiếu. Vui lòng tải lại dữ liệu.";
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                new PromotionErrorResponse(message, Map.of("system", message), LocalDateTime.now()));
-    }
-
-    @ExceptionHandler(org.springframework.validation.BindException.class)
-    public ResponseEntity<PromotionErrorResponse> handleBinding(org.springframework.validation.BindException ex) {
-        Map<String, String> errors = new java.util.TreeMap<>();
-        ex.getFieldErrors().forEach(error -> errors.put(error.getField(), "Giá trị không hợp lệ"));
-        return ResponseEntity.badRequest().body(
-                new PromotionErrorResponse("Dữ liệu không hợp lệ", errors, LocalDateTime.now()));
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<PromotionErrorResponse> handleUnexpected(
             Exception ex

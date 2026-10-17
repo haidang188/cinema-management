@@ -13,7 +13,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/movies/{movieId}/reviews")
-@CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173"})
+@CrossOrigin(origins = {
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174"
+})
 @RequiredArgsConstructor
 public class MovieReviewController {
     private final MovieReviewService movieReviewService;

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { Eye, Pencil, Trash2 } from "lucide-react"
 import AppModal from "../../../component/common/AppModal"
 import { deleteMovie, getMovies } from "../../../service/movie/movieService"
 import type { AdminMovie, Genre, NavigateHandler } from "../../../types/admin"
@@ -322,32 +323,32 @@ function MovieList({ onNavigate }: MovieListProps) {
                             {STATUS_LABELS[movie.status || ""] || movie.status || "-"}
                           </span>
                         </td>
-                        <td className="action-column">
+                        <td className="action-column admin-row-actions">
                           <button
                             type="button"
-                            className="edit-button movie-icon-action"
+                            className="edit-button movie-icon-action admin-action-button"
                             aria-label={`Xem phim ${movie.title}`}
                             onClick={(event) => {
                               event.stopPropagation()
                               setSelectedMovieId(movie.id)
                             }}
                           >
-                            o
+                            <Eye size={16} aria-hidden="true" />
                           </button>
                           <button
                             type="button"
-                            className="edit-button movie-icon-action"
+                            className="edit-button movie-icon-action admin-action-button"
                             aria-label={`Sửa phim ${movie.title}`}
                             onClick={(event) => {
                               event.stopPropagation()
                               onNavigate(`/admin/movies/${movie.id}/edit`)
                             }}
                           >
-                            E
+                            <Pencil size={16} aria-hidden="true" />
                           </button>
                           <button
                             type="button"
-                            className="edit-button movie-icon-action movie-delete-button"
+                            className="edit-button movie-icon-action movie-delete-button admin-action-button admin-action-danger"
                             aria-label={`Xóa phim ${movie.title}`}
                             disabled={deleting}
                             onClick={(event) => {
@@ -355,7 +356,7 @@ function MovieList({ onNavigate }: MovieListProps) {
                               setMovieToDelete(movie)
                             }}
                           >
-                            x
+                            <Trash2 size={16} aria-hidden="true" />
                           </button>
                         </td>
                       </tr>

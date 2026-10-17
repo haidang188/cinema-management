@@ -53,8 +53,10 @@ export function updateEmployee(id: string, data: UpdateEmployeeRequest): Promise
   })
 }
 
-export function deleteEmployee(id: number): Promise<void> {
+export function deactivateEmployee(id: number): Promise<void> {
   return request<void>(`/api/admin/employees/${id}`, {
     method: "DELETE",
   })
 }
+
+export const deleteEmployee = deactivateEmployee

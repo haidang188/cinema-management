@@ -10,7 +10,7 @@ import MovieEdit from "../pages/admin/movies/MovieEdit"
 import MovieList from "../pages/admin/movies/MovieList"
 import StatisticsPage from "../pages/admin/statistics/StatisticsPage"
 import AdminShowtimePage from "../pages/admin/showtimes/AdminShowtimePage"
-
+import EmployeeList from "../pages/admin/employees/EmployeeList"
 import type { NavigateHandler } from "../types/admin"
 
 function useAppNavigate(): NavigateHandler {
@@ -71,6 +71,10 @@ function MemberListRoute() {
   return <MemberList />
 }
 
+function EmployeeListRoute() {
+  return <EmployeeList onNavigate={useAppNavigate()} />
+}
+
 export const adminRoutes = [
   {
     path: "/admin/showtimes",
@@ -119,5 +123,9 @@ export const adminRoutes = [
   {
     path: "/admin/members",
     element: <MemberListRoute />,
+  },
+  {
+    path: "/admin/employees",
+    element: <EmployeeListRoute />,
   },
 ]

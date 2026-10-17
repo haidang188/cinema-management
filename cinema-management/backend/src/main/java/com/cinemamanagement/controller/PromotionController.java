@@ -1,7 +1,6 @@
 package com.cinemamanagement.controller;
 
 import com.cinemamanagement.request.PromotionCreateRequest;
-import com.cinemamanagement.request.PromotionUpdateRequest;
 import com.cinemamanagement.response.PromotionPageResponse;
 import com.cinemamanagement.response.PromotionResponse;
 import com.cinemamanagement.response.PromotionStatisticsResponse;
@@ -19,7 +18,9 @@ import java.time.LocalDateTime;
 @CrossOrigin(
         origins = {
                 "http://localhost:5173",
-                "http://127.0.0.1:5173"
+                "http://127.0.0.1:5173",
+                "http://localhost:5174",
+                "http://127.0.0.1:5174"
         }
 )
 @RestController
@@ -44,10 +45,10 @@ public class PromotionController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime toDate,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "8") int size
     ) {
         int safePage = Math.max(page, 0);
-        int safeSize = Math.min(Math.max(size, 1), 100);
+        int safeSize = Math.min(Math.max(size, 1), 50);
 
         Pageable pageable = PageRequest.of(
                 safePage,
@@ -83,23 +84,5 @@ public class PromotionController {
             @ModelAttribute PromotionCreateRequest request
     ) {
         return promotionService.createPromotion(request);
-    }
-
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public PromotionResponse updatePromotion(
-            @PathVariable Long id,
-            @ModelAttribute PromotionUpdateRequest request) {
-        return promotionService.updatePromotion(id, request);
-    }
-
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePromotion(@PathVariable Long id) {
-        promotionService.deletePromotion(id);
-    }
-
-    @PatchMapping("/{id}/enabled")
-    public PromotionResponse setEnabled(@PathVariable Long id, @RequestParam boolean enabled) {
-        return promotionService.setEnabled(id, enabled);
     }
 }

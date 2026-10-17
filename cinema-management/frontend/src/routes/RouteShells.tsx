@@ -29,6 +29,12 @@ const adminMenu: SidebarItem[] = [
     label: "Quản lý thành viên",
   },
   {
+    // Từ nhánh main: trang quản lý nhân viên
+    path: "/admin/employees",
+    icon: "users",
+    label: "Nhân viên",
+  },
+  {
     path: "/admin/movies",
     icon: "film",
     label: "Phim",

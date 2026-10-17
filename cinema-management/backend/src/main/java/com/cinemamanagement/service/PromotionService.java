@@ -1,7 +1,6 @@
 package com.cinemamanagement.service;
 
 import com.cinemamanagement.request.PromotionCreateRequest;
-import com.cinemamanagement.request.PromotionUpdateRequest;
 import com.cinemamanagement.response.PromotionResponse;
 import com.cinemamanagement.response.PromotionStatisticsResponse;
 import org.springframework.data.domain.Page;
@@ -25,10 +24,4 @@ public interface PromotionService {
     PromotionStatisticsResponse getStatistics();
 
     PromotionResponse createPromotion(PromotionCreateRequest request);
-
-    PromotionResponse updatePromotion(Long id, PromotionUpdateRequest request);
-
-    void deletePromotion(Long id);
-
-    PromotionResponse setEnabled(Long id, boolean enabled);
 }

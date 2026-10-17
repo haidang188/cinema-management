@@ -1,7 +1,7 @@
 .showtime-page {
     color: #f8fafc;
     margin: 0 auto;
-    max-width: 1180px;
+    max-width: 1480px;
     padding: 16px 0 42px;
     width: 100%;
 }
@@ -10,22 +10,20 @@
     border-bottom: 1px solid rgba(148, 163, 184, 0.14);
     display: grid;
     gap: 10px;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 390px);
     margin-bottom: 18px;
     padding-bottom: 18px;
 }
 
-.showtime-header::before {
-    color: #ef4444;
-    content: "PREMIERE / LỊCH CHIẾU TOÀN HỆ THỐNG";
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+.showtime-header .page-breadcrumb,
+.showtime-header h1,
+.showtime-header > p {
+    grid-column: 1;
 }
 
 .showtime-header h1 {
     color: #ffffff;
-    font-size: clamp(34px, 5vw, 56px);
+    font-size: clamp(29px, 3.5vw, 43px);
     font-weight: 950;
     letter-spacing: 0.02em;
     line-height: 0.95;
@@ -155,8 +153,11 @@
 .showtime-search-panel {
     background: #121818;
     border: 1px solid rgba(148, 163, 184, 0.14);
-    margin-bottom: 12px;
+    grid-column: 2;
+    grid-row: 1 / 4;
+    margin: 0;
     padding: 12px;
+    align-self: center;
 }
 
 .showtime-search-panel label {
@@ -196,8 +197,8 @@
     border: 1px solid rgba(148, 163, 184, 0.16);
     display: grid;
     gap: 18px;
-    grid-template-columns: 170px minmax(0, 1fr);
-    min-height: 260px;
+    grid-template-columns: 145px minmax(0, 1fr);
+    min-height: 230px;
     padding: 18px;
 }
 
@@ -205,14 +206,14 @@
     align-self: start;
     background: #0c1111;
     border: 1px solid rgba(148, 163, 184, 0.13);
-    min-height: 238px;
+    min-height: 204px;
     overflow: hidden;
     position: relative;
 }
 
 .showtime-movie-poster {
     display: block;
-    height: 238px;
+    height: 204px;
     object-fit: cover;
     width: 100%;
 }
@@ -343,6 +344,8 @@
 }
 
 @media (max-width: 860px) {
+    .showtime-header { grid-template-columns: 1fr; }
+    .showtime-search-panel { grid-column: 1; grid-row: auto; }
     .date-selector {
         grid-template-columns: 32px minmax(0, 1fr) 32px;
     }

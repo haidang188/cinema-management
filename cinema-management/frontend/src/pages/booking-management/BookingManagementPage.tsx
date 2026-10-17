@@ -1,13 +1,10 @@
-import StaffShell from "../../common/layout/StaffShell"
-import BookingManagement from "../../component/booking-management/BookingManagement"
-import { useAuth } from "../../hooks/useAuth"
+import Layout from "../../common/layout/Layout";
+import BookingManagement from "../../component/booking-management/BookingManagement";
 
 export default function BookingManagementPage() {
-    const { currentUser, logout } = useAuth()
-
     return (
-        <StaffShell currentUser={currentUser} onLogout={logout}>
+        <Layout>
             <BookingManagement />
-        </StaffShell>
-    )
+        </Layout>
+    );
 }

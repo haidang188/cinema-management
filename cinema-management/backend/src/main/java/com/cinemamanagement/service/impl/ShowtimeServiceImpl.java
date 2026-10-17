@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +65,8 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
         return showtimeRepository.findByMovieIdAndStartTimeBetween(movieId, startOfDay, endOfDay)
                 .stream()
+                .filter(showtime -> "OPEN".equalsIgnoreCase(showtime.getStatus()))
+                .filter(showtime -> LocalDateTime.now().isBefore(showtime.getStartTime().minusMinutes(5)))
                 .map(this::toResponse)
                 .toList();
     }
@@ -76,6 +79,20 @@ public class ShowtimeServiceImpl implements ShowtimeService {
                         "Không tìm thấy suất chiếu " + showtimeId
                 ));
         return toResponse(showtime);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ShowtimeResponse> searchUpcomingShowtimes(String keyword) {
+        String normalized = keyword == null ? "" : keyword.trim().toLowerCase(Locale.ROOT);
+        if (normalized.isEmpty()) return List.of();
+        LocalDateTime now = LocalDateTime.now();
+        return showtimeRepository.findAllStartingBetween(now, now.plusDays(60)).stream()
+                .filter(showtime -> "OPEN".equalsIgnoreCase(showtime.getStatus()))
+                .filter(showtime -> now.isBefore(showtime.getStartTime().minusMinutes(5)))
+                .filter(showtime -> showtime.getMovie().getTitle().toLowerCase(Locale.ROOT).contains(normalized))
+                .map(this::toResponse)
+                .toList();
     }
 
     private ShowtimeResponse toResponse(Showtime showtime) {

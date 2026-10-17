@@ -5,11 +5,15 @@ import com.cinemamanagement.request.CreateOnlineBookingRequest;
 import com.cinemamanagement.response.BookingDetailResponse;
 import com.cinemamanagement.response.BookingPreviewResponse;
 import com.cinemamanagement.response.OnlineBookingResponse;
+import com.cinemamanagement.response.PromotionQuote;
 
+import java.util.List;
 import java.util.Map;
 
 public interface OnlineBookingService {
     BookingPreviewResponse preview(BookingPreviewRequest request);
+
+    List<PromotionQuote> getApplicablePromotions(Long userId, String holdToken);
 
     OnlineBookingResponse create(CreateOnlineBookingRequest request, String clientIp);
 

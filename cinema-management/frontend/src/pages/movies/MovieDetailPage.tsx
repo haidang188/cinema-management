@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { CalendarX2, Star } from "lucide-react"
-import { useNavigate, useParams } from "react-router-dom"
+import { CalendarDays, CalendarX2, ChevronLeft, ChevronRight, Star, X } from "lucide-react"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { getPublicMovie } from "../../service/movie/movieService"
 import {
   createMovieReview,
@@ -22,20 +22,16 @@ function formatDateValue(date: Date) {
   return `${year}-${month}-${day}`
 }
 
-function getRemainingWeekDays() {
-  const today = new Date()
-  const dayOfWeek = today.getDay()
-  const remainingDays = dayOfWeek === 0 ? 1 : 8 - dayOfWeek
-
-  return Array.from({ length: remainingDays }, (_, index) => {
+function getDateOptions(offset: number) {
+  return Array.from({ length: 7 }, (_, index) => {
     const date = new Date()
-    date.setDate(date.getDate() + index)
+    date.setDate(date.getDate() + offset + index)
 
     return {
       value: formatDateValue(date),
       day: String(date.getDate()).padStart(2, "0"),
       label:
-        index === 0
+        offset + index === 0
           ? "Hôm nay"
           : date.toLocaleDateString("vi-VN", {
               weekday: "short",
@@ -62,6 +58,20 @@ function groupShowtimes(showtimes: ShowtimeData[]) {
   }, {})
 }
 
+function youtubeEmbedUrl(url?: string | null) {
+  if (!url) return ""
+  try {
+    const parsed = new URL(url)
+    let videoId = ""
+    if (parsed.hostname.includes("youtu.be")) videoId = parsed.pathname.split("/").filter(Boolean)[0] || ""
+    else if (parsed.pathname.startsWith("/embed/") || parsed.pathname.startsWith("/shorts/")) videoId = parsed.pathname.split("/")[2] || ""
+    else videoId = parsed.searchParams.get("v") || ""
+    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : ""
+  } catch {
+    return ""
+  }
+}
+
 interface MovieDetailPageProps {
   currentUser: AuthResponse | null
   onLoginClick: () => void
@@ -84,8 +94,10 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [isShowtimeLoading, setIsShowtimeLoading] = useState(false)
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
-  const dateOptions = getRemainingWeekDays()
-  const [selectedShowtimeDate, setSelectedShowtimeDate] = useState(dateOptions[0].value)
+  const [showTrailer, setShowTrailer] = useState(false)
+  const [dateOffset, setDateOffset] = useState(0)
+  const dateOptions = getDateOptions(dateOffset)
+  const [selectedShowtimeDate, setSelectedShowtimeDate] = useState(formatDateValue(new Date()))
 
   useEffect(() => {
     if (!movieId) return
@@ -174,11 +186,13 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
 
   return (
     <main className="movie-detail-page">
-      <section className="movie-detail-hero movie-detail-shell">
+      <div className="movie-detail-content movie-detail-shell">
+      <div className="movie-detail-left">
+      <section className="movie-detail-hero">
         <div className="movie-detail-poster-panel">
-          <button className="detail-back-button" type="button" onClick={() => navigate("/")}>
-            Chi tiết phim
-          </button>
+          <nav className="movie-detail-breadcrumb page-breadcrumb" aria-label="Đường dẫn trang">
+            <Link to="/">Phim</Link><span>›</span><Link to="/">Phim đang chiếu</Link><span>›</span><strong>Chi tiết phim</strong>
+          </nav>
           <div className="movie-detail-poster-frame">
             <span className="movie-age-badge">{movie.ageRating}</span>
             <div className="movie-detail-poster">
@@ -199,10 +213,8 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
           </div>
 
           <div className="movie-detail-actions">
-            <a href={movie.trailerUrl} target="_blank" rel="noreferrer">
-              Xem trailer
-            </a>
-            <button type="button">Đặt vé ngay</button>
+            <button className="movie-trailer-button" type="button" disabled={!youtubeEmbedUrl(movie.trailerUrl)} onClick={() => setShowTrailer(true)}>Xem trailer</button>
+            <button type="button" onClick={() => document.getElementById("movie-showtimes")?.scrollIntoView({ behavior: "smooth" })}>Đặt vé ngay</button>
           </div>
 
           <h2>Nội Dung Phim</h2>
@@ -225,13 +237,14 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
         </div>
       </section>
 
-      <section className="movie-detail-grid movie-detail-shell">
-        <div className="movie-detail-showtimes">
+      <section className="movie-detail-grid">
+        <div className="movie-detail-showtimes" id="movie-showtimes">
           <div className="movie-detail-section-head">
             <h2>Lịch Chiếu Phim</h2>
-            <span>{selectedShowtimeDate}</span>
+            <label className="movie-date-picker"><CalendarDays size={17} /><span>Chọn ngày</span><input type="date" min={formatDateValue(new Date())} value={selectedShowtimeDate} onChange={event => setSelectedShowtimeDate(event.target.value)} /></label>
           </div>
           <div className="movie-detail-date-tabs">
+            <button className="date-arrow" type="button" disabled={dateOffset === 0} onClick={() => setDateOffset(value => Math.max(0, value - 7))}><ChevronLeft /></button>
             {dateOptions.map((dateOption) => (
               <button
                 key={dateOption.value}
@@ -243,6 +256,7 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
                 <strong>{dateOption.day}</strong>
               </button>
             ))}
+            <button className="date-arrow" type="button" onClick={() => setDateOffset(value => value + 7)}><ChevronRight /></button>
           </div>
 
           {isShowtimeLoading && <p className="movie-state">Đang tải lịch chiếu...</p>}
@@ -288,6 +302,9 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
             </div>
           )}
         </div>
+
+      </section>
+      </div>
 
         <aside className="movie-review-panel">
           <div className="movie-review-head">
@@ -349,7 +366,13 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
             </form>
           )}
         </aside>
-      </section>
+      </div>
+      {showTrailer && <div className="trailer-modal" role="dialog" aria-modal="true" aria-label={`Trailer ${movie.title}`} onMouseDown={() => setShowTrailer(false)}>
+        <div className="trailer-modal__dialog" onMouseDown={event => event.stopPropagation()}>
+          <header><div><span>TRAILER CHÍNH THỨC</span><h2>{movie.title}</h2></div><button type="button" onClick={() => setShowTrailer(false)} aria-label="Đóng trailer"><X /></button></header>
+          <div className="trailer-modal__video"><iframe src={youtubeEmbedUrl(movie.trailerUrl)} title={`Trailer ${movie.title}`} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen /></div>
+        </div>
+      </div>}
     </main>
   )
 }

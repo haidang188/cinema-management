@@ -1,85 +1,62 @@
-import { NavLink } from 'react-router-dom'
-import { useState } from 'react'
-import BookingModal from '../BookingModal'
-import type { AuthResponse } from '../../types/auth'
+import { ChevronDown, LogOut } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import '../../pages/booking/booking.css'
-import './HomeHeader.css'
+import type { AuthResponse } from '../../types/auth'
 
 interface HomeHeaderProps {
   currentUser: AuthResponse | null
   onLoginClick: () => void
   onLogout: () => void
+  searchValue?: string
+  onSearchChange?: (value: string) => void
 }
 
-export default function HomeHeader({
-  currentUser,
-  onLoginClick,
-  onLogout,
-}: HomeHeaderProps) {
+function HomeHeader({ currentUser, onLoginClick, onLogout, searchValue = '', onSearchChange }: HomeHeaderProps) {
   const displayName = currentUser?.fullName || currentUser?.email
-  const [panel, setPanel] = useState<string | null>(null)
 
   return (
-    <header className="home-header premiere-customer-header">
-      <div className="pc-header-inner">
-        <div className="pc-brand">
-          PREMIERE <span>CINEMAS</span>
-        </div>
-
-        <nav className="pc-nav" aria-label="Điều hướng chính">
-          <NavLink to="/" end>Phim</NavLink>
-          <NavLink to="/showtimes">Lịch chiếu</NavLink>
-          <NavLink to="/promotions">Khuyến mãi</NavLink>
-
-          <button
-            type="button"
-            onClick={() => setPanel('Lịch sử đặt vé')}
-          >
-            Lịch sử đặt vé
-          </button>
-
-          <NavLink to="/ticket-prices">Giá vé</NavLink>
-
-          {currentUser?.role === 'ADMIN' && (
-            <NavLink to="/admin/promotions">Quản lý</NavLink>
-          )}
-        </nav>
-
-        <div className="pc-account">
-          {currentUser ? (
-            <>
-              <span className="pc-account-name" title={displayName}>
-                Xin chào, {displayName}
-              </span>
-
-              <button
-                type="button"
-                className="pc-account-button"
-                onClick={onLogout}
-              >
-                Đăng xuất
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              className="pc-account-button"
-              onClick={onLoginClick}
-            >
-              Đăng nhập
-            </button>
-          )}
-        </div>
+    <header className="home-header">
+      <div className="home-logo">
+        PREMIERE <span>CINEMAS</span>
       </div>
-
-      {panel && (
-        <BookingModal
-          title={panel}
-          onClose={() => setPanel(null)}
-        >
-          <p>Lịch sử đặt vé đang được hoàn thiện.</p>
-        </BookingModal>
-      )}
+      <nav className="home-nav" aria-label="Điều hướng chính">
+        <Link to="/">Phim</Link>
+        <Link to="/showtimes">Lịch chiếu</Link>
+        <Link to="/promotions">Khuyến mãi</Link>
+        <Link to="/ticket-prices">Giá vé</Link>
+      </nav>
+      <div className="home-actions">
+        {onSearchChange && (
+          <label className="home-search">
+            <span className="sr-only">Tìm kiếm phim</span>
+            <input
+              type="search"
+              placeholder="Tìm kiếm phim..."
+              value={searchValue}
+              onChange={(event) => onSearchChange(event.target.value)}
+            />
+          </label>
+        )}
+        {currentUser ? (
+          <div className="user-menu">
+            <button type="button" className="user-menu__trigger" aria-haspopup="menu">
+              <span>{displayName}</span><ChevronDown size={16} aria-hidden="true" />
+            </button>
+            <div className="user-menu__dropdown" role="menu">
+              {currentUser.role === 'MEMBER' && <Link role="menuitem" to="/account">Quản lý tài khoản</Link>}
+              {currentUser.role === 'ADMIN' && <Link role="menuitem" to="/admin/movies">Quản lý phim</Link>}
+              {currentUser.role === 'MEMBER' && <Link role="menuitem" to="/booking-history">Lịch sử đặt vé</Link>}
+              <button type="button" role="menuitem" onClick={onLogout}><LogOut size={16} /> Đăng xuất</button>
+            </div>
+          </div>
+        ) : (
+          <button type="button" onClick={onLoginClick}>
+            Đăng nhập
+          </button>
+        )}
+      </div>
     </header>
   )
 }
+
+export default HomeHeader

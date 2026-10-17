@@ -45,6 +45,9 @@ function storeUser(user: AuthResponse | null) {
 }
 
 export function getHomePath(user: AuthResponse | null): string {
+  if (user?.role === "MEMBER" && user.accountStatus === "PENDING_DELETION") {
+    return "/account/recovery"
+  }
   if (user?.role === "ADMIN") {
     return "/admin/movies"
   }
@@ -161,5 +164,6 @@ export function useAuth() {
     loginUser,
     logout,
     registerUser,
+    updateCurrentUser,
   }
 }

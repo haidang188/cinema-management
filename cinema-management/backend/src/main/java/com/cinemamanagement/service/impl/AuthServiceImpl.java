@@ -5,6 +5,7 @@ import com.cinemamanagement.entity.Member;
 import com.cinemamanagement.entity.Role;
 import com.cinemamanagement.entity.User;
 import com.cinemamanagement.exception.AuthValidationException;
+import com.cinemamanagement.enums.MemberStatus;
 import com.cinemamanagement.repository.AdminRepository;
 import com.cinemamanagement.repository.EmployeeRepository;
 import com.cinemamanagement.repository.MemberRepository;
@@ -50,6 +51,13 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String role = user.getRole().getName();
+        if (ROLE_MEMBER.equals(role)) {
+            Member member = memberRepository.findByUserId(user.getId()).orElse(null);
+            if (member != null && (MemberStatus.DELETED.name().equals(member.getStatus())
+                    || MemberStatus.INACTIVE.name().equals(member.getStatus()))) {
+                throw new AuthValidationException("Tài khoản không còn hoạt động", Map.of("system", "Tài khoản không còn hoạt động"));
+            }
+        }
         return buildResponse(user, role, "Đăng nhập thành công");
     }
 
@@ -177,6 +185,8 @@ public class AuthServiceImpl implements AuthService {
                         member.getEmail(),
                         member.getPhone(),
                         role,
+                        member.getStatus(),
+                        member.getScheduledDeletionAt(),
                         message
                 ))
                 .orElse(new AuthResponse(user.getId(), null, null, user.getUsername(), null, role, message));

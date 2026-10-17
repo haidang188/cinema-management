@@ -1,13 +1,13 @@
 import { client } from "../seatHold/seatHoldService";
 
 export type BookingChannel = "COUNTER" | "ONLINE";
-
 export type BookingSort = "NEWEST" | "OLDEST" | "UPCOMING";
 
 export type BookingSearchParams = {
     keyword?: string;
     channel?: "ALL" | BookingChannel;
     status?: string;
+    pickup?: "ALL" | "PICKED_UP" | "NOT_PICKED_UP";
     showFrom?: string;
     showTo?: string;
     createdFrom?: string;
@@ -45,6 +45,7 @@ export type BookingListItem = {
     paymentStatus: string | null;
     employeeName: string | null;
     createdAt: string;
+    pickedUpAt: string | null;
 };
 
 export type BookingDetail = {
@@ -53,7 +54,7 @@ export type BookingDetail = {
     channel: BookingChannel | string;
     status: string;
     createdAt: string;
-    customer: { name: string | null; phone: string | null };
+    customer: { name: string | null; phone: string | null; email: string | null };
     showtime: {
         id: number;
         movieTitle: string;
@@ -70,7 +71,6 @@ export type BookingDetail = {
         ticketCode: string | null;
         ticketStatus: string | null;
         issuedAt: string | null;
-
         reprintCount: number;
         lastReprintedAt: string | null;
     }[];
@@ -89,9 +89,9 @@ export type BookingDetail = {
     totalAmount: number;
     promotionCode: string | null;
     employeeName: string | null;
-
     reprintable: boolean;
     reprintBlockedReason: string | null;
+    pickup: { pickedUp: boolean; pickedUpAt: string | null; pickedUpBy: string | null };
 };
 
 
@@ -131,13 +131,11 @@ export async function reprintTickets(id: number, ticketCodes: string[] = []): Pr
     return data;
 }
 
-
 export const CHANNEL_LABEL: Record<string, string> = {
     COUNTER: "Tại quầy",
     ONLINE: "Online",
 };
 
-/** Trạng thái đơn đã biết; giá trị lạ vẫn hiển thị nguyên văn. */
 export const BOOKING_STATUS_LABEL: Record<string, string> = {
     PENDING: "Chờ thanh toán",
     CONFIRMED: "Đã thanh toán",
@@ -164,7 +162,6 @@ export function statusLabel(status?: string | null): string {
     if (!status) return "—";
     return BOOKING_STATUS_LABEL[status.toUpperCase()] ?? status;
 }
-
 
 export function statusTone(status?: string | null): "ok" | "wait" | "bad" | "info" {
     const value = String(status ?? "").toUpperCase();

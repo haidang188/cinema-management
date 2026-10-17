@@ -24,6 +24,9 @@ public record BookingDetailResponse(
         BigDecimal subtotal,
         BigDecimal discountAmount,
         BigDecimal totalAmount,
+        Integer pointsEarned,
+        Integer memberPointBalance,
+        String membershipLevel,
         String bookingQrToken,
         List<BookingTicketResponse> tickets
 ) {

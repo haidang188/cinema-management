@@ -512,14 +512,12 @@ function MemberList() {
                       {statusLabel(member.status)}
                     </span>
                   </td>
-                  <td className="member-actions action-column">
-                    <button type="button" className="edit-button member-action-view" onClick={() => openDetail(member.id)}>
+                  <td className="member-actions action-column admin-row-actions">
+                    <button type="button" className="edit-button member-action-view admin-action-button" aria-label={`Xem ${member.fullName}`} onClick={() => openDetail(member.id)}>
                       <Eye size={15} aria-hidden="true" />
-                      Xem
                     </button>
-                    <button type="button" className="primary-button member-action-edit" onClick={() => openEdit(member)}>
+                    <button type="button" className="edit-button member-action-edit admin-action-button" aria-label={`Sửa ${member.fullName}`} onClick={() => openEdit(member)}>
                       <Pencil size={15} aria-hidden="true" />
-                      Sửa
                     </button>
                   </td>
                 </tr>

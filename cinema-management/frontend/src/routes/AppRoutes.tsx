@@ -9,21 +9,21 @@ import BookingSeatsPage from "../pages/booking/BookingSeatsPage"
 import BookingConfirmPage from "../pages/booking/BookingConfirmPage"
 import BookingResultPage from "../pages/booking/BookingResultPage"
 import type { AuthMode } from "../types/auth"
-
 import { adminRoutes } from "./adminRoutes"
-import { customerPromotionRoutes } from "./CustomerPromotionRoutes"
 import { promotionRoutes } from "./PromotionRoutes"
 import { AdminShell, CustomerShell } from "./RouteShells"
 import { showtimeRoutes } from "./showtimeRoutes"
 import { ticketPriceRoutes } from "./ticketPriceRoutes"
 import { counterSaleRoutes } from "./counterSaleRoutes"
 import { bookingManagementRoutes } from "./bookingManagementRoutes"
-
+import AccountPage from "../pages/account/AccountPage"
+import PromotionsPage from "../pages/customer/PromotionsPage"
+import BookingHistoryPage from "../pages/customer/BookingHistoryPage"
+import { ticketPickupRoutes } from "./ticketPickupRoutes"
 
 
 function AppRouteContent() {
   const navigate = useNavigate()
-
   const {
     authFieldErrors,
     authLoading,
@@ -35,16 +35,12 @@ function AppRouteContent() {
     loginUser,
     logout,
     registerUser,
+    updateCurrentUser,
   } = useAuth()
 
   function renderAuthPage(mode: AuthMode) {
     if (currentUser) {
-      return (
-        <Navigate
-          to={getHomePath(currentUser)}
-          replace
-        />
-      )
+      return <Navigate to={getHomePath(currentUser)} replace />
     }
 
     return (
@@ -55,12 +51,7 @@ function AppRouteContent() {
         isLoading={authLoading}
         onModeChange={(nextMode) => {
           clearAuthFeedback()
-
-          navigate(
-            nextMode === "login"
-              ? "/login"
-              : "/register",
-          )
+          navigate(nextMode === "login" ? "/login" : "/register")
         }}
         onLogin={loginUser}
         onRegister={registerUser}
@@ -68,9 +59,12 @@ function AppRouteContent() {
     )
   }
 
-  function renderMemberPage(page: ReactNode) {
+  function renderMemberPage(page: ReactNode, allowPendingDeletion = false) {
     if (!currentUser) return <Navigate to="/login" replace />
     if (currentUser.role !== "MEMBER") return <Navigate to={getHomePath(currentUser)} replace />
+    if (currentUser.accountStatus === "PENDING_DELETION" && !allowPendingDeletion) {
+      return <Navigate to="/account/recovery" replace />
+    }
 
     return (
       <CustomerShell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
@@ -94,55 +88,51 @@ function AppRouteContent() {
       />
 
       <Route
-        path="/login"
-        element={renderAuthPage("login")}
+        path="/movies/:movieId"
+        element={<MovieDetailPage currentUser={currentUser} onLoginClick={goToLogin} />}
       />
 
-      <Route
-        path="/register"
-        element={renderAuthPage("register")}
-      />
+      <Route path="/login" element={renderAuthPage("login")} />
+      <Route path="/register" element={renderAuthPage("register")} />
 
-      {[
-        ...showtimeRoutes,
-        ...ticketPriceRoutes,
-        ...customerPromotionRoutes,
-      ].map((route) => (
+      <Route path="/booking/showtimes/:showtimeId/seats" element={renderMemberPage(currentUser && <BookingSeatsPage currentUser={currentUser} />)} />
+      <Route path="/booking/confirm" element={renderMemberPage(currentUser && <BookingConfirmPage currentUser={currentUser} />)} />
+      <Route path="/booking/result/:bookingCode" element={renderMemberPage(currentUser && <BookingResultPage currentUser={currentUser} />)} />
+      <Route path="/payment/vnpay-return" element={renderMemberPage(currentUser && <BookingResultPage currentUser={currentUser} />)} />
+      <Route path="/account" element={renderMemberPage(currentUser && <AccountPage currentUser={currentUser} onUserChanged={updateCurrentUser} />)} />
+      <Route path="/account/recovery" element={renderMemberPage(currentUser && <AccountPage currentUser={currentUser} onUserChanged={updateCurrentUser} />, true)} />
+      <Route path="/booking-history" element={renderMemberPage(currentUser && <BookingHistoryPage currentUser={currentUser} />)} />
+      <Route path="/promotions" element={<CustomerShell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}><PromotionsPage /></CustomerShell>} />
+
+      {[...showtimeRoutes, ...ticketPriceRoutes].map((route) => {
+        const Shell = currentUser?.role === "ADMIN" ? AdminShell : CustomerShell
+
+        return (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <Shell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
+                {route.element}
+              </Shell>
+            }
+          />
+        )
+      })}
+
+      {[...adminRoutes, ...promotionRoutes].map((route) => (
         <Route
           key={route.path}
           path={route.path}
           element={
-            <CustomerShell
-              currentUser={currentUser}
-              onLogout={logout}
-              onLoginClick={goToLogin}
-            >
-              {route.element}
-            </CustomerShell>
-          }
-        />
-      ))}
-
-      {[
-        ...adminRoutes,
-        ...promotionRoutes,
-      ].map((route) => (
-        <Route
-          key={route.path}
-          path={route.path}
-          element={
-            <AdminShell
-              currentUser={currentUser}
-              onLogout={logout}
-              onLoginClick={goToLogin}
-            >
+            <AdminShell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
               {route.element}
             </AdminShell>
           }
         />
       ))}
 
-      {[...counterSaleRoutes, ...bookingManagementRoutes].map((route) => (
+      {[...counterSaleRoutes, ...bookingManagementRoutes, ...ticketPickupRoutes].map((route) => (
         <Route
           key={route.path}
           path={route.path}
@@ -150,15 +140,7 @@ function AppRouteContent() {
         />
       ))}
 
-      <Route
-        path="*"
-        element={
-          <Navigate
-            to={getHomePath(currentUser)}
-            replace
-          />
-        }
-      />
+      <Route path="*" element={<Navigate to={getHomePath(currentUser)} replace />} />
     </Routes>
   )
 }

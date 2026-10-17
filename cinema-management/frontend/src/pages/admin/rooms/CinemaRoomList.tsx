@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { Eye, Pencil, Trash2 } from "lucide-react"
 import AppModal from "../../../component/common/AppModal"
 import { deleteRoom, getRooms } from "../../../service/cinema-room/cinemaRoomService"
 import type { CinemaRoom, NavigateHandler } from "../../../types/admin"
@@ -222,32 +223,32 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
                         {STATUS_LABELS[room.status || ""] || room.status || "-"}
                       </span>
                     </td>
-                    <td className="action-column">
-                      <button
-                        type="button"
-                        className="edit-button room-icon-action room-edit-button"
-                        aria-label={`Sửa phòng ${room.name}`}
-                        onClick={() => onNavigate(`/admin/cinema-rooms/${room.id}/edit`)}
-                      >
-                        E
-                      </button>
-                      <button
-                        type="button"
-                        className="edit-button room-icon-action room-detail-button"
-                        aria-label={`Xem chi tiết ghế của ${room.name}`}
-                        onClick={() => onNavigate(`/admin/cinema-rooms/${room.id}`)}
-                      >
-                        ...
-                      </button>
-                      <button
-                        type="button"
-                        className="edit-button room-icon-action room-delete-button"
-                        aria-label={`Xóa phòng ${room.name}`}
-                        disabled={deleting}
-                        onClick={() => setRoomToDelete(room)}
-                      >
-                        x
-                      </button>
+                      <td className="action-column admin-row-actions">
+                        <button
+                          type="button"
+                          className="edit-button room-icon-action room-edit-button admin-action-button"
+                          aria-label={`Sửa phòng ${room.name}`}
+                          onClick={() => onNavigate(`/admin/cinema-rooms/${room.id}/edit`)}
+                        >
+                          <Pencil size={16} aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          className="edit-button room-icon-action room-detail-button admin-action-button"
+                          aria-label={`Xem chi tiết ghế của ${room.name}`}
+                          onClick={() => onNavigate(`/admin/cinema-rooms/${room.id}`)}
+                        >
+                          <Eye size={16} aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          className="edit-button room-icon-action room-delete-button admin-action-button admin-action-danger"
+                          aria-label={`Xóa phòng ${room.name}`}
+                          disabled={deleting}
+                          onClick={() => setRoomToDelete(room)}
+                        >
+                          <Trash2 size={16} aria-hidden="true" />
+                        </button>
                     </td>
                   </tr>
                 ))}
