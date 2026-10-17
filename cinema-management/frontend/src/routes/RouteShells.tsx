@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import { Navigate, useNavigate } from "react-router-dom"
+
 import HomeFooter from "../component/home/HomeFooter"
 import HomeHeader from "../component/home/HomeHeader"
 import Layout from "../common/layout/Layout"
@@ -17,6 +18,11 @@ interface AppShellProps {
 }
 
 const adminMenu: SidebarItem[] = [
+  {
+    path: "/admin/statistics",
+    icon: "dashboard",
+    label: "Thống kê",
+  },
   {
     path: "/admin/members",
     icon: "users",
@@ -38,7 +44,7 @@ const adminMenu: SidebarItem[] = [
     label: "Khuyến mãi",
   },
   {
-    path: "/showtimes",
+    path: "/admin/showtimes",
     icon: "calendar",
     label: "Lịch chiếu",
   },
@@ -62,7 +68,9 @@ export function CustomerShell({
         onLoginClick={onLoginClick}
         onLogout={onLogout}
       />
+
       <div className="home-content">{children}</div>
+
       <HomeFooter />
     </main>
   )
@@ -75,10 +83,16 @@ export function AdminShell({
 }: AppShellProps) {
   const navigate = useNavigate()
 
-  if (!currentUser) return <Navigate to="/login" replace />
-  if (currentUser.role !== "ADMIN") return <Navigate to="/" replace />
+  if (!currentUser) {
+    return <Navigate to="/login" replace />
+  }
 
-  const displayName = currentUser.fullName || currentUser.email
+  if (currentUser.role !== "ADMIN") {
+    return <Navigate to="/" replace />
+  }
+
+  const displayName =
+    currentUser.fullName || currentUser.email
 
   return (
     <div className="workspace-shell">
@@ -98,6 +112,7 @@ export function AdminShell({
                 <span title={displayName}>
                   Xin chào, {displayName}
                 </span>
+
                 <button
                   type="button"
                   className="shell-home-button"
@@ -111,7 +126,9 @@ export function AdminShell({
         }
         footer={<Footer />}
       >
-        <section className="admin-content">{children}</section>
+        <section className="admin-content">
+          {children}
+        </section>
       </Layout>
     </div>
   )
