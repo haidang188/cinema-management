@@ -23,11 +23,15 @@ public record BookingManagementDetailResponse(
         String employeeName,
 
         boolean reprintable,
-
-        String reprintBlockedReason
+        String reprintBlockedReason,
+        Pickup pickup
 ) {
 
-    public record Customer(String name, String phone) {
+    public record Pickup(boolean pickedUp, LocalDateTime pickedUpAt, String pickedUpBy) {
+    }
+
+
+    public record Customer(String name, String phone, String email) {
     }
 
     public record Showtime(
@@ -48,7 +52,6 @@ public record BookingManagementDetailResponse(
             String ticketCode,
             String ticketStatus,
             LocalDateTime issuedAt,
-
             int reprintCount,
             LocalDateTime lastReprintedAt
     ) {

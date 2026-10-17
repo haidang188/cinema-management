@@ -75,4 +75,11 @@ public class Booking {
 
     @Column(name = "customer_phone", length = 15)
     private String customerPhone;
+
+    @Column(name = "picked_up_at")
+    private LocalDateTime pickedUpAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "picked_up_by")
+    private Employee pickedUpBy;
 }

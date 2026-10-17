@@ -16,6 +16,7 @@ import { showtimeRoutes } from "./showtimeRoutes"
 import { ticketPriceRoutes } from "./ticketPriceRoutes"
 import { counterSaleRoutes } from "./counterSaleRoutes"
 import { bookingManagementRoutes } from "./bookingManagementRoutes"
+import { ticketPickupRoutes } from "./ticketPickupRoutes"
 
 
 
@@ -121,7 +122,7 @@ function AppRouteContent() {
         />
       ))}
 
-      {[...counterSaleRoutes, ...bookingManagementRoutes].map((route) => (
+      {[...counterSaleRoutes, ...bookingManagementRoutes, ...ticketPickupRoutes].map((route) => (
         <Route
           key={route.path}
           path={route.path}
