@@ -50,6 +50,8 @@ public class CounterSaleServiceImpl implements CounterSaleService {
     private final PromotionApplyService promotionApplyService;
     private final CounterOrderService counterOrderService;
     private final CustomerService customerService;
+    private final MemberRepository memberRepository;
+    private final com.cinemamanagement.service.LoyaltyPointService loyaltyPointService;
 
 
     @Override
@@ -100,13 +102,15 @@ public class CounterSaleServiceImpl implements CounterSaleService {
         BigDecimal finalAmount = totalAmount.subtract(discountAmount);
 
         Customer customer = customerPhone == null ? null : customerService.recordPurchase(customerName, customerPhone);
+        Member member = customerPhone == null ? null
+                : memberRepository.findFirstByPhoneAndStatus(customerPhone, "ACTIVE").orElse(null);
 
         if (customerName == null && customer != null) {
             customerName = customer.getFullName();
         }
 
         Booking booking = createBooking(employee, showtime, promotion, discountAmount, finalAmount,
-                customer, customerName, customerPhone);
+                customer, member, customerName, customerPhone);
 
         List<BookingSeat> bookingSeats = createBookingSeats(booking, showtimeSeats, priceBySeatType);
 
@@ -115,6 +119,7 @@ public class CounterSaleServiceImpl implements CounterSaleService {
         List<String> ticketCodes = createTickets(bookingSeats);
 
         markSeatsAsSold(showtimeSeats);
+        int pointsEarned = loyaltyPointService.awardForPaidBooking(booking);
 
         if (order != null) {
             counterOrderService.markCompleted(order, booking.getId(), customerName, customerPhone);
@@ -128,6 +133,9 @@ public class CounterSaleServiceImpl implements CounterSaleService {
                 finalAmount,
                 payment.getPaymentMethod(),
                 payment.getStatus(),
+                pointsEarned,
+                member == null ? null : member.getPointBalance(),
+                member == null ? null : member.getMembershipLevel(),
                 ticketCodes
         );
     }
@@ -336,6 +344,7 @@ public class CounterSaleServiceImpl implements CounterSaleService {
             BigDecimal discountAmount,
             BigDecimal finalAmount,
             Customer customer,
+            Member member,
             String customerName,
             String customerPhone
     ) {
@@ -344,6 +353,7 @@ public class CounterSaleServiceImpl implements CounterSaleService {
         Booking booking = new Booking();
 
         booking.setCustomer(customer);
+        booking.setMember(member);
         booking.setCustomerName(customerName);
         booking.setCustomerPhone(customerPhone);
         booking.setBookingCode(generateBookingCode());

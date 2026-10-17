@@ -27,5 +27,11 @@ public class CounterSaleResponse {
 
     private String paymentStatus;
 
+    private Integer pointsEarned;
+
+    private Integer memberPointBalance;
+
+    private String membershipLevel;
+
     private List<String> ticketCodes;
 }

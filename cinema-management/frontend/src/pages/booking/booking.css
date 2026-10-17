@@ -2,8 +2,8 @@
 .customer-shell .home-logo, .customer-shell .home-logo span { color: #f01832; font-family: 'Times New Roman', serif; }
 .customer-shell .home-header { grid-template-columns: auto 1fr auto; }
 .customer-shell .home-actions { min-width: 0; }
-.customer-shell .user-menu { flex-wrap: wrap; max-width: 210px; }
-.customer-shell .home-nav { flex-wrap: wrap; }
+.customer-shell .user-menu { flex-wrap: nowrap; max-width: none; }
+.customer-shell .home-nav { flex-wrap: nowrap; }
 @media (max-width: 1000px) {
   .customer-shell .home-header { grid-template-columns: 1fr auto; }
   .customer-shell .home-nav { grid-column: 1 / -1; grid-row: 2; }
@@ -16,7 +16,7 @@
   --booking-panel-2: #1b2224;
   --booking-line: #30393c;
   --booking-muted: #9aa8ad;
-  width: min(1180px, calc(100% - 40px));
+  width: min(1480px, calc(100% - 40px));
   min-height: 70vh;
   margin: 0 auto;
   padding: 38px 0 64px;
@@ -40,7 +40,7 @@
   margin-top: -30px;
   margin-bottom: 34px;
   color: #748186;
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -76,8 +76,9 @@
   border-top: 1px solid #293235;
   border-bottom: 1px solid #293235;
   color: #aab5b9;
-  font-size: 12px;
+  font-size: 18px;
 }
+
 
 .booking-showtime-strip > span {
   display: inline-flex;
@@ -87,7 +88,7 @@
 }
 
 .booking-showtime-strip svg { color: var(--booking-red); }
-.booking-showtime-strip .booking-showtime-movie { color: #f5f2ed; font-family: "Times New Roman", Times, serif; font-size: 14px; font-weight: 700; }
+.booking-showtime-strip .booking-showtime-movie { color: #f5f2ed; font-family: "Times New Roman", Times, serif; font-size: 18px; font-weight: 700; }
 .booking-showtime-strip .booking-showtime-timer { margin-left: auto; }
 .booking-showtime-strip .booking-showtime-timer strong { color: #ff5d70; font-variant-numeric: tabular-nums; }
 .booking-showtime-strip .booking-showtime-timer.is-placeholder {
@@ -107,6 +108,8 @@
 .result-card {
   border: 1px solid var(--booking-line);
   background: var(--booking-panel);
+  width: 100%;
+  max-width: 800px;
 }
 
 .booking-main-panel {
@@ -128,6 +131,7 @@
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
+
 }
 
 .booking-title-row h1,
@@ -255,7 +259,10 @@
 .booking-page .confirm-card h2 { padding-bottom: 14px; border-bottom: 1px solid #303638; }
 .booking-page .booking-primary,
 .booking-page .booking-secondary { border-radius: 6px; font-size: 13px; }
-.selected-seat-prices { display: grid; gap: 7px; }
+.selected-seat-prices { display: grid; gap: 7px; grid-auto-rows: 36px; max-height: 165px; overflow-y: auto; padding-right: 5px; scrollbar-color: #5b686d #171d1f; scrollbar-width: thin; }
+.selected-seat-prices::-webkit-scrollbar { width: 6px; }
+.selected-seat-prices::-webkit-scrollbar-track { background: #171d1f; }
+.selected-seat-prices::-webkit-scrollbar-thumb { background: #5b686d; border-radius: 8px; }
 .selected-seat-prices > div { display: flex; justify-content: space-between; gap: 8px; padding: 10px; background: #252a2c; border-radius: 5px; font-size: 12px; }
 .selected-seat-prices span { display: flex; gap: 6px; align-items: center; color: #ff6476; }
 .customer-details > div { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; }
@@ -276,7 +283,7 @@
 .promotion-empty svg { color: #ef5266; }
 .promotion-empty h3 { font-size: 17px; color: white; margin: 18px 0 10px; }
 .home-nav > button { border: 0; background: none; color: inherit; font: inherit; cursor: pointer; padding: 0; white-space: nowrap; }
-.home-nav { flex-wrap: wrap; }
+.home-nav { flex-wrap: nowrap; }
 .movie-filters input[type=date] { color-scheme: dark; min-height: 44px; padding: 10px 14px; border: 1px solid #374147; border-radius: 8px; background: #202529; color: #fff; }
 .movie-detail-showtime-group, .movie-detail-date-tabs button, .movie-detail-showtime-times button, .showtime-time { border-radius: 6px; }
 .order-reference > small { display: block; color: #adb8bb; margin-bottom: 8px; }
@@ -336,6 +343,8 @@
   position: sticky;
   top: 18px;
   padding: 22px;
+  width: 420px;
+  min-width: 420px;
 }
 
 .booking-summary-panel h2,
@@ -477,13 +486,16 @@
 }
 
 .confirm-heading {
-  margin-bottom: 24px;
+  margin: 0 auto 24px;
+  width: min(100%, 1178px);
   padding-left: 16px;
   border-left: 3px solid var(--booking-red);
 }
 
 .booking-layout--confirm {
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 800px) 360px;
+  gap: 22px;
+  justify-content: center;
 }
 
 .confirm-sections {
@@ -628,6 +640,11 @@
 .promotion-empty-card strong { font-size: 12px; }
 .promotion-empty-card small { color: #7f8d92; font-size: 10px; }
 .promotion-empty-card > button { padding: 7px 9px; border: 1px solid #343e42; border-radius: 4px; background: #252d30; color: #697579; font-size: 9px; }
+.promotion-option-card { border-color: #3d484c; }
+.promotion-option-card > span { color: #f2bd52; }
+.promotion-option-card > button { border-color: #d94a60; background: #762535; color: #fff; cursor: pointer; font-weight: 800; }
+.promotion-option-card > button:hover:not(:disabled) { background: #963044; }
+.promotion-option-card > button:disabled { opacity: .55; cursor: wait; }
 
 .booking-grand-total {
   display: flex;
@@ -851,7 +868,7 @@
 }
 
 @media (max-width: 560px) {
-  .booking-page { width: min(100% - 24px, 1180px); padding-top: 24px; }
+  .booking-page { width: calc(100% - 24px); padding-top: 24px; }
   .booking-steps { gap: 7px; font-size: 9px; }
   .booking-steps i { width: 24px; }
   .booking-main-panel,

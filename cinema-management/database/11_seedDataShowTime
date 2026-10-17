@@ -1,0 +1,251 @@
+USE cinema_management;
+
+SET @previous_sql_safe_updates := @@SQL_SAFE_UPDATES;
+SET SQL_SAFE_UPDATES = 0;
+
+-- =====================================================
+-- 1. Lấy phim đang chiếu
+-- =====================================================
+
+SET @movie_1 := (
+    SELECT id
+    FROM movies
+    WHERE UPPER(status) = 'SHOWING'
+    ORDER BY id
+    LIMIT 1
+);
+
+SET @movie_2 := (
+    SELECT id
+    FROM movies
+    WHERE UPPER(status) = 'SHOWING'
+      AND id <> @movie_1
+    ORDER BY id
+    LIMIT 1
+);
+
+SET @movie_3 := (
+    SELECT id
+    FROM movies
+    WHERE UPPER(status) = 'SHOWING'
+      AND id NOT IN (@movie_1, COALESCE(@movie_2, -1))
+    ORDER BY id
+    LIMIT 1
+);
+
+-- Nếu database chỉ có một hoặc hai phim đang chiếu thì dùng lại phim đã có.
+SET @movie_2 := COALESCE(@movie_2, @movie_1);
+SET @movie_3 := COALESCE(@movie_3, @movie_1);
+
+
+-- =====================================================
+-- 2. Lấy phòng đang hoạt động
+-- =====================================================
+
+SET @room_1 := (
+    SELECT id
+    FROM cinema_rooms
+    WHERE UPPER(COALESCE(status, 'ACTIVE')) = 'ACTIVE'
+    ORDER BY id
+    LIMIT 1
+);
+
+SET @room_2 := (
+    SELECT id
+    FROM cinema_rooms
+    WHERE UPPER(COALESCE(status, 'ACTIVE')) = 'ACTIVE'
+      AND id <> @room_1
+    ORDER BY id
+    LIMIT 1
+);
+
+SET @room_3 := (
+    SELECT id
+    FROM cinema_rooms
+    WHERE UPPER(COALESCE(status, 'ACTIVE')) = 'ACTIVE'
+      AND id NOT IN (@room_1, COALESCE(@room_2, -1))
+    ORDER BY id
+    LIMIT 1
+);
+
+-- Nếu không đủ ba phòng thì dùng lại phòng đầu.
+SET @room_2 := COALESCE(@room_2, @room_1);
+SET @room_3 := COALESCE(@room_3, @room_1);
+
+
+-- =====================================================
+-- 3. Chuẩn bị lịch chiếu thử
+-- =====================================================
+
+DROP TEMPORARY TABLE IF EXISTS test_showtime_schedule;
+
+CREATE TEMPORARY TABLE test_showtime_schedule (
+    movie_id BIGINT NOT NULL,
+    room_id BIGINT NOT NULL,
+    day_offset INT NOT NULL,
+    start_at TIME NOT NULL,
+    format_name VARCHAR(50) NOT NULL
+);
+
+INSERT INTO test_showtime_schedule (
+    movie_id,
+    room_id,
+    day_offset,
+    start_at,
+    format_name
+)
+VALUES
+    -- Ngày mai
+    (@movie_1, @room_1, 1, '08:30:00', '2D Phụ đề Việt'),
+    (@movie_2, @room_2, 1, '13:30:00', '2D Lồng tiếng'),
+    (@movie_3, @room_3, 1, '19:30:00', '2D Phụ đề Việt'),
+
+    -- Hai ngày tới
+    (@movie_2, @room_1, 2, '09:00:00', '2D Phụ đề Việt'),
+    (@movie_3, @room_2, 2, '14:00:00', '2D Lồng tiếng'),
+    (@movie_1, @room_3, 2, '20:00:00', '2D Phụ đề Việt'),
+
+    -- Ba ngày tới
+    (@movie_3, @room_1, 3, '08:30:00', '2D Phụ đề Việt'),
+    (@movie_1, @room_2, 3, '13:30:00', '2D Lồng tiếng'),
+    (@movie_2, @room_3, 3, '19:30:00', '2D Phụ đề Việt'),
+
+    -- Bốn ngày tới
+    (@movie_1, @room_1, 4, '09:00:00', '2D Phụ đề Việt'),
+    (@movie_2, @room_2, 4, '14:00:00', '2D Lồng tiếng'),
+    (@movie_3, @room_3, 4, '20:00:00', '2D Phụ đề Việt');
+
+
+-- =====================================================
+-- 4. Thêm suất chiếu
+--
+-- Cộng thêm 15 phút vào thời lượng phim để tránh hai suất
+-- trong cùng phòng nằm quá sát nhau.
+-- =====================================================
+
+INSERT INTO showtimes (
+    movie_id,
+    room_id,
+    format,
+    start_time,
+    end_time,
+    status,
+    created_at
+)
+SELECT
+    schedule.movie_id,
+    schedule.room_id,
+    schedule.format_name,
+    TIMESTAMP(
+        DATE_ADD(CURDATE(), INTERVAL schedule.day_offset DAY),
+        schedule.start_at
+    ),
+    DATE_ADD(
+        TIMESTAMP(
+            DATE_ADD(CURDATE(), INTERVAL schedule.day_offset DAY),
+            schedule.start_at
+        ),
+        INTERVAL movie.duration_minutes MINUTE
+    ),
+    'OPEN',
+    NOW()
+FROM test_showtime_schedule AS schedule
+JOIN movies AS movie
+    ON movie.id = schedule.movie_id
+JOIN cinema_rooms AS room
+    ON room.id = schedule.room_id
+WHERE schedule.movie_id IS NOT NULL
+  AND schedule.room_id IS NOT NULL
+  AND UPPER(movie.status) = 'SHOWING'
+  AND UPPER(COALESCE(room.status, 'ACTIVE')) = 'ACTIVE'
+
+  -- Không tạo nếu cùng phòng đã có suất bị chồng thời gian.
+  AND NOT EXISTS (
+      SELECT 1
+      FROM showtimes AS existing_showtime
+      WHERE existing_showtime.room_id = schedule.room_id
+        AND existing_showtime.status <> 'CANCELLED'
+        AND existing_showtime.start_time <
+            DATE_ADD(
+                TIMESTAMP(
+                    DATE_ADD(CURDATE(), INTERVAL schedule.day_offset DAY),
+                    schedule.start_at
+                ),
+                INTERVAL movie.duration_minutes + 15 MINUTE
+            )
+        AND existing_showtime.end_time >
+            DATE_SUB(
+                TIMESTAMP(
+                    DATE_ADD(CURDATE(), INTERVAL schedule.day_offset DAY),
+                    schedule.start_at
+                ),
+                INTERVAL 15 MINUTE
+            )
+  );
+
+
+-- =====================================================
+-- 5. Tạo trạng thái ghế cho tất cả suất chiếu vừa có
+-- =====================================================
+
+INSERT IGNORE INTO showtime_seats (
+    showtime_id,
+    seat_id,
+    status,
+    held_until,
+    hold_owner
+)
+SELECT
+    showtime.id,
+    seat.id,
+    'AVAILABLE',
+    NULL,
+    NULL
+FROM showtimes AS showtime
+JOIN cinema_rooms AS room
+    ON room.id = showtime.room_id
+JOIN seats AS seat
+    ON seat.room_id = room.id
+WHERE showtime.start_time >= CURDATE()
+  AND showtime.start_time < DATE_ADD(CURDATE(), INTERVAL 5 DAY)
+  AND UPPER(showtime.status) = 'OPEN'
+  AND UPPER(COALESCE(room.status, 'ACTIVE')) = 'ACTIVE'
+  AND UPPER(COALESCE(seat.status, 'ACTIVE')) = 'ACTIVE';
+
+
+DROP TEMPORARY TABLE IF EXISTS test_showtime_schedule;
+
+SET SQL_SAFE_UPDATES = @previous_sql_safe_updates;
+
+
+-- =====================================================
+-- 6. Kiểm tra kết quả
+-- =====================================================
+
+SELECT
+    showtime.id,
+    movie.title AS movie_title,
+    room.name AS room_name,
+    showtime.format,
+    showtime.start_time,
+    showtime.end_time,
+    showtime.status,
+    COUNT(showtime_seat.id) AS available_seat_records
+FROM showtimes AS showtime
+JOIN movies AS movie
+    ON movie.id = showtime.movie_id
+JOIN cinema_rooms AS room
+    ON room.id = showtime.room_id
+LEFT JOIN showtime_seats AS showtime_seat
+    ON showtime_seat.showtime_id = showtime.id
+WHERE showtime.start_time >= CURDATE()
+  AND showtime.start_time < DATE_ADD(CURDATE(), INTERVAL 5 DAY)
+GROUP BY
+    showtime.id,
+    movie.title,
+    room.name,
+    showtime.format,
+    showtime.start_time,
+    showtime.end_time,
+    showtime.status
+ORDER BY showtime.start_time;

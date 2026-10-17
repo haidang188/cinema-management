@@ -12,15 +12,17 @@ interface MovieGroup {
 
 interface FormatGroup {
     format: string;
+    date: string;
     showtimes: ShowtimeData[];
 }
 
 interface MovieShowtimeCardProps {
     movie: MovieGroup;
+    showDates?: boolean;
 }
 
 function MovieShowtimeCard({
-                               movie
+                               movie, showDates = false
                            }: MovieShowtimeCardProps) {
     const navigate = useNavigate();
 
@@ -34,16 +36,19 @@ function MovieShowtimeCard({
             (formats, showtime) => {
 
                 const format = showtime.format || "Khác";
+                const date = showtime.startTime.slice(0, 10);
+                const key = showDates ? `${date}-${format}` : format;
 
-                if (!formats[format]) {
+                if (!formats[key]) {
 
-                    formats[format] = {
+                    formats[key] = {
                         format,
+                        date,
                         showtimes: []
                     };
                 }
 
-                formats[format].showtimes.push(showtime);
+                formats[key].showtimes.push(showtime);
 
                 return formats;
 
@@ -146,6 +151,7 @@ function MovieShowtimeCard({
 
                                 <div className="format-info">
                                     <span />
+                                    {showDates && <b>{new Date(formatGroup.date + "T00:00:00").toLocaleDateString("vi-VN", { weekday: "short", day: "2-digit", month: "2-digit" })}</b>}
                                     {formatGroup.format}
                                 </div>
 

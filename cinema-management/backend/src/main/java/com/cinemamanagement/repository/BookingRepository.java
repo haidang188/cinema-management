@@ -24,6 +24,29 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
 
     Optional<Booking> findByHoldToken(String holdToken);
 
+    @EntityGraph(attributePaths = {"showtime", "showtime.movie", "showtime.room", "promotion"})
+    @Query("""
+        select booking from Booking booking
+        where booking.member.user.id = :userId
+          and (:fromDate is null or booking.createdAt >= :fromDate)
+          and (:toDate is null or booking.createdAt < :toDate)
+          and (:timeline is null
+               or (:timeline = 'UNPAID' and upper(booking.status) = 'PENDING_PAYMENT')
+               or (:timeline = 'UPCOMING'
+                   and upper(booking.status) = 'CONFIRMED'
+                   and booking.showtime.startTime >= :now)
+               or (:timeline = 'COMPLETED'
+                   and upper(booking.status) = 'CONFIRMED'
+                   and booking.showtime.startTime < :now))
+        """)
+    Page<Booking> findMemberHistory(
+            @Param("userId") Long userId,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
+            @Param("timeline") String timeline,
+            @Param("now") LocalDateTime now,
+            Pageable pageable);
+
     boolean existsByHoldToken(String holdToken);
 
     List<Booking> findAllByStatusAndPaymentDeadlineLessThanEqual(
@@ -42,10 +65,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
             @Param("userId") Long userId,
             @Param("movieId") Long movieId);
 
-    @Override
+       @Override
     @EntityGraph(attributePaths = {"showtime", "showtime.movie", "showtime.room", "employee", "promotion"})
     Page<Booking> findAll(Specification<Booking> spec, Pageable pageable);
 
+    /** Nhận vé: khoá đơn khi xác nhận để 2 quầy không giao vé trùng. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select b from Booking b where b.id = :id")
     Optional<Booking> lockById(@Param("id") Long id);

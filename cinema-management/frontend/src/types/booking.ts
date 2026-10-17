@@ -44,6 +44,19 @@ export interface BookingPreview {
   promotionMessage: string
 }
 
+export interface PromotionQuote {
+  valid: boolean
+  promotionId: number
+  code: string
+  title: string
+  discountType: string
+  discountValue: number
+  orderAmount: number
+  discountAmount: number
+  finalAmount: number
+  message: string
+}
+
 export interface PaymentInstruction {
   method: PaymentMethod
   amount: number
@@ -90,6 +103,9 @@ export interface BookingDetail {
   subtotal: number
   discountAmount: number
   totalAmount: number
+  pointsEarned: number
+  memberPointBalance: number | null
+  membershipLevel: string | null
   bookingQrToken: string
   tickets: BookingTicket[]
 }

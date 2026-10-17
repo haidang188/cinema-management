@@ -1,10 +1,9 @@
 import "./Showtime.css";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import type {ShowtimeData} from "../../types/showtime/showtime";
 
-import {
-    getShowtimesByDate
-} from "../../service/showtime/showtimeService";
+import { getShowtimesByDate } from "../../service/showtime/showtimeService";
 
 import DateSelector from "./DateSelector";
 import MovieShowtimeCard from "./MovieShowtimeCard";
@@ -120,17 +119,32 @@ function Showtime() {
 
         const loadShowtimes = async () => {
 
-            const data =
-                await getShowtimesByDate(
-                    selectedDate
-                );
+            const data = await getShowtimesByDate(selectedDate);
+            const query = searchKeyword.trim().toLocaleLowerCase("vi-VN");
 
-            setShowtimes(data);
+            setShowtimes(
+                query
+                    ? data.filter((showtime) =>
+                        [
+                            showtime.movieTitle,
+                            showtime.roomName,
+                            showtime.roomType,
+                            showtime.format
+                        ]
+                            .filter(Boolean)
+                            .some((value) =>
+                                String(value)
+                                    .toLocaleLowerCase("vi-VN")
+                                    .includes(query)
+                            )
+                    )
+                    : data
+            );
         };
 
         loadShowtimes();
 
-    }, [selectedDate]);
+    }, [selectedDate, searchKeyword]);
 
     const handlePreviousWeek = () => {
 
@@ -224,30 +238,8 @@ function Showtime() {
         setSelectedDate(value);
     };
 
-    const normalizedKeyword =
-        searchKeyword.trim().toLowerCase();
-
-    const filteredShowtimes =
-        normalizedKeyword
-            ? showtimes.filter((showtime) =>
-                [
-                    showtime.movieTitle,
-                    showtime.roomName,
-                    showtime.roomType,
-                    showtime.format,
-                    showtime.ageRating
-                ]
-                    .filter(Boolean)
-                    .some((value) =>
-                        String(value)
-                            .toLowerCase()
-                            .includes(normalizedKeyword)
-                    )
-            )
-            : showtimes;
-
     const groupedMovies =
-        filteredShowtimes.reduce<
+        showtimes.reduce<
             Record<number, MovieGroup>
         >(
             (groups, showtime) => {
@@ -295,6 +287,12 @@ function Showtime() {
 
             <div className="showtime-header">
 
+                <nav className="page-breadcrumb" aria-label="Đường dẫn trang">
+                    <Link to="/">Trang chủ</Link>
+                    <span>›</span>
+                    <strong>Lịch chiếu</strong>
+                </nav>
+
                 <h1>
                     LỊCH CHIẾU PHIM
                 </h1>
@@ -302,6 +300,18 @@ function Showtime() {
                 <p>
                     Xem lịch chiếu phim theo ngày
                 </p>
+
+                <div className="showtime-search-panel">
+                    <label>
+                        <span>Tìm kiếm lịch chiếu</span>
+                        <input
+                            type="search"
+                            placeholder="Tìm theo phim, phòng, format..."
+                            value={searchKeyword}
+                            onChange={(event) => setSearchKeyword(event.target.value)}
+                        />
+                    </label>
+                </div>
 
             </div>
 
@@ -323,22 +333,6 @@ function Showtime() {
                     handleCalendarChange
                 }
             />
-
-            <div className="showtime-search-panel">
-                <label>
-                    <span>Tìm kiếm lịch chiếu</span>
-                    <input
-                        type="search"
-                        placeholder="Tìm theo phim, phòng, format..."
-                        value={searchKeyword}
-                        onChange={(event) =>
-                            setSearchKeyword(
-                                event.target.value
-                            )
-                        }
-                    />
-                </label>
-            </div>
 
             <div className="selected-date">
 

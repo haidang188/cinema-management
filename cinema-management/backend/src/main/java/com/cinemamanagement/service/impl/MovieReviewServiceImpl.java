@@ -82,6 +82,9 @@ public class MovieReviewServiceImpl implements MovieReviewService {
     @Transactional
     public MovieReviewResponse createReview(Long movieId, Long userId, MovieReviewRequest request) {
         validateRequest(request);
+        if (memberRepository.findByUserId(userId).filter(member -> "ACTIVE".equals(member.getStatus())).isEmpty()) {
+            throw new BadRequestException("Tài khoản không ở trạng thái hoạt động");
+        }
         Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new ResourceNotFoundException("Phim không tồn tại với id " + movieId));
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại với id " + userId));
         if (!bookingRepository.existsValidBookingByUserIdAndMovieId(userId, movieId)) {

@@ -16,6 +16,7 @@ import com.cinemamanagement.repository.SeatHoldRepository;
 import com.cinemamanagement.repository.ShowtimeRepository;
 import com.cinemamanagement.repository.ShowtimeSeatRepository;
 import com.cinemamanagement.repository.UserRepository;
+import com.cinemamanagement.repository.MemberRepository;
 import com.cinemamanagement.request.HoldSeatsRequest;
 import com.cinemamanagement.request.UpdateSeatHoldRequest;
 import com.cinemamanagement.response.SeatHoldActionResponse;
@@ -62,6 +63,7 @@ public class SeatHoldServiceImpl implements SeatHoldService {
     private final ShowtimeSeatRepository showtimeSeatRepository;
     private final ShowtimeRepository showtimeRepository;
     private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final CounterOrderRepository counterOrderRepository;
     private final BookingProperties bookingProperties;
     private final HoldPolicyService holdPolicyService;
@@ -96,6 +98,7 @@ public class SeatHoldServiceImpl implements SeatHoldService {
         if (!conflicts.isEmpty()) {
             throw new SeatConflictException(conflicts);
         }
+        validateNoSingleGap(showtime.getId(), requestedIds, null, now);
 
         String token = UUID.randomUUID().toString();
         String owner = HoldTokens.owner(token);
@@ -138,6 +141,7 @@ public class SeatHoldServiceImpl implements SeatHoldService {
 
         String owner = HoldTokens.owner(token);
         List<Long> desiredIds = normalizeIds(request.getShowtimeSeatIds(), false);
+        validateNoSingleGap(showtimeId, desiredIds, owner, now);
         Map<Long, SeatHold> currentById = activeHolds.stream().collect(
                 Collectors.toMap(h -> h.getShowtimeSeat().getId(), Function.identity()));
         LinkedHashSet<Long> allIds = new LinkedHashSet<>(currentById.keySet());
@@ -457,6 +461,11 @@ public class SeatHoldServiceImpl implements SeatHoldService {
             throw new BadRequestException(
                     "Chỉ tài khoản thành viên mới được đặt vé online");
         }
+        if (memberRepository.findByUserId(userId)
+                .filter(member -> "ACTIVE".equals(member.getStatus()))
+                .isEmpty()) {
+            throw new ConflictException("Tài khoản thành viên không ở trạng thái hoạt động");
+        }
         return user;
     }
 
@@ -519,6 +528,37 @@ public class SeatHoldServiceImpl implements SeatHoldService {
             throw new BadRequestException(
                     "Một hoặc nhiều ghế không thuộc suất chiếu đã chọn");
         }
+    }
+
+    /** Không cho phép lựa chọn tạo ra đúng một ghế trống bị kẹp giữa hai ghế không còn trống. */
+    private void validateNoSingleGap(Long showtimeId, List<Long> selectedIds, String owner, LocalDateTime now) {
+        Set<Long> selected = new HashSet<>(selectedIds);
+        Map<String, List<ShowtimeSeat>> rows = showtimeSeatRepository.findAllByShowtimeIdWithSeat(showtimeId)
+                .stream().collect(Collectors.groupingBy(seat -> seat.getSeat().getRowLabel()));
+
+        for (Map.Entry<String, List<ShowtimeSeat>> entry : rows.entrySet()) {
+            List<ShowtimeSeat> row = entry.getValue().stream()
+                    .sorted(Comparator.comparing(seat -> seat.getSeat().getSeatNumber()))
+                    .toList();
+            for (int index = 1; index < row.size() - 1; index++) {
+                ShowtimeSeat seat = row.get(index);
+                ShowtimeSeat left = row.get(index - 1);
+                ShowtimeSeat right = row.get(index + 1);
+                int number = seat.getSeat().getSeatNumber();
+                if (left.getSeat().getSeatNumber() != number - 1 || right.getSeat().getSeatNumber() != number + 1) continue;
+                if (!isRemainingFree(seat, selected, owner, now)) continue;
+                if (!isRemainingFree(left, selected, owner, now) && !isRemainingFree(right, selected, owner, now)) {
+                    throw new BadRequestException("Không được để trống một ghế ở giữa hàng "
+                            + entry.getKey() + " (ghế " + seatCode(seat) + ")");
+                }
+            }
+        }
+    }
+
+    private boolean isRemainingFree(ShowtimeSeat seat, Set<Long> selected, String owner, LocalDateTime now) {
+        if (selected.contains(seat.getId())) return false;
+        if (owner != null && owner.equals(seat.getHoldOwner()) && isActiveHold(seat, now)) return true;
+        return isFree(seat, now);
     }
 
     private List<SeatHold> ownedActiveHolds(String token, Long userId) {

@@ -45,4 +45,9 @@ public class ShowtimeController {
     ) {
         return showtimeService.getShowtimesByMovieAndDate(movieId, date);
     }
+
+    @GetMapping("/search")
+    public List<ShowtimeResponse> searchUpcomingShowtimes(@RequestParam String keyword) {
+        return showtimeService.searchUpcomingShowtimes(keyword);
+    }
 }

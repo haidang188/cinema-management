@@ -17,6 +17,9 @@ export interface CounterSaleResponse {
     finalAmount: number;
     paymentMethod: string;
     paymentStatus: string;
+    pointsEarned: number;
+    memberPointBalance: number | null;
+    membershipLevel: string | null;
     ticketCodes: string[];
 }
 

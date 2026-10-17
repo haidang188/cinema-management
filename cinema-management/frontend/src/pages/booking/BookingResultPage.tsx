@@ -70,7 +70,7 @@ function BookingResultPage({ currentUser }: BookingResultPageProps) {
             <div><span>{booking.ageRating} · {booking.format}</span><h1>{booking.movieTitle}</h1><p>{dateTime(booking.startTime)}</p><p>{booking.roomName} · {booking.roomType}</p></div>
           </article>
           <article className="result-card"><h2>Ghế đã đặt ({booking.tickets.length})</h2><div className="ticket-chip-list">{booking.tickets.map((ticket) => <span key={ticket.seatName}>{ticket.seatName} <small>{ticket.seatType}</small></span>)}</div></article>
-          <article className="result-card payment-breakdown"><h2>Chi tiết thanh toán</h2><dl><div><dt>Tiền vé</dt><dd>{money(booking.subtotal)}</dd></div><div><dt>Giảm giá</dt><dd>-{money(booking.discountAmount)}</dd></div><div><dt>Tổng thanh toán</dt><dd>{money(booking.totalAmount)}</dd></div></dl></article>
+          <article className="result-card payment-breakdown"><h2>Chi tiết thanh toán</h2><dl><div><dt>Tiền vé</dt><dd>{money(booking.subtotal)}</dd></div><div><dt>Giảm giá</dt><dd>-{money(booking.discountAmount)}</dd></div><div><dt>Tổng thanh toán</dt><dd>{money(booking.totalAmount)}</dd></div>{paid && <><div><dt>Điểm vừa nhận</dt><dd>+{booking.pointsEarned}</dd></div><div><dt>Điểm tích lũy</dt><dd>{booking.memberPointBalance} · {booking.membershipLevel}</dd></div></>}</dl></article>
         </div>
 
         <div className="result-column">

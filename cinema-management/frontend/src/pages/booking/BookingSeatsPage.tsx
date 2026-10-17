@@ -69,6 +69,7 @@ function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
   const [expiresAt, setExpiresAt] = useState<string | null>(null)
   const [secondsLeft, setSecondsLeft] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
+  const [isHolding, setIsHolding] = useState(false)
   const [error, setError] = useState("")
   const selectedIdsRef = useRef<number[]>([])
   const updatingRef = useRef(false)
@@ -160,15 +161,22 @@ function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
       ? selectedIds.filter((id) => id !== seat.id)
       : [...selectedIds, seat.id]
 
+    // Ở bước chọn ghế chỉ đánh dấu trên giao diện. Ghế chỉ được giữ trên
+    // server khi khách bấm Tiếp tục để sang bước xác nhận.
+    if (!holdToken) {
+      selectedIdsRef.current = nextIds
+      setSelectedIds(nextIds)
+      setError("")
+      return
+    }
+
     updatingRef.current = true
     const previousIds = selectedIds
     selectedIdsRef.current = nextIds
     setSelectedIds(nextIds)
     setError("")
     try {
-      const hold = holdToken
-        ? await updateSeatHold(holdToken, currentUser.userId, nextIds)
-        : await createSeatHold(currentUser.userId, showtimeId, nextIds)
+      const hold = await updateSeatHold(holdToken, currentUser.userId, nextIds)
 
       // Đã cập nhật lạc quan ở trên. Chỉ sửa lại khi server thực sự
       // trả về một tập ghế khác để tránh render/chớp sơ đồ lần thứ hai.
@@ -198,9 +206,44 @@ function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
     }
   }
 
-  function continueBooking() {
-    if (updatingRef.current || !holdToken || selectedIds.length === 0) return
-    navigate("/booking/confirm")
+  async function continueBooking() {
+    if (updatingRef.current || isHolding || selectedIds.length === 0) return
+    const leavesSingleGap = Object.values(rows).some(rowSeats => rowSeats.some((seat, index) => {
+      if (index === 0 || index === rowSeats.length - 1 || selectedIds.includes(seat.id) || seat.status !== "AVAILABLE") return false
+      const left = rowSeats[index - 1]
+      const right = rowSeats[index + 1]
+      const consecutive = left.seatNumber === seat.seatNumber - 1 && right.seatNumber === seat.seatNumber + 1
+      const leftBlocked = selectedIds.includes(left.id) || left.status !== "AVAILABLE"
+      const rightBlocked = selectedIds.includes(right.id) || right.status !== "AVAILABLE"
+      return consecutive && leftBlocked && rightBlocked
+    }))
+    if (leavesSingleGap) {
+      setError("Không được để trống một ghế ở giữa các ghế đã chọn hoặc đã bán.")
+      return
+    }
+    if (holdToken) {
+      navigate("/booking/confirm")
+      return
+    }
+
+    setIsHolding(true)
+    setError("")
+    try {
+      const hold = await createSeatHold(currentUser.userId, showtimeId, selectedIds)
+      if (hold.status !== "ACTIVE") throw new Error("Không thể giữ các ghế đã chọn")
+      setHoldToken(hold.holdToken)
+      setExpiresAt(hold.expiresAt)
+      sessionStorage.setItem(
+        BOOKING_DRAFT_KEY,
+        JSON.stringify({ userId: currentUser.userId, showtimeId, holdToken: hold.holdToken, expiresAt: hold.expiresAt }),
+      )
+      navigate("/booking/confirm")
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Ghế vừa được khách khác giữ, vui lòng chọn lại")
+      getShowtimeSeats(showtimeId).then(setSeats).catch(() => undefined)
+    } finally {
+      setIsHolding(false)
+    }
   }
 
   if (isLoading) return <section className="booking-page booking-state">Đang tải sơ đồ ghế...</section>
@@ -277,8 +320,8 @@ function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
           </dl>
           <div className="selected-seat-prices">{selectedSeats.map(seat => <div key={seat.id}><span><Ticket size={14} /> {seat.rowLabel}{seat.seatNumber} · {seat.seatType}</span><strong>{seat.price?.toLocaleString("vi-VN")} đ</strong></div>)}</div>
           <div className="booking-grand-total"><span>Tổng cộng</span><strong>{selectedSeats.reduce((sum, seat) => sum + (seat.price || 0), 0).toLocaleString("vi-VN")} đ</strong></div>
-          <button className="booking-primary" type="button" disabled={!holdToken || selectedIds.length === 0 || secondsLeft === 0} onClick={continueBooking}>
-            Tiếp tục <Armchair size={18} />
+          <button className="booking-primary" type="button" disabled={selectedIds.length === 0 || isHolding} onClick={continueBooking}>
+            {isHolding ? "Đang giữ ghế..." : "Tiếp tục"} <Armchair size={18} />
           </button>
           <small className="booking-note">Không giới hạn số ghế trong một lần đặt</small>
         </aside>
