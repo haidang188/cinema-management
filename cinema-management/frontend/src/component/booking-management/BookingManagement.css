@@ -1,5 +1,4 @@
 
-
 .bm-page,
 .bm-drawer-backdrop {
     --bm-red: #e50914;
@@ -812,5 +811,13 @@
 .bm-ticket-code small {
     color: var(--bm-amber);
     font-size: 10.5px;
+    font-weight: 700;
+}
+
+/* ---------- Trạng thái nhận vé ---------- */
+
+.bm-sub.is-picked,
+.bm-dl dd.is-picked {
+    color: var(--bm-amber);
     font-weight: 700;
 }

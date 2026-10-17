@@ -8,6 +8,12 @@ export const employeeMenu: SidebarItem[] = [
         section: "Bán hàng",
     },
     {
+        section: "Bán hàng",
+        label: "Nhận vé online",
+        path: "/ticket-pickup",
+        icon: "ticket",
+    },
+    {
         section: "Tra cứu",
         label: "Quản lý đặt vé",
         path: "/bookings",

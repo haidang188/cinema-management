@@ -43,16 +43,12 @@ function formatTime(value?: string | null): string {
         ? "--:--"
         : d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", hour12: false });
 }
-
-
-/** Ngăn kéo bên phải: chi tiết 1 đơn đặt vé. Esc hoặc bấm ra ngoài để đóng. */
 export default function BookingDetailDrawer({ bookingId, onClose }: Props) {
     const [detail, setDetail] = useState<BookingDetail | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const closeRef = useRef<HTMLButtonElement>(null);
 
-    // In lại vé: null = không in; danh sách mã vé = đang in các vé đó.
     const [printCodes, setPrintCodes] = useState<string[] | null>(null);
     const [reprintBusy, setReprintBusy] = useState(false);
     const [reprintError, setReprintError] = useState("");
@@ -203,10 +199,39 @@ export default function BookingDetailDrawer({ bookingId, onClose }: Props) {
                                             "—"
                                         )}
                                     </dd>
+                                    {detail.customer.email && (
+                                        <>
+                                            <dt>Email</dt>
+                                            <dd>{detail.customer.email}</dd>
+                                        </>
+                                    )}
                                 </dl>
                             ) : (
                                 <p className="bm-muted">Khách không để lại thông tin.</p>
                             )}
+                        </section>
+
+                        {/* ---------- Nhận vé (6.10.4) ---------- */}
+                        <section className="bm-drawer-section">
+                            <h4>Nhận vé</h4>
+                            <dl className="bm-dl">
+                                <dt>Trạng thái</dt>
+                                <dd className={detail.pickup.pickedUp ? "is-picked" : ""}>
+                                    {detail.pickup.pickedUp ? "Đã nhận vé" : "Chưa nhận vé"}
+                                </dd>
+                                {detail.pickup.pickedUpAt && (
+                                    <>
+                                        <dt>Nhận lúc</dt>
+                                        <dd>{formatDateTime(detail.pickup.pickedUpAt)}</dd>
+                                    </>
+                                )}
+                                {detail.pickup.pickedUpBy && (
+                                    <>
+                                        <dt>Nhân viên giao</dt>
+                                        <dd>{detail.pickup.pickedUpBy}</dd>
+                                    </>
+                                )}
+                            </dl>
                         </section>
 
                         {/* ---------- Vé ---------- */}
