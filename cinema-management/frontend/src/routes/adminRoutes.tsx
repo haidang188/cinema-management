@@ -8,6 +8,9 @@ import MemberList from "../pages/admin/members/MemberList"
 import MovieCreate from "../pages/admin/movies/MovieCreate"
 import MovieEdit from "../pages/admin/movies/MovieEdit"
 import MovieList from "../pages/admin/movies/MovieList"
+import StatisticsPage from "../pages/admin/statistics/StatisticsPage"
+import AdminShowtimePage from "../pages/admin/showtimes/AdminShowtimePage"
+import EmployeeList from "../pages/admin/employees/EmployeeList"
 import type { NavigateHandler } from "../types/admin"
 
 function useAppNavigate(): NavigateHandler {
@@ -25,7 +28,13 @@ function MovieCreateRoute() {
 
 function MovieEditRoute() {
   const { movieId = "" } = useParams()
-  return <MovieEdit movieId={movieId} onNavigate={useAppNavigate()} />
+
+  return (
+    <MovieEdit
+      movieId={movieId}
+      onNavigate={useAppNavigate()}
+    />
+  )
 }
 
 function CinemaRoomListRoute() {
@@ -38,19 +47,47 @@ function CinemaRoomCreateRoute() {
 
 function CinemaRoomEditRoute() {
   const { roomId = "" } = useParams()
-  return <CinemaRoomEdit roomId={roomId} onNavigate={useAppNavigate()} />
+
+  return (
+    <CinemaRoomEdit
+      roomId={roomId}
+      onNavigate={useAppNavigate()}
+    />
+  )
 }
 
 function CinemaRoomDetailRoute() {
   const { roomId = "" } = useParams()
-  return <CinemaRoomDetail roomId={roomId} onNavigate={useAppNavigate()} />
+
+  return (
+    <CinemaRoomDetail
+      roomId={roomId}
+      onNavigate={useAppNavigate()}
+    />
+  )
 }
 
 function MemberListRoute() {
   return <MemberList />
 }
 
+function EmployeeListRoute() {
+  return <EmployeeList onNavigate={useAppNavigate()} />
+}
+
 export const adminRoutes = [
+  {
+    path: "/admin/showtimes",
+    element: <AdminShowtimePage />,
+  },
+  {
+    path: "/admin/showtimes/create",
+    element: <AdminShowtimePage create />,
+  },
+  {
+    path: "/admin/statistics",
+    element: <StatisticsPage />,
+  },
   {
     path: "/admin",
     element: <MovieListRoute />,
@@ -86,5 +123,9 @@ export const adminRoutes = [
   {
     path: "/admin/members",
     element: <MemberListRoute />,
+  },
+  {
+    path: "/admin/employees",
+    element: <EmployeeListRoute />,
   },
 ]

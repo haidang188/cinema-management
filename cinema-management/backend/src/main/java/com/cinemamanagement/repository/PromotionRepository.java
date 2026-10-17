@@ -113,6 +113,14 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
                         """)
         int incrementUsedCountIfAvailable(@Param("id") Long id);
 
+        @Modifying(flushAutomatically = true)
+        @Query("""
+                        update Promotion p
+                        set p.usedCount = case when coalesce(p.usedCount, 0) > 0 then p.usedCount - 1 else 0 end
+                        where p.id = :id
+                        """)
+        int decrementUsedCount(@Param("id") Long id);
+
         @Query("""
                         select p from Promotion p
                         where upper(coalesce(p.status, '')) <> 'INACTIVE'

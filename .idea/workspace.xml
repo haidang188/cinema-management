@@ -4,29 +4,76 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd9e301d-48fb-41b7-8c0b-1cbf2fe5297f" name="Changes" comment="" />
+    <list default="true" id="dd9e301d-48fb-41b7-8c0b-1cbf2fe5297f" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/cinema-management/backend/src/main/java/com/cinemamanagement/controller/AdminShowtimeController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cinema-management/backend/src/main/java/com/cinemamanagement/controller/StatisticsController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cinema-management/backend/src/main/java/com/cinemamanagement/repository/StatisticsRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cinema-management/backend/src/main/java/com/cinemamanagement/request/AdminShowtimeRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cinema-management/backend/src/main/java/com/cinemamanagement/response/AdminShowtimeResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cinema-management/backend/src/main/java/com/cinemamanagement/response/StatisticsResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cinema-management/backend/src/main/java/com/cinemamanagement/service/AdminShowtimeService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cinema-management/backend/src/main/java/com/cinemamanagement/service/StatisticsService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cinema-management/backend/src/main/java/com/cinemamanagement/util/ShowtimeRules.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cinema-management/backend/src/main/java/com/cinemamanagement/config/CorsConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/cinema-management/backend/src/main/java/com/cinemamanagement/config/CorsConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cinema-management/backend/src/main/java/com/cinemamanagement/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/cinema-management/backend/src/main/java/com/cinemamanagement/controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cinema-management/frontend/src/hooks/useAuth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/cinema-management/frontend/src/hooks/useAuth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cinema-management/frontend/src/routes/RouteShells.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/cinema-management/frontend/src/routes/RouteShells.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cinema-management/frontend/src/routes/adminRoutes.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/cinema-management/frontend/src/routes/adminRoutes.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cinema-management/frontend/src/service/auth/authService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/cinema-management/frontend/src/service/auth/authService.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 6
-}]]></component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$/cinema-management/backend">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;HuyDEV10&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/haidang188/cinema-management.git&quot;,
+    &quot;accountId&quot;: &quot;9fb3f773-a826-4035-a829-fcfcd1c3087c&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="3JG313oRwensgXdB3mvFNplgnWO" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/Java/cinema-management2"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Java/cinema-management2&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>

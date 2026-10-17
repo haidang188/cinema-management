@@ -7,6 +7,8 @@ public class AuthResponse {
     private String email;
     private String phone;
     private String role;
+    private String accountStatus;
+    private java.time.LocalDateTime scheduledDeletionAt;
     private String message;
 
     public AuthResponse(
@@ -18,12 +20,28 @@ public class AuthResponse {
             String role,
             String message
     ) {
+        this(userId, profileId, fullName, email, phone, role, "ACTIVE", null, message);
+    }
+
+    public AuthResponse(
+            Long userId,
+            Long profileId,
+            String fullName,
+            String email,
+            String phone,
+            String role,
+            String accountStatus,
+            java.time.LocalDateTime scheduledDeletionAt,
+            String message
+    ) {
         this.userId = userId;
         this.profileId = profileId;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
         this.role = role;
+        this.accountStatus = accountStatus;
+        this.scheduledDeletionAt = scheduledDeletionAt;
         this.message = message;
     }
 
@@ -73,6 +91,22 @@ public class AuthResponse {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getAccountStatus() {
+        return accountStatus;
+    }
+
+    public void setAccountStatus(String accountStatus) {
+        this.accountStatus = accountStatus;
+    }
+
+    public java.time.LocalDateTime getScheduledDeletionAt() {
+        return scheduledDeletionAt;
+    }
+
+    public void setScheduledDeletionAt(java.time.LocalDateTime scheduledDeletionAt) {
+        this.scheduledDeletionAt = scheduledDeletionAt;
     }
 
     public String getMessage() {

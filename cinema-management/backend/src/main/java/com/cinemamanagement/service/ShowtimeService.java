@@ -10,5 +10,7 @@ public interface ShowtimeService {
 
     List<ShowtimeResponse> getShowtimesByMovieAndDate(Long movieId, LocalDate date);
 
+    List<ShowtimeResponse> searchUpcomingShowtimes(String keyword);
+
     ShowtimeResponse getShowtimeById(Long showtimeId);
 }

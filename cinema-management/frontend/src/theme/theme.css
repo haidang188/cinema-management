@@ -457,6 +457,41 @@ html[data-theme="light"] .promotion-page {
   background: var(--theme-page);
 }
 
+/* Breadcrumb dùng chung cho các trang phía khách hàng. */
+.page-breadcrumb {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 14px;
+  font-weight: 650;
+  gap: 9px;
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.page-breadcrumb a {
+  color: #8fb8d0;
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.page-breadcrumb a:hover {
+  color: #ef5266;
+}
+
+.page-breadcrumb span {
+  color: #64747b;
+  font-weight: 800;
+}
+
+.page-breadcrumb strong {
+  color: #fff;
+  font-weight: 800;
+}
+
+html[data-theme="light"] .page-breadcrumb a { color: #47758e; }
+html[data-theme="light"] .page-breadcrumb strong { color: var(--theme-text); }
+
 @media (max-width: 720px) {
   .theme-toggle {
     right: 10px;

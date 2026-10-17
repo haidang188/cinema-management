@@ -5,6 +5,7 @@ import com.cinemamanagement.request.CreateOnlineBookingRequest;
 import com.cinemamanagement.response.BookingDetailResponse;
 import com.cinemamanagement.response.BookingPreviewResponse;
 import com.cinemamanagement.response.OnlineBookingResponse;
+import com.cinemamanagement.response.PromotionQuote;
 import com.cinemamanagement.service.OnlineBookingService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -23,6 +25,14 @@ public class OnlineBookingController {
     @PostMapping("/preview")
     public BookingPreviewResponse preview(@Valid @RequestBody BookingPreviewRequest request) {
         return onlineBookingService.preview(request);
+    }
+
+    @GetMapping("/promotions")
+    public List<PromotionQuote> applicablePromotions(
+            @RequestParam Long userId,
+            @RequestParam String holdToken
+    ) {
+        return onlineBookingService.getApplicablePromotions(userId, holdToken);
     }
 
     @PostMapping

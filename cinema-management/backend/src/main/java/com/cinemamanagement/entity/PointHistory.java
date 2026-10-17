@@ -26,11 +26,20 @@ public class PointHistory {
     @Column(nullable = false)
     private Integer points;
 
+    @Column(name = "balance_before", nullable = false)
+    private Integer balanceBefore;
+
+    @Column(name = "balance_after", nullable = false)
+    private Integer balanceAfter;
+
     @Column(length = 20)
     private String type;
 
     @Column(length = 255)
     private String description;
+
+    @Column(name = "idempotency_key", unique = true, length = 150)
+    private String idempotencyKey;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

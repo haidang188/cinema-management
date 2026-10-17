@@ -36,7 +36,6 @@ type DateField = "show" | "created";
 
 type DatePreset = { key: string; label: string; from: string; to: string };
 
-
 function formatMoney(value: number): string {
     return `${Math.round(value).toLocaleString("vi-VN")}đ`;
 }
@@ -92,9 +91,7 @@ function getApiErrorMessage(err: unknown, fallback: string): string {
     return err instanceof Error && err.message ? err.message : fallback;
 }
 
-
 function BookingManagement() {
-    // Bộ lọc nằm trên URL: tải lại trang / quay lại vẫn giữ nguyên kết quả đang xem.
     const [searchParams, setSearchParams] = useSearchParams();
 
     const filters = useMemo<BookingSearchParams>(
@@ -102,6 +99,7 @@ function BookingManagement() {
             keyword: searchParams.get("q") ?? "",
             channel: (searchParams.get("channel") as BookingSearchParams["channel"]) ?? "ALL",
             status: searchParams.get("status") ?? "",
+            pickup: (searchParams.get("pickup") as BookingSearchParams["pickup"]) ?? "ALL",
             sort: (searchParams.get("sort") as BookingSort) ?? "NEWEST",
             page: Number(searchParams.get("page") ?? 0) || 0,
             size: PAGE_SIZE,
@@ -153,7 +151,6 @@ function BookingManagement() {
 
         const id = window.setTimeout(() => updateFilters({ q: keywordInput.trim() }), SEARCH_DEBOUNCE_MS);
         return () => window.clearTimeout(id);
-
     }, [keywordInput]);
 
     useEffect(() => {
@@ -179,11 +176,15 @@ function BookingManagement() {
     }, [query, reloadToken]);
 
     const hasFilter = Boolean(
-        filters.keyword || (filters.channel && filters.channel !== "ALL") || filters.status || dateFrom || dateTo
+        filters.keyword ||
+        (filters.channel && filters.channel !== "ALL") ||
+        filters.status ||
+        (filters.pickup && filters.pickup !== "ALL") ||
+        dateFrom ||
+        dateTo
     );
 
     function applyRange(from: string, to: string) {
-
         const [a, b] = from && to && from > to ? [to, from] : [from, to];
         updateFilters({ from: a, to: b });
     }
@@ -207,7 +208,6 @@ function BookingManagement() {
     return (
         <div className="bm-page">
 
-
             <header className="bm-header">
                 <div>
                     <h1>Quản lý đặt vé</h1>
@@ -218,7 +218,6 @@ function BookingManagement() {
                     {result ? `${result.totalItems.toLocaleString("vi-VN")} đơn` : ""}
                 </span>
             </header>
-
 
             <section className="bm-toolbar" aria-label="Tìm kiếm và lọc">
                 <label className="bm-search">
@@ -266,6 +265,18 @@ function BookingManagement() {
                                     {BOOKING_STATUS_LABEL[value]}
                                 </option>
                             ))}
+                        </select>
+                    </label>
+
+                    <label className="bm-field">
+                        <span>Nhận vé</span>
+                        <select
+                            value={filters.pickup ?? "ALL"}
+                            onChange={(event) => updateFilters({ pickup: event.target.value })}
+                        >
+                            <option value="ALL">Tất cả</option>
+                            <option value="NOT_PICKED_UP">Chưa nhận vé</option>
+                            <option value="PICKED_UP">Đã nhận vé</option>
                         </select>
                     </label>
 
@@ -332,7 +343,6 @@ function BookingManagement() {
                     </div>
                 </div>
             </section>
-
 
             <section className="bm-table-card" aria-busy={loading}>
                 {error ? (
@@ -456,6 +466,11 @@ function BookingManagement() {
                                                       <span className={`bm-status is-${statusTone(item.status)}`}>
                                                           {statusLabel(item.status)}
                                                       </span>
+                                                {channel === "ONLINE" && (
+                                                    <span className={`bm-sub ${item.pickedUpAt ? "is-picked" : ""}`}>
+                                                              {item.pickedUpAt ? "Đã nhận vé" : "Chưa nhận vé"}
+                                                          </span>
+                                                )}
                                             </td>
 
                                             <td>

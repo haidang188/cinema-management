@@ -26,6 +26,7 @@ public final class BookingSpecifications {
         add(specs, keyword(request.getKeyword()));
         add(specs, channel(request.getChannel()));
         add(specs, status(request.getStatus()));
+        add(specs, pickup(request.getPickup()));
         add(specs, showBetween(request.getShowFrom(), request.getShowTo()));
         add(specs, createdBetween(request.getCreatedFrom(), request.getCreatedTo()));
         add(specs, movie(request.getMovieId()));
@@ -34,7 +35,7 @@ public final class BookingSpecifications {
         return Specification.allOf(specs);
     }
 
-    public static Specification<Booking> keyword(String raw) {
+        public static Specification<Booking> keyword(String raw) {
         if (raw == null || raw.isBlank()) {
             return null;
         }
@@ -54,7 +55,6 @@ public final class BookingSpecifications {
                 any.add(cb.like(root.get("customerPhone"), "%" + digits + "%"));
             }
 
-            // Mã vé: chỉ tìm khi từ khoá đủ dài để tránh quét cả bảng vé.
             if (upper.length() >= 4) {
                 Subquery<Long> ticket = query.subquery(Long.class);
                 Root<Ticket> t = ticket.from(Ticket.class);
@@ -85,6 +85,18 @@ public final class BookingSpecifications {
 
         String value = status.trim().toUpperCase(Locale.ROOT);
         return (root, query, cb) -> cb.equal(cb.upper(root.get("status")), value);
+    }
+
+    public static Specification<Booking> pickup(String pickup) {
+        if (pickup == null || pickup.isBlank() || "ALL".equalsIgnoreCase(pickup)) {
+            return null;
+        }
+
+        boolean picked = "PICKED_UP".equalsIgnoreCase(pickup.trim());
+
+        return (root, query, cb) -> picked
+                ? cb.isNotNull(root.get("pickedUpAt"))
+                : cb.isNull(root.get("pickedUpAt"));
     }
 
     public static Specification<Booking> showBetween(LocalDate from, LocalDate to) {
@@ -175,6 +187,7 @@ public final class BookingSpecifications {
             specs.add(spec);
         }
     }
+
     private static String normalizePhoneDigits(String raw) {
         String digits = raw.replaceAll("\\D", "");
 

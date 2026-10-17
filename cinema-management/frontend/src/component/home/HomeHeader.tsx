@@ -1,6 +1,5 @@
+import { ChevronDown, LogOut } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
-import BookingModal from '../BookingModal'
 import '../../pages/booking/booking.css'
 import type { AuthResponse } from '../../types/auth'
 
@@ -14,7 +13,6 @@ interface HomeHeaderProps {
 
 function HomeHeader({ currentUser, onLoginClick, onLogout, searchValue = '', onSearchChange }: HomeHeaderProps) {
   const displayName = currentUser?.fullName || currentUser?.email
-  const [panel, setPanel] = useState<string | null>(null)
 
   return (
     <header className="home-header">
@@ -24,10 +22,8 @@ function HomeHeader({ currentUser, onLoginClick, onLogout, searchValue = '', onS
       <nav className="home-nav" aria-label="Điều hướng chính">
         <Link to="/">Phim</Link>
         <Link to="/showtimes">Lịch chiếu</Link>
-        <button type="button" onClick={() => setPanel('Khuyến mãi')}>Khuyến mãi</button>
-        <button type="button" onClick={() => setPanel('Lịch sử đặt vé')}>Lịch sử đặt vé</button>
+        <Link to="/promotions">Khuyến mãi</Link>
         <Link to="/ticket-prices">Giá vé</Link>
-        {currentUser?.role === 'ADMIN' && <Link to="/admin/promotions">Quản lý</Link>}
       </nav>
       <div className="home-actions">
         {onSearchChange && (
@@ -43,10 +39,15 @@ function HomeHeader({ currentUser, onLoginClick, onLogout, searchValue = '', onS
         )}
         {currentUser ? (
           <div className="user-menu">
-            <span>Xin chào, {displayName}</span>
-            <button type="button" onClick={onLogout}>
-              Đăng xuất
+            <button type="button" className="user-menu__trigger" aria-haspopup="menu">
+              <span>{displayName}</span><ChevronDown size={16} aria-hidden="true" />
             </button>
+            <div className="user-menu__dropdown" role="menu">
+              {currentUser.role === 'MEMBER' && <Link role="menuitem" to="/account">Quản lý tài khoản</Link>}
+              {currentUser.role === 'ADMIN' && <Link role="menuitem" to="/admin/movies">Quản lý phim</Link>}
+              {currentUser.role === 'MEMBER' && <Link role="menuitem" to="/booking-history">Lịch sử đặt vé</Link>}
+              <button type="button" role="menuitem" onClick={onLogout}><LogOut size={16} /> Đăng xuất</button>
+            </div>
           </div>
         ) : (
           <button type="button" onClick={onLoginClick}>
@@ -54,7 +55,6 @@ function HomeHeader({ currentUser, onLoginClick, onLogout, searchValue = '', onS
           </button>
         )}
       </div>
-      {panel && <BookingModal title={panel} onClose={() => setPanel(null)}><p>{panel === 'Khuyến mãi' ? 'Hiện chưa có mã khuyến mãi.' : 'Lịch sử đặt vé đang được hoàn thiện.'}</p></BookingModal>}
     </header>
   )
 }

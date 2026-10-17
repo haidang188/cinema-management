@@ -6,6 +6,7 @@ import "./TicketPrint.css";
 
 export type PrintableTicket = {
     code: string;
+    qrValue?: string | null;
     seatLabel: string;
     seatKind?: string;
 };
@@ -45,14 +46,12 @@ export function seatKindLabel(type?: string | null): string {
     return "Thường";
 }
 
-
 type TicketCardProps = {
     ticket: PrintableTicket;
     show: TicketShowInfo;
     bookingCode: string;
     index: number;
     total: number;
-
     onPrint?: () => void;
     onCopy?: () => void;
     copied?: boolean;
@@ -105,7 +104,7 @@ export function TicketCard({ ticket, show, bookingCode, index, total, onPrint, o
 
             <div className="cs-ticket-stub">
                 <div className="cs-ticket-qr">
-                    <QRCodeSVG value={ticket.code} size={92} marginSize={1} level="M" />
+                    <QRCodeSVG value={ticket.qrValue || ticket.code} size={92} marginSize={1} level="M" />
                 </div>
 
                 <code>{ticket.code}</code>
@@ -131,9 +130,7 @@ export function TicketCard({ ticket, show, bookingCode, index, total, onPrint, o
 
 
 type TicketPrintAreaProps = {
-
     tickets: PrintableTicket[];
-
     allTickets?: PrintableTicket[];
     show: TicketShowInfo;
     bookingCode: string;
@@ -141,6 +138,7 @@ type TicketPrintAreaProps = {
     onPrinted?: () => void;
     onDone: () => void;
 };
+
 
 export function TicketPrintArea({
                                     tickets,
@@ -163,7 +161,6 @@ export function TicketPrintArea({
 
         window.addEventListener("afterprint", handleAfterPrint);
 
-        // Đợi React vẽ xong vùng in rồi mới mở hộp thoại in.
         const id = window.requestAnimationFrame(() => {
             onPrintedRef.current?.();
             window.print();
