@@ -13,6 +13,10 @@ import java.util.Optional;
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     boolean existsByEmail(String email);
 
+    boolean existsByEmailIgnoreCase(String email);
+
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
+
     boolean existsByEmployeeCodeIgnoreCase(String employeeCode);
 
     boolean existsByEmployeeCodeIgnoreCaseAndIdNot(String employeeCode, Long id);
@@ -26,6 +30,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             where (:status is null or e.status = :status)
               and (:keyword is null
                 or lower(e.employeeCode) like lower(concat('%', :keyword, '%'))
+                or lower(e.user.username) like lower(concat('%', :keyword, '%'))
                 or lower(e.fullName) like lower(concat('%', :keyword, '%'))
                 or lower(e.email) like lower(concat('%', :keyword, '%'))
                 or lower(e.phone) like lower(concat('%', :keyword, '%'))

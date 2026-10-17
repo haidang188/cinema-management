@@ -740,3 +740,19 @@
     grid-template-columns: 1fr;
   }
 }
+
+.admin-content .member-actions.admin-row-actions {
+  display: flex;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.admin-content .member-actions .admin-action-button,
+.admin-content .member-action-view,
+.admin-content .member-action-edit {
+  height: 44px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0;
+  width: 44px;
+}
