@@ -28,6 +28,8 @@ public class BookingSearchRequest {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate createdTo;
 
+    private String pickup;
+
     private Long movieId;
 
     private Long showtimeId;

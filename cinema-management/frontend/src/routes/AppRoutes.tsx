@@ -19,7 +19,7 @@ import { bookingManagementRoutes } from "./bookingManagementRoutes"
 import AccountPage from "../pages/account/AccountPage"
 import PromotionsPage from "../pages/customer/PromotionsPage"
 import BookingHistoryPage from "../pages/customer/BookingHistoryPage"
-
+import { ticketPickupRoutes } from "./ticketPickupRoutes"
 
 
 function AppRouteContent() {
@@ -132,7 +132,7 @@ function AppRouteContent() {
         />
       ))}
 
-      {[...counterSaleRoutes, ...bookingManagementRoutes].map((route) => (
+      {[...counterSaleRoutes, ...bookingManagementRoutes, ...ticketPickupRoutes].map((route) => (
         <Route
           key={route.path}
           path={route.path}

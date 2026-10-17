@@ -29,18 +29,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class CounterSaleServiceImpl implements CounterSaleService {
 
-    /*
-     * Mã vé / mã đặt vé: tiền tố + yyMMddHHmmss + 6 ký tự ngẫu nhiên.
-     * Ví dụ: TK260925183618K7Q2XM (20 ký tự).
-     *
-     * Bản cũ dùng String.valueOf(System.nanoTime()).substring(10):
-     * - nanoTime trên Windows chỉ chính xác tới ~100ns nên 2 chữ số cuối luôn là "00".
-     * - nanoTime tính từ lúc khởi động máy: máy mới bật -> số ngắn (12 chữ số)
-     *   -> substring(10) chỉ còn "00" -> mọi vé trong cùng 1 giây trùng mã.
-     * Vì vậy lỗi lúc có lúc không, tuỳ máy và thời gian máy đã chạy.
-     */
     private static final DateTimeFormatter CODE_TIME = DateTimeFormatter.ofPattern("yyMMddHHmmss");
-    // Bỏ các ký tự dễ nhầm khi đọc: 0/O, 1/I/L
+
     private static final char[] CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ".toCharArray();
     private static final int CODE_RANDOM_LENGTH = 6;
     private static final int MAX_CODE_ATTEMPTS = 10;
@@ -63,9 +53,6 @@ public class CounterSaleServiceImpl implements CounterSaleService {
     private final MemberRepository memberRepository;
     private final com.cinemamanagement.service.LoyaltyPointService loyaltyPointService;
 
-    /* =====================================================================
-     * BÁN VÉ
-     * ===================================================================== */
 
     @Override
     @Transactional
@@ -81,12 +68,10 @@ public class CounterSaleServiceImpl implements CounterSaleService {
 
         validateShowtimeForSale(showtime);
 
-        // Có holdToken: ghế phải trống hoặc đang được CHÍNH phiên này giữ.
         String holdOwner = request.getHoldToken() == null || request.getHoldToken().isBlank()
                 ? null
                 : HoldTokens.owner(request.getHoldToken());
 
-        // Đơn quầy (nếu bán theo đơn nháp) + thông tin khách.
         CounterOrder order = holdOwner == null
                 ? null
                 : counterOrderService.findActiveByOwner(holdOwner).orElse(null);
@@ -100,13 +85,10 @@ public class CounterSaleServiceImpl implements CounterSaleService {
 
         List<ShowtimeSeat> showtimeSeats = lockAndValidateSeats(request.getShowtimeSeatIds(), showtime.getId(), holdOwner);
 
-        // Tra giá 1 lần, dùng chung cho tổng tiền và từng ghế -> luôn khớp nhau.
         Map<String, BigDecimal> priceBySeatType = resolvePrices(showtime, showtimeSeats);
 
         BigDecimal totalAmount = calculateTotalAmount(showtimeSeats, priceBySeatType);
 
-        // Mã giảm giá: kiểm tra lại + trừ lượt TRONG transaction này.
-        // Bán lỗi ở bước sau -> rollback -> lượt dùng được hoàn lại.
         Promotion promotion = null;
         BigDecimal discountAmount = BigDecimal.ZERO;
         String promotionCode = request.getPromotionCode();
@@ -119,7 +101,6 @@ public class CounterSaleServiceImpl implements CounterSaleService {
 
         BigDecimal finalAmount = totalAmount.subtract(discountAmount);
 
-        // Khách vãng lai: có SĐT thì lưu / cập nhật hồ sơ khách (tra lại vé, tích điểm sau này).
         Customer customer = customerPhone == null ? null : customerService.recordPurchase(customerName, customerPhone);
         Member member = customerPhone == null ? null
                 : memberRepository.findFirstByPhoneAndStatus(customerPhone, "ACTIVE").orElse(null);
@@ -158,10 +139,6 @@ public class CounterSaleServiceImpl implements CounterSaleService {
                 ticketCodes
         );
     }
-
-    /* =====================================================================
-     * XEM TRƯỚC GIÁ
-     * ===================================================================== */
 
     @Override
     @Transactional(readOnly = true)
@@ -230,7 +207,6 @@ public class CounterSaleServiceImpl implements CounterSaleService {
             ));
         }
 
-        // Xem trước mã giảm giá: KHÔNG trừ lượt, mã sai thì báo lý do chứ không ném lỗi.
         PromotionQuote promotion = null;
 
         if (request.getPromotionCode() != null && !request.getPromotionCode().isBlank()) {
@@ -250,10 +226,6 @@ public class CounterSaleServiceImpl implements CounterSaleService {
         );
     }
 
-    /* =====================================================================
-     * VALIDATE
-     * ===================================================================== */
-
     private void validateRequest(CounterSaleRequest request) {
 
         if (request == null) {
@@ -270,7 +242,6 @@ public class CounterSaleServiceImpl implements CounterSaleService {
             throw new RuntimeException("Chưa chọn ghế");
         }
 
-        // Cùng 1 ghế gửi 2 lần sẽ bị bán 2 lần trong 1 đơn -> chặn.
         if (seatIds.stream().anyMatch(Objects::isNull) || new HashSet<>(seatIds).size() != seatIds.size()) {
             throw new RuntimeException("Danh sách ghế không hợp lệ hoặc bị trùng");
         }
@@ -280,11 +251,6 @@ public class CounterSaleServiceImpl implements CounterSaleService {
         }
     }
 
-    /*
-     * Khoá ghế (SELECT ... FOR UPDATE) theo thứ tự id TĂNG DẦN để hai quầy bán
-     * cùng lúc không khoá chéo nhau (deadlock). Kết quả trả về vẫn theo đúng
-     * thứ tự request, vì frontend ghép mã vé với ghế theo thứ tự này.
-     */
     private List<ShowtimeSeat> lockAndValidateSeats(List<Long> showtimeSeatIds, Long showtimeId, String holdOwner) {
 
         Map<Long, ShowtimeSeat> locked = new HashMap<>();
@@ -301,7 +267,6 @@ public class CounterSaleServiceImpl implements CounterSaleService {
                     && holdOwner.equals(showtimeSeat.getHoldOwner())
                     && SeatHoldService.isActiveHold(showtimeSeat, now);
 
-            // Trống (kể cả đang giữ nhưng đã quá hạn) hoặc do chính quầy này giữ.
             if (!mine && !SeatHoldService.isFree(showtimeSeat, now)) {
                 throw new RuntimeException("Ghế " + seatLabel(showtimeSeat) + " không còn trống");
             }
@@ -329,11 +294,6 @@ public class CounterSaleServiceImpl implements CounterSaleService {
         }
     }
 
-    /* =====================================================================
-     * GIÁ VÉ
-     * ===================================================================== */
-
-    /** Tra giá cho từng loại ghế có trong đơn: mỗi loại ghế chỉ query 1 lần. */
     private Map<String, BigDecimal> resolvePrices(Showtime showtime, List<ShowtimeSeat> showtimeSeats) {
 
         String roomType = showtime.getRoom().getRoomType();
@@ -376,9 +336,6 @@ public class CounterSaleServiceImpl implements CounterSaleService {
         }
     }
 
-    /* =====================================================================
-     * TẠO DỮ LIỆU
-     * ===================================================================== */
 
     private Booking createBooking(
             Employee employee,
@@ -394,7 +351,7 @@ public class CounterSaleServiceImpl implements CounterSaleService {
         LocalDateTime now = LocalDateTime.now();
 
         Booking booking = new Booking();
-        // Bản chụp thông tin khách lúc mua: khách đổi tên / số sau này thì đơn cũ vẫn đúng.
+
         booking.setCustomer(customer);
         booking.setMember(member);
         booking.setCustomerName(customerName);
@@ -409,6 +366,8 @@ public class CounterSaleServiceImpl implements CounterSaleService {
         booking.setStatus("CONFIRMED");
         booking.setCreatedAt(now);
         booking.setUpdatedAt(now);
+        booking.setPickedUpAt(now);
+        booking.setPickedUpBy(employee);
 
         return bookingRepository.save(booking);
     }
@@ -434,10 +393,6 @@ public class CounterSaleServiceImpl implements CounterSaleService {
         return bookingSeats;
     }
 
-    /*
-     * Tiền mặt: lưu tiền khách đưa + tiền thối (phục vụ đối soát cuối ca).
-     * Chuyển khoản: VietQR, nhân viên tự xác nhận đã nhận tiền.
-     */
     private Payment createPayment(
             Booking booking,
             BigDecimal amount,
@@ -469,8 +424,6 @@ public class CounterSaleServiceImpl implements CounterSaleService {
             payment.setTransactionCode(generateTransactionCode());
 
         } else if ("TRANSFER".equals(method)) {
-            // Chuyển khoản VietQR: nhân viên đã kiểm tra tài khoản nhận tiền.
-            // Lưu nội dung chuyển khoản để cuối ngày đối soát với sao kê ngân hàng.
             String reference = request.getPaymentReference();
 
             if (reference == null || reference.isBlank()) {
@@ -491,8 +444,6 @@ public class CounterSaleServiceImpl implements CounterSaleService {
 
         List<String> ticketCodes = new ArrayList<>();
 
-        // Các vé cùng đơn chưa được flush xuống DB, existsByTicketCode không thấy
-        // -> phải tự nhớ các mã đã phát trong đơn này.
         Set<String> usedInThisOrder = new HashSet<>();
         LocalDateTime issuedAt = LocalDateTime.now();
 
@@ -523,16 +474,10 @@ public class CounterSaleServiceImpl implements CounterSaleService {
         }
 
         showtimeSeatRepository.saveAll(showtimeSeats);
-
-        // Báo cho mọi quầy / khách online: các ghế này đã bán.
         if (!showtimeSeats.isEmpty()) {
             seatEventPublisher.publishAfterCommit(showtimeSeats.get(0).getShowtime().getId(), showtimeSeats);
         }
     }
-
-    /* =====================================================================
-     * SINH MÃ
-     * ===================================================================== */
 
     private String generateBookingCode() {
 

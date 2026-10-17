@@ -14,6 +14,7 @@ import com.cinemamanagement.response.BookingManagementDetailResponse;
 import com.cinemamanagement.response.BookingListItemResponse;
 import com.cinemamanagement.response.PageResponse;
 import com.cinemamanagement.service.BookingManagementService;
+import com.cinemamanagement.util.BookingCustomers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,12 +35,10 @@ public class BookingManagementServiceImpl implements BookingManagementService {
     private static final int DEFAULT_PAGE_SIZE = 20;
     private static final int MAX_PAGE_SIZE = 100;
 
-
     private static final Set<String> PAID_STATUSES = Set.of("CONFIRMED", "PAID", "COMPLETED", "CHECKED_IN", "PICKED_UP");
     private static final Set<String> CLOSED_STATUSES = Set.of("CANCELLED", "CANCELED", "REFUNDED", "EXPIRED");
 
     private static final Set<String> BLOCKED_TICKET_STATUSES = Set.of("USED", "CHECKED_IN", "CANCELLED", "CANCELED", "REFUNDED");
-
     private static final long FALLBACK_SHOW_HOURS = 3;
 
     private final BookingRepository bookingRepository;
@@ -87,7 +86,6 @@ public class BookingManagementServiceImpl implements BookingManagementService {
         return PageResponse.of(page, items);
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public BookingManagementDetailResponse getDetail(Long bookingId) {
@@ -134,7 +132,11 @@ public class BookingManagementServiceImpl implements BookingManagementService {
                 booking.getBookingType(),
                 booking.getStatus(),
                 booking.getCreatedAt(),
-                new BookingManagementDetailResponse.Customer(customerName(booking), customerPhone(booking)),
+                new BookingManagementDetailResponse.Customer(
+                        BookingCustomers.name(booking),
+                        BookingCustomers.phone(booking),
+                        BookingCustomers.email(booking)
+                ),
                 new BookingManagementDetailResponse.Showtime(
                         showtime.getId(),
                         movie.getTitle(),
@@ -155,14 +157,18 @@ public class BookingManagementServiceImpl implements BookingManagementService {
                         payment.getTransactionCode(),
                         payment.getPaidAt()
                 ),
-
                 total.add(discount),
                 discount,
                 total,
                 booking.getPromotion() == null ? null : booking.getPromotion().getCode(),
                 employeeName(booking),
                 reprintBlocked == null,
-                reprintBlocked
+                reprintBlocked,
+                new BookingManagementDetailResponse.Pickup(
+                        booking.getPickedUpAt() != null,
+                        booking.getPickedUpAt(),
+                        booking.getPickedUpBy() == null ? null : booking.getPickedUpBy().getFullName()
+                )
         );
     }
 
@@ -242,7 +248,6 @@ public class BookingManagementServiceImpl implements BookingManagementService {
         return null;
     }
 
-
     private BookingListItemResponse toListItem(Booking b, List<String> seats, Payment payment) {
 
         var showtime = b.getShowtime();
@@ -253,8 +258,8 @@ public class BookingManagementServiceImpl implements BookingManagementService {
                 b.getBookingCode(),
                 b.getBookingType(),
                 b.getStatus(),
-                customerName(b),
-                customerPhone(b),
+                BookingCustomers.name(b),
+                BookingCustomers.phone(b),
                 movie.getTitle(),
                 movie.getPosterUrl(),
                 showtime.getStartTime(),
@@ -265,16 +270,9 @@ public class BookingManagementServiceImpl implements BookingManagementService {
                 payment == null ? null : payment.getPaymentMethod(),
                 payment == null ? null : payment.getStatus(),
                 employeeName(b),
-                b.getCreatedAt()
+                b.getCreatedAt(),
+                b.getPickedUpAt()
         );
-    }
-
-    private static String customerName(Booking b) {
-        return b.getCustomerName();
-    }
-
-    private static String customerPhone(Booking b) {
-        return b.getCustomerPhone();
     }
 
     private static String employeeName(Booking b) {
@@ -298,7 +296,6 @@ public class BookingManagementServiceImpl implements BookingManagementService {
 
     private static boolean isUpcomingSort(String sort) {
         String value = sort == null ? "" : sort.trim().toUpperCase(Locale.ROOT);
-
         return value.equals("UPCOMING") || value.equals("SHOWTIME");
     }
 
