@@ -52,7 +52,8 @@
 .admin-content .member-stat-card,
 .admin-content .member-table-card,
 .admin-content .member-empty-state,
-.admin-content .member-alert {
+.admin-content .member-alert,
+.app-modal .member-alert {
   background: linear-gradient(180deg, rgba(21, 29, 35, 0.96), rgba(17, 24, 29, 0.98));
   border: 1px solid var(--border, #26323a);
   border-radius: var(--radius-lg, 16px);
@@ -464,7 +465,8 @@
   margin: 0 0 8px;
 }
 
-.admin-content .member-alert {
+.admin-content .member-alert,
+.app-modal .member-alert {
   color: var(--text-secondary, #a8b3bb);
   font-size: 14px;
   font-weight: 600;
@@ -473,7 +475,8 @@
   padding: 14px 16px;
 }
 
-.admin-content .member-alert-error {
+.admin-content .member-alert-error,
+.app-modal .member-alert-error {
   background: rgba(229, 57, 53, 0.12);
   border-color: rgba(229, 57, 53, 0.3);
   color: #ff7474;

@@ -169,6 +169,10 @@ function validate(values: MemberFormValues): MemberFieldErrors {
 }
 
 function MemberList() {
+  const submittingRef = useRef(false)
+  const detailRequestRef = useRef(0)
+  const [editError, setEditError] = useState("")
+  const [discardEdit, setDiscardEdit] = useState(false)
   const avatarInputRef = useRef<HTMLInputElement | null>(null)
   const [members, setMembers] = useState<MemberListItem[]>([])
   const [statistics, setStatistics] = useState<MemberStatistics>(EMPTY_STATS)
@@ -263,15 +267,18 @@ function MemberList() {
   }
 
   function openDetail(memberId: number) {
+    const requestId = ++detailRequestRef.current
     setDetailLoading(true)
+    setDetailMember(null)
     setError("")
     getMember(memberId)
-      .then(setDetailMember)
-      .catch(() => setError("Không thể tải chi tiết thành viên. Vui lòng thử lại."))
-      .finally(() => setDetailLoading(false))
+      .then((member) => { if (requestId === detailRequestRef.current) setDetailMember(member) })
+      .catch(() => { if (requestId === detailRequestRef.current) setError("Không thể tải chi tiết thành viên. Vui lòng thử lại.") })
+      .finally(() => { if (requestId === detailRequestRef.current) setDetailLoading(false) })
   }
 
   function openEdit(member: Member) {
+    setEditError("")
     setDetailMember(null)
     setEditingMember(member)
     setValues(toFormValues(member))
@@ -325,15 +332,17 @@ function MemberList() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!editingMember) return
+    if (!editingMember || submittingRef.current) return
 
     setSubmitAttempted(true)
     const nextErrors = validate(values)
     setFieldErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
+    submittingRef.current = true
     setSaving(true)
-    setError("")
+    setEditError("")
+    setSuccessMessage("")
     updateMember(editingMember.id, buildUpdatePayload())
       .then(() => {
         setEditingMember(null)
@@ -345,9 +354,9 @@ function MemberList() {
           setFieldErrors(requestError.fieldErrors)
           setSubmitAttempted(true)
         }
-        setError(requestError.message || "Không thể cập nhật thành viên. Vui lòng thử lại.")
+        setEditError(requestError.message || "Không thể cập nhật thành viên. Vui lòng thử lại.")
       })
-      .finally(() => setSaving(false))
+      .finally(() => { submittingRef.current = false; setSaving(false) })
   }
 
   const emptyTitle = hasActiveFilter ? "Không tìm thấy thành viên phù hợp" : "Chưa có thành viên nào"
@@ -436,8 +445,8 @@ function MemberList() {
         </button>
       </section>
 
-      {successMessage && <div className="member-alert member-alert-success">{successMessage}</div>}
-      {error && <div className="member-alert member-alert-error">{error}</div>}
+      {successMessage && <div className="member-alert member-alert-success" role="status">{successMessage}</div>}
+      {error && <div className="member-alert member-alert-error" role="alert">{error}</div>}
 
       {loading && (
         <div className="member-table-card" aria-label="Đang tải danh sách thành viên">
@@ -556,7 +565,7 @@ function MemberList() {
       )}
 
       {detailLoading && (
-        <AppModal title="Chi tiết thành viên" subtitle="Đang tải thông tin thành viên" size="lg" onClose={() => setDetailLoading(false)}>
+        <AppModal title="Chi tiết thành viên" subtitle="Đang tải thông tin thành viên" size="lg" onClose={() => { detailRequestRef.current += 1; setDetailLoading(false) }}>
           <div className="member-skeleton-row" />
           <div className="member-skeleton-row" />
         </AppModal>
@@ -651,10 +660,12 @@ function MemberList() {
           title="Chỉnh sửa thành viên"
           subtitle="Cập nhật thông tin thành viên"
           size="lg"
+          busy={saving}
+          confirmClose={JSON.stringify(values) !== JSON.stringify(toFormValues(editingMember))}
           onClose={() => setEditingMember(null)}
           footer={
             <>
-              <button type="button" className="secondary-button modal__button" disabled={saving} onClick={() => setEditingMember(null)}>
+              <button type="button" className="secondary-button modal__button" disabled={saving} onClick={() => { if (JSON.stringify(values) !== JSON.stringify(toFormValues(editingMember))) setDiscardEdit(true); else setEditingMember(null) }}>
                 Hủy
               </button>
               <button type="submit" form="member-edit-form" className="primary-button modal__button" disabled={saving}>
@@ -663,6 +674,7 @@ function MemberList() {
             </>
           }
         >
+          {editError && <div className="member-alert member-alert-error" role="alert">{editError}</div>}
           <form id="member-edit-form" className="member-form" onSubmit={handleSubmit} noValidate>
             <section className="member-avatar-editor">
               <span>Ảnh đại diện</span>
@@ -777,6 +789,10 @@ function MemberList() {
           </form>
         </AppModal>
       )}
+      {discardEdit && <AppModal title="Bỏ các thay đổi chưa lưu?" variant="warning" onClose={() => setDiscardEdit(false)} actions={[
+        { label: "Tiếp tục chỉnh sửa", variant: "secondary", onClick: () => setDiscardEdit(false) },
+        { label: "Bỏ thay đổi", onClick: () => { setDiscardEdit(false); setEditingMember(null) } },
+      ]} />}
     </main>
   )
 }

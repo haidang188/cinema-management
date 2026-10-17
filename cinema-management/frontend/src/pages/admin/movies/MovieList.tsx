@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Eye, Pencil, Trash2 } from "lucide-react"
 import AppModal from "../../../component/common/AppModal"
 import { deleteMovie, getMovies } from "../../../service/movie/movieService"
@@ -63,6 +63,7 @@ function getVisibleGenres(genres: Genre[] = []) {
 }
 
 function MovieList({ onNavigate }: MovieListProps) {
+  const deletingRef = useRef(false)
   const [movies, setMovies] = useState<AdminMovie[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [keyword, setKeyword] = useState("")
@@ -145,8 +146,9 @@ function MovieList({ onNavigate }: MovieListProps) {
   }
 
   async function handleDeleteMovie() {
-    if (!movieToDelete || deleting) return
+    if (!movieToDelete || deleting || deletingRef.current) return
 
+    deletingRef.current = true
     setDeleting(true)
     setError("")
     try {
@@ -160,6 +162,7 @@ function MovieList({ onNavigate }: MovieListProps) {
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Không thể xóa phim. Vui lòng thử lại.")
     } finally {
+      deletingRef.current = false
       setDeleting(false)
     }
   }
@@ -480,10 +483,11 @@ function MovieList({ onNavigate }: MovieListProps) {
       {movieToDelete && (
         <AppModal
           title="Xóa phim"
-          message={`Bạn có chắc muốn xóa phim "${movieToDelete.title}"? Hành động này không thể hoàn tác.`}
+          message={<><p>{`Bạn có chắc muốn xóa phim "${movieToDelete.title}"? Hành động này không thể hoàn tác.`}</p>{error && <p role="alert">{error}</p>}</>}
           variant="warning"
           size="sm"
           closeOnEsc={!deleting}
+          busy={deleting}
           closeOnOverlay={!deleting}
           onClose={() => {
             if (!deleting) setMovieToDelete(null)

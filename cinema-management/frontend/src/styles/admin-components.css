@@ -381,6 +381,36 @@
   grid-template-columns: 220px minmax(0, 1fr);
 }
 
+.admin-content,
+.admin-content .seat-designer-stage,
+.admin-content .seat-map-panel,
+.admin-content .room-designer-sidebar {
+  min-width: 0;
+}
+
+.admin-content .seat-grid-scroll {
+  max-width: 100%;
+  overflow: auto;
+}
+
+.admin-content .movie-search-field > span,
+.admin-content .movie-filter-field > span,
+.admin-content .room-search-field > span,
+.admin-content .room-filter-field > span,
+.admin-content .employee-search-field > span,
+.admin-content .employee-filter-field > span,
+.admin-content .member-search-field > span,
+.admin-content .member-filter-field > span {
+  display: block;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .admin-sidebar {
   width: 220px;
   padding: 14px 12px;
@@ -556,7 +586,7 @@
   .admin-content .movie-toolbar,
   .admin-content .room-toolbar,
   .admin-content .employee-toolbar {
-    grid-template-columns: minmax(240px, 1fr) 1fr 1fr auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

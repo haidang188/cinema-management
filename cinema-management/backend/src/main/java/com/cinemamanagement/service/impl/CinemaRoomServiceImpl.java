@@ -8,6 +8,7 @@ import com.cinemamanagement.exception.ResourceNotFoundException;
 import com.cinemamanagement.repository.BookingSeatRepository;
 import com.cinemamanagement.repository.CinemaRoomRepository;
 import com.cinemamanagement.repository.SeatRepository;
+import com.cinemamanagement.repository.ShowtimeSeatRepository;
 import com.cinemamanagement.request.CreateCinemaRoomRequest;
 import com.cinemamanagement.request.SeatTypeUpdateRequest;
 import com.cinemamanagement.request.UpdateCinemaRoomRequest;
@@ -36,15 +37,18 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
     private final CinemaRoomRepository cinemaRoomRepository;
     private final SeatRepository seatRepository;
     private final BookingSeatRepository bookingSeatRepository;
+    private final ShowtimeSeatRepository showtimeSeatRepository;
 
     public CinemaRoomServiceImpl(
             CinemaRoomRepository cinemaRoomRepository,
             SeatRepository seatRepository,
-            BookingSeatRepository bookingSeatRepository
+            BookingSeatRepository bookingSeatRepository,
+            ShowtimeSeatRepository showtimeSeatRepository
     ) {
         this.cinemaRoomRepository = cinemaRoomRepository;
         this.seatRepository = seatRepository;
         this.bookingSeatRepository = bookingSeatRepository;
+        this.showtimeSeatRepository = showtimeSeatRepository;
     }
 
     @Override
@@ -313,7 +317,12 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
                     : gridKey(existingSeat.getGridRow(), existingSeat.getGridColumn());
             if (existingGridKey == null || !requestedGridPositions.contains(existingGridKey)) {
                 if (bookingSeatRepository.existsBySeatId(existingSeat.getId())) {
-                    throw new BadRequestException("Cannot remove booked seat " + existingSeat.getRowLabel() + existingSeat.getSeatNumber());
+                    throw new BadRequestException("Không thể chuyển ghế " + existingSeat.getRowLabel() + existingSeat.getSeatNumber()
+                            + " thành khoảng trống vì ghế đã gắn với vé đặt. Vui lòng giữ lại ghế hoặc chọn Ghế ngừng hoạt động.");
+                }
+                if (showtimeSeatRepository.existsBySeatId(existingSeat.getId())) {
+                    throw new ConflictException("Không thể chuyển ghế " + existingSeat.getRowLabel() + existingSeat.getSeatNumber()
+                            + " thành khoảng trống vì ghế đang gắn với suất chiếu. Vui lòng giữ lại ghế hoặc chọn Ghế ngừng hoạt động.");
                 }
                 seatsToDelete.add(existingSeat);
             }
@@ -321,6 +330,32 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
 
         if (!seatsToDelete.isEmpty()) {
             seatRepository.deleteAll(seatsToDelete);
+            seatRepository.flush();
+        }
+
+        // Free old seat numbers before any IDENTITY insert or final renumbering.
+        // Otherwise adding A1 before an existing A1 attempts an insert while that
+        // unique (room_id, row_label, seat_number) key is still occupied.
+        // Keep seat IDs intact so booking/showtime references remain valid.
+        Set<Integer> reservedNumbers = new HashSet<>();
+        existingSeats.forEach(seat -> reservedNumbers.add(seat.getSeatNumber()));
+        requestedSeats.forEach(seat -> reservedNumbers.add(seat.getSeatNumber()));
+        int temporaryNumber = 1;
+        boolean stagedRenumbering = false;
+        for (CreateCinemaRoomRequest.SeatLayoutRequest requestedSeat : requestedSeats) {
+            Seat existingSeat = existingByGridPosition.get(gridKey(requestedSeat.getGridRow(), requestedSeat.getGridColumn()));
+            if (existingSeat == null || (existingSeat.getRowLabel().equals(requestedSeat.getRowLabel())
+                    && existingSeat.getSeatNumber().equals(requestedSeat.getSeatNumber()))) {
+                continue;
+            }
+            while (reservedNumbers.contains(temporaryNumber)) {
+                temporaryNumber++;
+            }
+            existingSeat.setSeatNumber(temporaryNumber);
+            reservedNumbers.add(temporaryNumber);
+            stagedRenumbering = true;
+        }
+        if (stagedRenumbering) {
             seatRepository.flush();
         }
 

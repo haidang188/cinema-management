@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import AppModal from "../../../component/common/AppModal"
 import SeatMap from "../../../component/room/SeatMap"
 import { getRoomDetail, updateSeatTypes } from "../../../service/cinema-room/cinemaRoomService"
@@ -48,6 +48,7 @@ function getBulkFieldValue(seats: Seat[], pendingSeats: Record<number, SeatDraft
 }
 
 function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
+  const savingRef = useRef(false)
   const [room, setRoom] = useState<CinemaRoom | null>(null)
   const [pendingSeats, setPendingSeats] = useState<Record<number, SeatDraft>>({})
   const [selectedSeatIds, setSelectedSeatIds] = useState<number[]>([])
@@ -155,7 +156,7 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
   }
 
   async function handleSave() {
-    if (!hasChanges || saving) return
+    if (!hasChanges || saving || savingRef.current) return
 
     const seats = Object.entries(pendingSeats).map(([seatId, draft]) => ({
       seatId: Number(seatId),
@@ -163,6 +164,7 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
       status: draft.status,
     }))
 
+    savingRef.current = true
     setSaving(true)
     setError("")
     try {
@@ -174,6 +176,7 @@ function CinemaRoomDetail({ roomId, onNavigate }: CinemaRoomDetailProps) {
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : SAVE_ERROR_MESSAGE)
     } finally {
+      savingRef.current = false
       setSaving(false)
     }
   }

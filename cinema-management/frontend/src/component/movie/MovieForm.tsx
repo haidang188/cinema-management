@@ -100,9 +100,9 @@ function validate(values: MovieFormValues, requiresPoster: boolean): Record<stri
   }
 
   if (values.trailerUrl.length > 255) errors.trailerUrl = "Tối đa 255 ký tự"
+  else if (values.trailerUrl.trim() && !isValidUrl(values.trailerUrl.trim())) errors.trailerUrl = "Link trailer phải là địa chỉ HTTP hoặc HTTPS hợp lệ"
   if (values.director.length > 100) errors.director = "Tối đa 100 ký tự"
   if (values.language.length > 50) errors.language = "Tối đa 50 ký tự"
-  if (values.trailerUrl.length > 255) errors.trailerUrl = "Tối đa 255 ký tự"
 
   const posterError = validatePosterUrl(values.posterUrl, requiresPoster)
   if (posterError) errors.posterUrl = posterError
@@ -117,6 +117,8 @@ function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSu
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   const [submitError, setSubmitError] = useState("")
+  const [posterFailed, setPosterFailed] = useState(false)
+  const submittingRef = useRef(false)
   const formRef = useRef<HTMLFormElement | null>(null)
   const requiresPoster = !initialMovie
 
@@ -142,6 +144,7 @@ function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSu
   const canOpenTrailer = isValidUrl(values.trailerUrl)
 
   function updateField<K extends keyof MovieFormValues>(name: K, value: MovieFormValues[K]) {
+    if (name === "posterUrl") setPosterFailed(false)
     setValues((current) => ({ ...current, [name]: value }))
     setErrors((current) => ({ ...current, [name]: "" }))
   }
@@ -167,7 +170,7 @@ function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSu
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (saving) return
+    if (submittingRef.current) return
 
     const validationErrors = validate(values, requiresPoster)
     setErrors(validationErrors)
@@ -186,6 +189,7 @@ function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSu
       genreIds: values.genreIds,
     }
 
+    submittingRef.current = true
     setSaving(true)
     try {
       await onSubmit(payload)
@@ -194,16 +198,17 @@ function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSu
       setSubmitError(requestError.message)
       setErrors(requestError.fieldErrors || {})
     } finally {
+      submittingRef.current = false
       setSaving(false)
     }
   }
 
   return (
     <form ref={formRef} className="movie-form movie-admin-form" onSubmit={handleSubmit} noValidate>
-      {submitError && <div className="movie-alert movie-alert-error">{submitError}</div>}
+      {submitError && <div className="movie-alert movie-alert-error" role="alert">{submitError}</div>}
 
       <div className="form-actions movie-action-bar movie-action-bar-top">
-        <button type="button" className="secondary-button" onClick={onCancel}>
+        <button type="button" className="secondary-button" disabled={saving} onClick={onCancel}>
           {cancelLabel}
         </button>
         <button type="submit" className="primary-button" disabled={saving}>
@@ -221,6 +226,8 @@ function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSu
             <span>Tên phim *</span>
             <input
               data-field="title"
+              aria-invalid={Boolean(errors.title)}
+              aria-describedby={errors.title ? "movie-title-error" : undefined}
               className={errors.title ? "is-invalid" : ""}
               type="text"
               value={values.title}
@@ -228,7 +235,7 @@ function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSu
               maxLength={150}
               required
             />
-            {errors.title && <small>{errors.title}</small>}
+            {errors.title && <small id="movie-title-error" role="alert">{errors.title}</small>}
           </label>
 
           <label className="movie-field">
@@ -244,6 +251,8 @@ function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSu
             <span>Thời lượng *</span>
             <input
               data-field="durationMinutes"
+              aria-invalid={Boolean(errors.durationMinutes)}
+              aria-describedby={errors.durationMinutes ? "movie-duration-error" : undefined}
               className={errors.durationMinutes ? "is-invalid" : ""}
               type="number"
               min="1"
@@ -251,7 +260,7 @@ function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSu
               onChange={(event) => updateField("durationMinutes", event.target.value)}
               required
             />
-            {errors.durationMinutes && <small>{errors.durationMinutes}</small>}
+            {errors.durationMinutes && <small id="movie-duration-error" role="alert">{errors.durationMinutes}</small>}
           </label>
 
           <label className="movie-field">
@@ -343,6 +352,8 @@ function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSu
             <span>Link poster Cloudinary {requiresPoster ? "*" : ""}</span>
             <input
               data-field="posterUrl"
+              aria-invalid={Boolean(errors.posterUrl)}
+              aria-describedby={errors.posterUrl ? "movie-poster-error" : undefined}
               className={errors.posterUrl ? "is-invalid" : ""}
               type="url"
               value={values.posterUrl}
@@ -351,12 +362,12 @@ function MovieForm({ initialMovie, submitLabel, cancelLabel = "Quay lại", onSu
               maxLength={255}
               required={requiresPoster}
             />
-            {errors.posterUrl && <small>{errors.posterUrl}</small>}
+            {errors.posterUrl && <small id="movie-poster-error" role="alert">{errors.posterUrl}</small>}
           </label>
 
           <div className="poster-frame">
             <div className="poster-preview">
-              {posterPreview ? <img src={posterPreview} alt="Xem trước poster" /> : <span>Xem trước poster</span>}
+              {posterPreview && !posterFailed ? <img src={posterPreview} alt="Xem trước poster" onError={() => setPosterFailed(true)} /> : <span role="status">{posterFailed ? "Không tải được ảnh poster. Vui lòng kiểm tra đường dẫn." : "Xem trước poster"}</span>}
             </div>
           </div>
 

@@ -226,6 +226,7 @@ Sidebar admin nam trong `frontend/src/routes/RouteShells.tsx`. Sidebar/layout mo
 
 Thu muc `database/` hien co:
 
+- `cinema_management_all_in_one.sql`: file tong hop cho MySQL 8.0+, dung voi database `cinema_management` moi/trong. Mo file, chon toan bo va chay mot lan; khong can chay cac file le ben duoi. Gom schema, roles, du lieu mau tieng Viet, bang danh gia, nhan vien, dat ve online, gia ve, lich chieu 7 ngay tu ngay mai va mo ta phim mo rong. Khong nap ban dump du lieu cu hoac file 03 vi ID phim/the loai khong khop voi du lieu mau 02. Khong chay lai tren database da co bang.
 - `rap_chieu_phim_full.sql`: script database tong hop.
 - `02_sample_data.sql`: du lieu mau.
 - `03_update_vietnamese_data.sql`: cap nhat du lieu tieng Viet.

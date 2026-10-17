@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-17",
+  "mode": "read-only; login checked separately; no POST/PUT/DELETE entity writes",
+  "checks": [
+    {
+      "path": "/api/movies/admin",
+      "status": 200,
+      "totalElements": 18
+    },
+    {
+      "path": "/api/movies/admin/:id",
+      "status": 200
+    },
+    {
+      "path": "/api/movies/admin?keyword=qa_no_result_20261017",
+      "status": 200,
+      "totalElements": 0
+    },
+    {
+      "path": "/api/admin/cinema-rooms",
+      "status": 200,
+      "totalElements": 5
+    },
+    {
+      "path": "/api/admin/cinema-rooms/:id",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/cinema-rooms?keyword=qa_no_result_20261017",
+      "status": 200,
+      "totalElements": 0
+    },
+    {
+      "path": "/api/admin/employees",
+      "status": 200,
+      "totalElements": 10
+    },
+    {
+      "path": "/api/admin/employees/:id",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/employees?keyword=qa_no_result_20261017",
+      "status": 200,
+      "totalElements": 0
+    },
+    {
+      "path": "/api/admin/members",
+      "status": 200,
+      "totalElements": 1
+    },
+    {
+      "path": "/api/admin/members/:id",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/members?keyword=qa_no_result_20261017",
+      "status": 200,
+      "totalElements": 0
+    },
+    {
+      "path": "/api/admin/genres",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/members/statistics",
+      "status": 200
+    }
+  ]
+}

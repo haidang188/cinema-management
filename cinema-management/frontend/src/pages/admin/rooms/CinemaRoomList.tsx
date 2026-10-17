@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Eye, Pencil, Trash2 } from "lucide-react"
 import AppModal from "../../../component/common/AppModal"
 import { deleteRoom, getRooms } from "../../../service/cinema-room/cinemaRoomService"
@@ -37,6 +37,7 @@ function getVisiblePages(currentPage: number, totalPages: number) {
 }
 
 function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
+  const deletingRef = useRef(false)
   const [rooms, setRooms] = useState<CinemaRoom[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [keyword, setKeyword] = useState("")
@@ -105,8 +106,9 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
   }
 
   async function handleDeleteRoom() {
-    if (!roomToDelete || deleting) return
+    if (!roomToDelete || deleting || deletingRef.current) return
 
+    deletingRef.current = true
     setDeleting(true)
     setError("")
     try {
@@ -120,6 +122,7 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Không thể xóa phòng chiếu. Vui lòng thử lại.")
     } finally {
+      deletingRef.current = false
       setDeleting(false)
     }
   }
@@ -178,7 +181,7 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
         </button>
       </section>
 
-      {error && <div className="room-alert room-alert-error">{error}</div>}
+      {error && <div className="room-alert room-alert-error" role="alert">{error}</div>}
 
       {loading && (
         <div className="room-table-card" aria-label="Đang tải danh sách phòng">
@@ -190,8 +193,8 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
 
       {!loading && !error && rooms.length === 0 && (
         <section className="room-empty-state">
-          <h2>Không tìm thấy phòng chiếu phù hợp</h2>
-          <p>Thử đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái.</p>
+          <h2>{hasActiveFilter ? "Không tìm thấy phòng chiếu phù hợp" : "Chưa có phòng chiếu"}</h2>
+          <p>{hasActiveFilter ? "Thử đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái." : "Thêm phòng chiếu mới để bắt đầu thiết kế sơ đồ ghế."}</p>
         </section>
       )}
 
@@ -297,10 +300,11 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
       {roomToDelete && (
         <AppModal
           title="Xóa phòng chiếu"
-          message={`Bạn có chắc muốn xóa phòng "${roomToDelete.name}"? Thao tác này sẽ xóa các ghế của phòng nếu phòng chưa được dùng bởi suất chiếu hoặc đặt vé.`}
+          message={<><p>{`Bạn có chắc muốn xóa phòng "${roomToDelete.name}"? Thao tác này sẽ xóa các ghế của phòng nếu phòng chưa được dùng bởi suất chiếu hoặc đặt vé.`}</p>{error && <p role="alert">{error}</p>}</>}
           variant="warning"
           size="sm"
           closeOnEsc={!deleting}
+          busy={deleting}
           closeOnOverlay={!deleting}
           onClose={() => {
             if (!deleting) setRoomToDelete(null)

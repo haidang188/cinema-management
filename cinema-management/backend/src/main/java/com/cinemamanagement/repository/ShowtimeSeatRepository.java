@@ -17,6 +17,8 @@ import java.util.Optional;
 
 @Repository
 public interface ShowtimeSeatRepository extends JpaRepository<ShowtimeSeat, Long> {
+    boolean existsBySeatId(Long seatId);
+
     List<ShowtimeSeat> findByShowtimeId(Long showtimeId);
 
     Optional<ShowtimeSeat> findByShowtimeIdAndSeatId(

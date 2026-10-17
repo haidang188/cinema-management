@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState, type FormEvent, type PointerEvent } from "react"
+import { Fragment, useMemo, useRef, useState, type FormEvent, type PointerEvent } from "react"
 import AppModal from "../../../component/common/AppModal"
 import type { CinemaRoom, CinemaRoomPayload, CinemaRoomSeatPayload, Seat } from "../../../types/admin"
 
@@ -142,6 +142,7 @@ function hasActiveSeatsOutside(grid: SeatCell[][], rowCount: number, columnCount
 }
 
 function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: CinemaRoomFormProps) {
+  const submittingRef = useRef(false)
   const initialLayout = useMemo(() => buildGridFromRoom(initialRoom), [initialRoom])
   const [formValues, setFormValues] = useState({
     name: initialRoom?.name || "",
@@ -172,8 +173,8 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
   }
 
   function updateGridSize(nextRows: number, nextColumns: number) {
-    const safeRows = Math.min(MAX_ROWS, Math.max(1, nextRows))
-    const safeColumns = Math.min(MAX_COLUMNS, Math.max(1, nextColumns))
+    const safeRows = Math.min(MAX_ROWS, Math.max(1, Math.trunc(nextRows) || 1))
+    const safeColumns = Math.min(MAX_COLUMNS, Math.max(1, Math.trunc(nextColumns) || 1))
     if (
       (safeRows < rowCount || safeColumns < columnCount) &&
       hasActiveSeatsOutside(grid, safeRows, safeColumns)
@@ -198,7 +199,7 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
 
   function handlePointerDown(event: PointerEvent<HTMLButtonElement>, rowIndex: number, columnIndex: number) {
     event.preventDefault()
-    event.currentTarget.setPointerCapture(event.pointerId)
+    event.currentTarget.focus()
     setIsPainting(true)
     setPaintingTool(selectedTool)
     paintCell(rowIndex, columnIndex, selectedTool)
@@ -241,6 +242,7 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (saving || submittingRef.current) return
     const name = formValues.name.trim()
     if (!name) {
       setError("Vui lòng nhập tên phòng chiếu.")
@@ -254,6 +256,7 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
     }
 
     setError("")
+    submittingRef.current = true
     try {
       await onSubmit({
         name,
@@ -263,12 +266,14 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
       })
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Không thể lưu phòng chiếu. Vui lòng thử lại.")
+    } finally {
+      submittingRef.current = false
     }
   }
 
   return (
     <form className="room-designer-shell" onSubmit={handleSubmit}>
-      {error && <div className="room-alert room-alert-error">{error}</div>}
+      {error && <div className="room-alert room-alert-error" role="alert">{error}</div>}
 
       <section className="room-designer-layout">
         <aside className="room-designer-sidebar">
@@ -365,6 +370,7 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
             <ul>
               <li>Có thể kéo chuột để vẽ hoặc xoá nhiều ghế cùng lúc.</li>
               <li>Ô trống là lối đi hoặc khoảng trống, không tạo ghế.</li>
+              {mode === "edit" && <li>Đổi ghế thành khoảng trống sẽ xóa ghế khi lưu. Ghế đã gắn với suất chiếu hoặc vé không thể xóa; hãy dùng “Ghế ngừng hoạt động” nếu cần giữ lại ghế.</li>}
             </ul>
           </section>
         </aside>
@@ -429,10 +435,12 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
                       ]
                         .filter(Boolean)
                         .join(" ")}
-                      aria-label={`${getRowLabel(rowIndex)} cột ${columnIndex + 1}${cell.active ? ", có ghế" : ", khoảng trống"}`}
+                      aria-label={`${getRowLabel(rowIndex)} cột ${columnIndex + 1}, ${!cell.active ? "khoảng trống" : cell.status === "INACTIVE" ? "ghế ngừng hoạt động" : cell.seatType === "VIP" ? "ghế VIP" : "ghế thường"}`}
+                      onClick={(event) => { if (event.detail === 0) paintCell(rowIndex, columnIndex, selectedTool) }}
                       onPointerDown={(event) => handlePointerDown(event, rowIndex, columnIndex)}
                       onPointerEnter={() => handlePointerEnter(rowIndex, columnIndex)}
                       onPointerUp={stopPainting}
+                      onPointerCancel={stopPainting}
                     >
                       {cell.active && <span className="seat-cell-icon" aria-hidden="true" />}
                     </button>

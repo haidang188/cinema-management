@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react"
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
 import {
   AlertTriangle,
   Briefcase,
@@ -89,6 +89,7 @@ interface EmployeeFormProps {
   mode: EmployeeModalMode
   initialEmployee?: Employee | null
   onCancel: () => void
+  onStateChange: (state: { busy: boolean; dirty: boolean }) => void
   onSubmit: (values: EmployeeFormValues) => Promise<void>
 }
 
@@ -255,14 +256,18 @@ function EmployeeStatCard({ tone, icon, label, value, caption }: StatCardProps) 
   )
 }
 
-function EmployeeForm({ mode, initialEmployee, onCancel, onSubmit }: EmployeeFormProps) {
+function EmployeeForm({ mode, initialEmployee, onCancel, onSubmit, onStateChange }: EmployeeFormProps) {
   const [values, setValues] = useState<EmployeeFormValues>(() => toFormValues(initialEmployee))
   const [errors, setErrors] = useState<EmployeeFieldErrors>({})
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const submittingRef = useRef(false)
   const isEdit = mode === "edit"
+  useEffect(() => {
+    onStateChange({ busy: saving, dirty: JSON.stringify(values) !== JSON.stringify(toFormValues(initialEmployee)) })
+  }, [saving, values, initialEmployee, onStateChange])
 
   function updateField(name: EmployeeFieldName, value: string) {
     setValues((current) => ({ ...current, [name]: value }))
@@ -277,12 +282,13 @@ function EmployeeForm({ mode, initialEmployee, onCancel, onSubmit }: EmployeeFor
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (saving) return
+    if (submittingRef.current) return
 
     const nextErrors = validate(values, mode)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
+    submittingRef.current = true
     setSaving(true)
     setFormError("")
     try {
@@ -294,13 +300,14 @@ function EmployeeForm({ mode, initialEmployee, onCancel, onSubmit }: EmployeeFor
       }
       setFormError(apiError.message || "Không thể lưu nhân viên. Vui lòng thử lại.")
     } finally {
+      submittingRef.current = false
       setSaving(false)
     }
   }
 
   return (
     <form className="employee-admin-form" onSubmit={handleSubmit} noValidate>
-      {formError && <div className="employee-alert employee-alert-error">{formError}</div>}
+      {formError && <div className="employee-alert employee-alert-error" role="alert">{formError}</div>}
 
       <section className="employee-form-section">
         <h3>Thông tin tài khoản</h3>
@@ -513,6 +520,19 @@ function EmployeeDetail({ employee }: { employee: Employee }) {
 }
 
 function EmployeeList({ onNavigate: _onNavigate }: EmployeeListProps) {
+  const [formState, setFormState] = useState({ busy: false, dirty: false })
+  const [discardForm, setDiscardForm] = useState(false)
+  const detailRequestRef = useRef(0)
+  const deactivatingRef = useRef(false)
+  function closeForm() {
+    if (formState.busy) return
+    if (formState.dirty) { setDiscardForm(true); return }
+    detailRequestRef.current += 1
+    setDetailLoading(false)
+    setFormMode(null)
+    setEditingEmployee(null)
+    setModalError("")
+  }
   const [employees, setEmployees] = useState<EmployeeListItem[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [keyword, setKeyword] = useState("")
@@ -635,29 +655,34 @@ function EmployeeList({ onNavigate: _onNavigate }: EmployeeListProps) {
   }
 
   async function openDetail(employeeId: number) {
+    const requestId = ++detailRequestRef.current
     setDetailLoading(true)
     setModalError("")
     setDetailEmployee(null)
     try {
-      setDetailEmployee(await getEmployee(String(employeeId)))
+      const employee = await getEmployee(String(employeeId))
+      if (requestId === detailRequestRef.current) setDetailEmployee(employee)
     } catch {
-      setModalError("Không thể tải chi tiết nhân viên. Vui lòng thử lại.")
+      if (requestId === detailRequestRef.current) setModalError("Không thể tải chi tiết nhân viên. Vui lòng thử lại.")
     } finally {
-      setDetailLoading(false)
+      if (requestId === detailRequestRef.current) setDetailLoading(false)
     }
   }
 
   async function openEdit(employeeId: number) {
+    const requestId = ++detailRequestRef.current
     setDetailLoading(true)
     setModalError("")
     setEditingEmployee(null)
+    setFormState({ busy: false, dirty: false })
     setFormMode("edit")
     try {
-      setEditingEmployee(await getEmployee(String(employeeId)))
+      const employee = await getEmployee(String(employeeId))
+      if (requestId === detailRequestRef.current) setEditingEmployee(employee)
     } catch {
-      setModalError("Không thể tải thông tin nhân viên. Vui lòng thử lại.")
+      if (requestId === detailRequestRef.current) setModalError("Không thể tải thông tin nhân viên. Vui lòng thử lại.")
     } finally {
-      setDetailLoading(false)
+      if (requestId === detailRequestRef.current) setDetailLoading(false)
     }
   }
 
@@ -679,8 +704,9 @@ function EmployeeList({ onNavigate: _onNavigate }: EmployeeListProps) {
   }
 
   async function handleDeactivate() {
-    if (!confirmEmployee || deactivating) return
+    if (!confirmEmployee || deactivating || deactivatingRef.current) return
 
+    deactivatingRef.current = true
     setDeactivating(true)
     setError("")
     try {
@@ -691,6 +717,7 @@ function EmployeeList({ onNavigate: _onNavigate }: EmployeeListProps) {
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Không thể ngừng hoạt động nhân viên.")
     } finally {
+      deactivatingRef.current = false
       setDeactivating(false)
     }
   }
@@ -704,7 +731,7 @@ function EmployeeList({ onNavigate: _onNavigate }: EmployeeListProps) {
           <h1>Quản lý nhân viên</h1>
           <p>Quản lý thông tin và trạng thái nhân viên trong hệ thống</p>
         </div>
-        <button type="button" className="primary-button employee-add-button" onClick={() => setFormMode("create")}>
+        <button type="button" className="primary-button employee-add-button" onClick={() => { setFormState({ busy: false, dirty: false }); setFormMode("create") }}>
           <UserPlus size={16} />
           Thêm nhân viên
         </button>
@@ -772,7 +799,7 @@ function EmployeeList({ onNavigate: _onNavigate }: EmployeeListProps) {
         </button>
       </section>
 
-      {error && <div className="employee-alert employee-alert-error">{error}</div>}
+      {error && <div className="employee-alert employee-alert-error" role="alert">{error}</div>}
 
       {loading && (
         <div className="employee-table-card" aria-label="Đang tải danh sách nhân viên...">
@@ -904,23 +931,18 @@ function EmployeeList({ onNavigate: _onNavigate }: EmployeeListProps) {
           title={formMode === "create" ? "Thêm nhân viên" : "Chỉnh sửa nhân viên"}
           size="xl"
           closeOnOverlay={false}
-          onClose={() => {
-            setFormMode(null)
-            setEditingEmployee(null)
-            setModalError("")
-          }}
+          busy={formState.busy}
+          onClose={closeForm}
         >
           {detailLoading && <div className="employee-alert">Đang tải thông tin nhân viên...</div>}
-          {modalError && <div className="employee-alert employee-alert-error">{modalError}</div>}
+          {modalError && <div className="employee-alert employee-alert-error" role="alert">{modalError}</div>}
           {(!detailLoading && (formMode === "create" || editingEmployee)) && (
             <EmployeeForm
               key={`${formMode}-${editingEmployee?.id || "new"}`}
               mode={formMode}
               initialEmployee={editingEmployee}
-              onCancel={() => {
-                setFormMode(null)
-                setEditingEmployee(null)
-              }}
+              onStateChange={setFormState}
+              onCancel={closeForm}
               onSubmit={formMode === "create" ? handleCreate : handleUpdate}
             />
           )}
@@ -933,12 +955,14 @@ function EmployeeList({ onNavigate: _onNavigate }: EmployeeListProps) {
           size="lg"
           closeOnOverlay
           onClose={() => {
+            detailRequestRef.current += 1
+            setDetailLoading(false)
             setDetailEmployee(null)
             setModalError("")
           }}
           footer={
             <div className="employee-modal-footer">
-              <button type="button" className="secondary-button" onClick={() => setDetailEmployee(null)}>
+              <button type="button" className="secondary-button" onClick={() => { detailRequestRef.current += 1; setDetailLoading(false); setDetailEmployee(null); setModalError("") }}>
                 Đóng
               </button>
               {detailEmployee && (
@@ -948,6 +972,7 @@ function EmployeeList({ onNavigate: _onNavigate }: EmployeeListProps) {
                   onClick={() => {
                     setEditingEmployee(detailEmployee)
                     setDetailEmployee(null)
+                    setFormState({ busy: false, dirty: false })
                     setFormMode("edit")
                   }}
                 >
@@ -958,7 +983,7 @@ function EmployeeList({ onNavigate: _onNavigate }: EmployeeListProps) {
           }
         >
           {detailLoading && <div className="employee-alert">Đang tải thông tin nhân viên...</div>}
-          {modalError && <div className="employee-alert employee-alert-error">{modalError}</div>}
+          {modalError && <div className="employee-alert employee-alert-error" role="alert">{modalError}</div>}
           {detailEmployee && <EmployeeDetail employee={detailEmployee} />}
         </AppModal>
       )}
@@ -969,6 +994,7 @@ function EmployeeList({ onNavigate: _onNavigate }: EmployeeListProps) {
           variant="warning"
           size="sm"
           closeOnEsc={!deactivating}
+          busy={deactivating}
           closeOnOverlay={!deactivating}
           onClose={() => {
             if (!deactivating) setConfirmEmployee(null)
@@ -988,6 +1014,7 @@ function EmployeeList({ onNavigate: _onNavigate }: EmployeeListProps) {
           ]}
         >
           <div className="employee-confirm-copy">
+            {error && <p role="alert">{error}</p>}
             <span className="employee-confirm-icon">
               <AlertTriangle size={28} />
             </span>
@@ -1003,6 +1030,10 @@ function EmployeeList({ onNavigate: _onNavigate }: EmployeeListProps) {
           {toastMessage}
         </div>
       )}
+      {discardForm && <AppModal title="Bỏ các thay đổi chưa lưu?" variant="warning" onClose={() => setDiscardForm(false)} actions={[
+        { label: "Tiếp tục chỉnh sửa", variant: "secondary", onClick: () => setDiscardForm(false) },
+        { label: "Bỏ thay đổi", onClick: () => { setDiscardForm(false); setFormMode(null); setEditingEmployee(null); setModalError("") } },
+      ]} />}
     </main>
   )
 }
