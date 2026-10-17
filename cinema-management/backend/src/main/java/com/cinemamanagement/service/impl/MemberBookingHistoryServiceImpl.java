@@ -80,7 +80,7 @@ public class MemberBookingHistoryServiceImpl implements MemberBookingHistoryServ
                 showtime.getStartTime(), showtime.getRoom().getName(),
                 seats.stream().sorted(SEAT_ORDER).toList(), zero(booking.getTotalAmount()),
                 zero(booking.getDiscountAmount()), payment == null ? null : payment.getPaymentMethod(),
-                payment == null ? null : payment.getStatus(), null, booking.getCreatedAt());
+                payment == null ? null : payment.getStatus(), null, booking.getCreatedAt(), booking.getPickedUpAt());
     }
 
     private String seatName(BookingSeat bookingSeat) {
