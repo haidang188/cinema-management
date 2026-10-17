@@ -1,8 +1,19 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
-import { AuthRequestError, login, register } from "../service/auth/authService"
-import type { AuthFieldErrors, AuthResponse, LoginPayload, RegisterPayload } from "../types/auth"
+import {
+  AuthRequestError,
+  login,
+  register,
+  logoutSession,
+} from "../service/auth/authService"
+
+import type {
+  AuthFieldErrors,
+  AuthResponse,
+  LoginPayload,
+  RegisterPayload,
+} from "../types/auth"
 
 const STORAGE_KEY = "cinema.currentUser"
 
@@ -23,7 +34,10 @@ function readStoredUser(): AuthResponse | null {
 
 function storeUser(user: AuthResponse | null) {
   if (user) {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(user),
+    )
     return
   }
 
@@ -47,9 +61,13 @@ export function getHomePath(user: AuthResponse | null): string {
 
 export function useAuth() {
   const navigate = useNavigate()
-  const [currentUser, setCurrentUser] = useState<AuthResponse | null>(() => readStoredUser())
+
+  const [currentUser, setCurrentUser] =
+    useState<AuthResponse | null>(() => readStoredUser())
+
   const [authMessage, setAuthMessage] = useState("")
-  const [authFieldErrors, setAuthFieldErrors] = useState<AuthFieldErrors>({})
+  const [authFieldErrors, setAuthFieldErrors] =
+    useState<AuthFieldErrors>({})
   const [authLoading, setAuthLoading] = useState(false)
 
   function clearAuthFeedback() {
@@ -72,9 +90,18 @@ export function useAuth() {
     navigate("/register")
   }
 
-  function logout() {
-    updateCurrentUser(null)
-    navigate("/")
+  async function logout() {
+    try {
+      await logoutSession()
+      updateCurrentUser(null)
+      navigate("/")
+    } catch (error) {
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Không thể đăng xuất. Vui lòng thử lại.",
+      )
+    }
   }
 
   async function loginUser(payload: LoginPayload) {
@@ -107,14 +134,23 @@ export function useAuth() {
     }
   }
 
-  function handleAuthError(error: unknown, fallbackMessage: string) {
+  function handleAuthError(
+    error: unknown,
+    fallbackMessage: string,
+  ) {
     if (error instanceof AuthRequestError) {
       setAuthFieldErrors(error.fieldErrors)
-      setAuthMessage(error.fieldErrors.system ? error.message : "")
+      setAuthMessage(
+        error.fieldErrors.system ? error.message : "",
+      )
       return
     }
 
-    setAuthMessage(error instanceof Error ? error.message : fallbackMessage)
+    setAuthMessage(
+      error instanceof Error
+        ? error.message
+        : fallbackMessage,
+    )
   }
 
   return {

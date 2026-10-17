@@ -1,16 +1,13 @@
-﻿import type { ReactNode } from "react"
-import {
-  Clapperboard,
-  Percent,
-  Tags,
-  Ticket,
-  UserRound,
-  UsersRound,
-} from "lucide-react"
-import { Navigate, useLocation, useNavigate } from "react-router-dom"
+import type { ReactNode } from "react"
+import { Navigate, useNavigate } from "react-router-dom"
 
 import HomeFooter from "../component/home/HomeFooter"
 import HomeHeader from "../component/home/HomeHeader"
+import Layout from "../common/layout/Layout"
+import Sidebar from "../common/layout/Sidebar"
+import type { SidebarItem } from "../common/layout/Sidebar"
+import Header from "../common/layout/Header"
+import Footer from "../common/layout/Footer"
 import type { AuthResponse } from "../types/auth"
 
 interface AppShellProps {
@@ -20,28 +17,77 @@ interface AppShellProps {
   onLoginClick: () => void
 }
 
-const navItems = [
-  { path: "/admin/members", icon: UsersRound, label: "Quản lý thành viên" },
-  { path: "/admin/movies", icon: Clapperboard, label: "Phim" },
-  { path: "/admin/cinema-rooms", icon: Ticket, label: "Phòng chiếu" },
-  { path: "/admin/employees", icon: UserRound, label: "Nhân viên" },
-  { path: "/admin/promotions", icon: Percent, label: "Khuyến mãi" },
-  { path: "/ticket-prices", icon: Tags, label: "Giá vé" },
+const adminMenu: SidebarItem[] = [
+  {
+    path: "/admin/statistics",
+    icon: "dashboard",
+    label: "Thống kê",
+  },
+  {
+    path: "/admin/members",
+    icon: "users",
+    label: "Quản lý thành viên",
+  },
+  {
+    // Từ nhánh main: trang quản lý nhân viên
+    path: "/admin/employees",
+    icon: "users",
+    label: "Nhân viên",
+  },
+  {
+    path: "/admin/movies",
+    icon: "film",
+    label: "Phim",
+  },
+  {
+    path: "/admin/cinema-rooms",
+    icon: "dashboard",
+    label: "Phòng chiếu",
+  },
+  {
+    path: "/admin/promotions",
+    icon: "ticket",
+    label: "Khuyến mãi",
+  },
+  {
+    path: "/admin/showtimes",
+    icon: "calendar",
+    label: "Lịch chiếu",
+  },
+  {
+    path: "/ticket-prices",
+    icon: "receipt",
+    label: "Giá vé",
+  },
 ]
 
-export function CustomerShell({ children, currentUser, onLogout, onLoginClick }: AppShellProps) {
+export function CustomerShell({
+  children,
+  currentUser,
+  onLogout,
+  onLoginClick,
+}: AppShellProps) {
   return (
     <main className="home-page customer-shell">
-      <HomeHeader currentUser={currentUser} onLoginClick={onLoginClick} onLogout={onLogout} />
+      <HomeHeader
+        currentUser={currentUser}
+        onLoginClick={onLoginClick}
+        onLogout={onLogout}
+      />
+
       <div className="home-content">{children}</div>
+
       <HomeFooter />
     </main>
   )
 }
 
-export function AdminShell({ children, currentUser, onLogout }: AppShellProps) {
+export function AdminShell({
+  children,
+  currentUser,
+  onLogout,
+}: AppShellProps) {
   const navigate = useNavigate()
-  const location = useLocation()
 
   if (!currentUser) {
     return <Navigate to="/login" replace />
@@ -51,37 +97,45 @@ export function AdminShell({ children, currentUser, onLogout }: AppShellProps) {
     return <Navigate to="/" replace />
   }
 
-  return (
-    <main className="admin-layout">
-      <aside className="admin-sidebar">
-        <button type="button" className="admin-brand" onClick={() => navigate("/")}>
-          Cinema Admin
-        </button>
-        <nav aria-label="Điều hướng quản trị">
-          {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
+  const displayName =
+    currentUser.fullName || currentUser.email
 
-            return (
-              <button
-                key={item.path}
-                type="button"
-                className={isActive ? "is-active" : undefined}
-                onClick={() => navigate(item.path)}
-              >
-                <span className="admin-nav-icon" aria-hidden="true">
-                  <Icon size={18} strokeWidth={2.25} />
+  return (
+    <div className="workspace-shell">
+      <Layout
+        sidebar={
+          <Sidebar
+            brand="PREMIERE ADMIN"
+            items={adminMenu}
+            onLogout={onLogout}
+          />
+        }
+        header={
+          <Header
+            title="Không gian quản trị"
+            rightContent={
+              <>
+                <span title={displayName}>
+                  Xin chào, {displayName}
                 </span>
-                <span className="admin-nav-label">{item.label}</span>
-              </button>
-            )
-          })}
-        </nav>
-        <button type="button" className="admin-logout" onClick={onLogout}>
-          Đăng xuất
-        </button>
-      </aside>
-      <section className="admin-content">{children}</section>
-    </main>
+
+                <button
+                  type="button"
+                  className="shell-home-button"
+                  onClick={() => navigate("/")}
+                >
+                  Trang chủ
+                </button>
+              </>
+            }
+          />
+        }
+        footer={<Footer />}
+      >
+        <section className="admin-content">
+          {children}
+        </section>
+      </Layout>
+    </div>
   )
 }
