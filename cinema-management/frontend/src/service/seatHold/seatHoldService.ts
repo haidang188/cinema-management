@@ -14,7 +14,7 @@ const env = (import.meta as unknown as { env?: Record<string, string | undefined
 export const API_BASE_URL = env.VITE_API_BASE_URL ?? "http://localhost:8080";
 export const WS_URL = env.VITE_WS_URL ?? `${API_BASE_URL.replace(/^http/, "ws")}/ws`;
 
-export const client = axios.create({ baseURL: API_BASE_URL });
+export const client = axios.create({ baseURL: API_BASE_URL, withCredentials: true, });
 
 client.interceptors.request.use((config) => {
     const token = localStorage.getItem("token") ?? localStorage.getItem("accessToken");
