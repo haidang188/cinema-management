@@ -9,6 +9,21 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ShowtimeRepository extends JpaRepository <Showtime, Long>{
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select s from Showtime s where s.id = :id")
+    java.util.Optional<Showtime> findByIdForScheduling(@Param("id") Long id);
+
+    @Query("select s.room.id from Showtime s where s.id = :id")
+    java.util.Optional<Long> findRoomIdById(@Param("id") Long id);
+    @Query("""
+            select count(s) > 0 from Showtime s
+            where s.room.id = :roomId and s.status <> 'CANCELLED'
+              and (:excludedId is null or s.id <> :excludedId)
+              and s.startTime < :endTime and s.endTime > :startTime
+            """)
+    boolean hasSchedulingConflict(@Param("roomId") Long roomId, @Param("excludedId") Long excludedId,
+                                  @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+
 
     List<Showtime> findByStartTimeGreaterThanEqualAndStartTimeLessThan (
             LocalDateTime startOfDay,

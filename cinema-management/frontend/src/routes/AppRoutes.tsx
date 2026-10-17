@@ -101,7 +101,7 @@ function AppRouteContent() {
             path={route.path}
             element={
               <Shell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
-                {route.element}
+                {currentUser?.role === "ADMIN" && route.path === "/showtimes" ? <Navigate to="/admin/showtimes" replace /> : route.element}
               </Shell>
             }
           />

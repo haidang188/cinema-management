@@ -19,6 +19,10 @@ import java.util.Optional;
 public interface ShowtimeSeatRepository extends JpaRepository<ShowtimeSeat, Long> {
     boolean existsBySeatId(Long seatId);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select ss from ShowtimeSeat ss where ss.showtime.id = :showtimeId order by ss.id")
+    List<ShowtimeSeat> lockAllForScheduling(@Param("showtimeId") Long showtimeId);
+
     List<ShowtimeSeat> findByShowtimeId(Long showtimeId);
 
     Optional<ShowtimeSeat> findByShowtimeIdAndSeatId(

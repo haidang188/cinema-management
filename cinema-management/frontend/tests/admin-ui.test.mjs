@@ -11,7 +11,7 @@ for (const name of ['window', 'document', 'HTMLElement', 'Node', 'Event', 'Mouse
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 const { createRoot } = await import('react-dom/client')
 dom.window.HTMLElement.prototype.scrollIntoView = function () {}
-let server, root, AppModal, MovieForm, RoomForm, MovieList, RoomList, EmployeeList, MemberList, request
+let server, root, AppModal, MovieForm, RoomForm, MovieList, RoomList, EmployeeList, MemberList, ShowtimeManagement, request
 let routes, AdminShell, router
 const { createMemoryRouter, RouterProvider } = await import('react-router-dom')
 let calls = []
@@ -27,6 +27,7 @@ function normalResponse(url) {
   if (path === '/api/movies/admin/3') return json(movie)
   if (path === '/api/admin/cinema-rooms/4') return json(room)
   if (path === '/api/admin/cinema-rooms') return json(page([room]))
+  if (path === '/api/admin/showtimes') return json([])
   if (path.endsWith('/statistics')) return json({ totalMembers: 1, activeMembers: 1, inactiveMembers: 0, totalPoints: 1250 })
   if (path.endsWith('/genres')) return json([{ id: 1, name: 'Hành động' }])
   if (path.endsWith('/members/1')) return json(member)
@@ -45,6 +46,7 @@ before(async () => {
   RoomList = await load('pages/admin/rooms/CinemaRoomList.tsx')
   EmployeeList = await load('pages/admin/employees/EmployeeList.tsx')
   MemberList = await load('pages/admin/members/MemberList.tsx')
+  ShowtimeManagement = await load('pages/admin/showtimes/ShowtimeManagement.tsx')
   request = (await server.ssrLoadModule('/src/service/httpClient.ts')).request
   routes = [
     ...(await server.ssrLoadModule('/src/routes/adminRoutes.tsx')).adminRoutes,
@@ -275,7 +277,7 @@ test('HTTP: HTML 500, invalid success JSON, network loss and empty 204', async (
   assert.equal(await request('/api/test'), null)
 })
 
-for (const path of ['/admin', '/admin/movies', '/admin/movies/create', '/admin/movies/3/edit', '/admin/cinema-rooms', '/admin/cinema-rooms/create', '/admin/cinema-rooms/4/edit', '/admin/cinema-rooms/4', '/admin/employees', '/admin/members', '/admin/promotions', '/admin/promotions/create', '/admin/promotions/1', '/showtimes', '/ticket-prices']) {
+for (const path of ['/admin', '/admin/movies', '/admin/movies/create', '/admin/movies/3/edit', '/admin/cinema-rooms', '/admin/cinema-rooms/create', '/admin/cinema-rooms/4/edit', '/admin/cinema-rooms/4', '/admin/employees', '/admin/members', '/admin/showtimes', '/admin/promotions', '/admin/promotions/create', '/admin/promotions/1', '/showtimes', '/ticket-prices']) {
   test(`Admin regression: ${path} mounts in shell without runtime errors (mock API)`, async () => {
     mockFetch()
     const browserErrors = []
@@ -360,4 +362,92 @@ test('SP3: pending edit blocks dismiss and repeated submits; success refreshes l
   await act(async () => pending.resolve(json(employee)))
   assert.equal(document.querySelector('[role="dialog"]'), null)
   assert.match(document.querySelector('.employee-toast[role="status"]').textContent, /thành công/)
+})
+
+const scheduled = { id: 90, movieId: 3, movieTitle: movie.title, roomId: 4, roomName: room.name, roomType: '2D', format: '2D', durationMinutes: 120, startTime: '2099-01-01T10:00:00', endTime: '2099-01-01T12:00:00', status: 'OPEN', totalSeats: 1, availableSeats: 1 }
+function schedulingResponse(url) {
+  const path = new URL(url).pathname
+  if (path === '/api/movies/admin') return json(page([movie]))
+  if (path === '/api/admin/showtimes') return json([scheduled])
+  return normalResponse(url)
+}
+async function select(element, value) {
+  await act(async () => { element.value = value; element.dispatchEvent(new Event('change', { bubbles: true })) })
+}
+async function fillSchedule() {
+  await select(document.querySelectorAll('#schedule-form select')[0], '3')
+  await select(document.querySelectorAll('#schedule-form select')[1], '4')
+  await input(document.querySelector('#schedule-form input[type="datetime-local"]'), '2099-01-02T10:00')
+}
+
+test('Scheduling: creates via admin API once, computes end, blocks closing while pending and reloads selected date', async () => {
+  respond = schedulingResponse
+  await render(ShowtimeManagement)
+  await click(button('Xếp lịch mới'))
+  await submit(document.querySelector('#schedule-form'))
+  assert.equal(calls.filter((c) => c.method === 'POST').length, 0)
+  assert.ok(document.querySelector('#schedule-form [role="alert"]'))
+  await fillSchedule()
+  assert.match(document.querySelector('.schedule-end strong').textContent, /12:00/)
+  const pending = deferred()
+  respond = (url, options) => options.method === 'POST' ? pending.promise : schedulingResponse(url)
+  const form = document.querySelector('#schedule-form')
+  await act(async () => { form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })) })
+  const writes = calls.filter((c) => c.method === 'POST')
+  assert.equal(writes.length, 1)
+  assert.equal(new URL(writes[0].url).pathname, '/api/admin/showtimes')
+  assert.deepEqual(JSON.parse(writes[0].body), { movieId: 3, roomId: 4, startTime: '2099-01-02T10:00:00', format: '2D' })
+  assert.equal(document.querySelector('.modal__close').disabled, true)
+  await act(async () => pending.resolve(json(scheduled, 201)))
+  assert.equal(document.querySelector('[role="dialog"]'), null)
+  assert.match(document.querySelector('.schedule-success').textContent, /Đã xếp lịch/)
+  assert.ok(calls.some((c) => c.url.includes('date=2099-01-02')))
+})
+
+test('Scheduling: overlap error remains in modal with the draft; dirty close asks before discarding', async () => {
+  respond = schedulingResponse
+  await render(ShowtimeManagement)
+  await click(button('Xếp lịch mới')); await fillSchedule()
+  respond = (url, options) => options.method === 'POST' ? json({ message: 'Phòng đã có suất chiếu trong khung giờ này.' }, 409) : schedulingResponse(url)
+  await submit(document.querySelector('#schedule-form'))
+  assert.match(document.querySelector('#schedule-form [role="alert"]').textContent, /Phòng đã có suất/)
+  assert.equal(document.querySelector('#schedule-form input').value, '2099-01-02T10:00')
+  assert.equal(document.querySelector('.schedule-success'), null)
+  await click(document.querySelector('.modal__close'))
+  assert.equal(document.querySelectorAll('[role="dialog"]').length, 2)
+})
+
+test('Scheduling: edit uses PUT, keeps room fixed; cancellation asks confirmation and handles server rejection', async () => {
+  respond = schedulingResponse
+  await render(ShowtimeManagement)
+  await click(document.querySelector('button[aria-label^="Sửa suất"]'))
+  assert.equal(document.querySelectorAll('#schedule-form select')[1].disabled, true)
+  await input(document.querySelector('#schedule-form input'), '2099-01-01T14:00')
+  respond = (url, options) => options.method === 'PUT' ? json(scheduled) : schedulingResponse(url)
+  await submit(document.querySelector('#schedule-form'))
+  assert.ok(calls.some((c) => c.method === 'PUT' && c.url.endsWith('/admin/showtimes/90')))
+  await click(document.querySelector('button[aria-label^="Hủy suất"]'))
+  assert.equal(calls.filter((c) => c.url.endsWith('/cancel')).length, 0)
+  respond = (url, options) => options.method === 'POST' ? json({ message: 'Suất chiếu đã có đặt vé hoặc ghế đang giữ.' }, 409) : schedulingResponse(url)
+  await click(button('Hủy suất chiếu'))
+  assert.match(document.querySelector('[role="dialog"] [role="alert"]').textContent, /đã có đặt vé/)
+  assert.ok(document.querySelector('[role="dialog"]'))
+  respond = (url, options) => options.method === 'POST' ? new Response(null, { status: 204 }) : schedulingResponse(url)
+  await click(button('Hủy suất chiếu'))
+  assert.equal(document.querySelector('[role="dialog"]'), null)
+  assert.match(document.querySelector('.schedule-success').textContent, /Đã hủy suất/)
+})
+
+test('Scheduling: filtering and offline error with retry', async () => {
+  respond = schedulingResponse
+  await render(ShowtimeManagement)
+  await input(document.querySelector('input[type="search"]'), 'khongtimthay')
+  assert.match(document.querySelector('.movie-empty-state').textContent, /Chưa có suất/)
+  await input(document.querySelector('input[type="search"]'), '')
+  respond = () => { throw new TypeError('offline') }
+  await click(button('Làm mới'))
+  assert.match(document.querySelector('[role="alert"]').textContent, /Không thể kết nối/)
+  respond = schedulingResponse
+  await click(button('Thử lại'))
+  assert.ok(document.querySelector('.schedule-table'))
 })

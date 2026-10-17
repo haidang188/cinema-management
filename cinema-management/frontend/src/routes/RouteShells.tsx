@@ -27,7 +27,7 @@ const navItems = [
   { path: "/admin/cinema-rooms", icon: Ticket, label: "Phòng chiếu" },
   { path: "/admin/employees", icon: UserRound, label: "Nhân viên" },
   { path: "/admin/promotions", icon: Percent, label: "Khuyến mãi" },
-  { path: "/showtimes", icon: CalendarClock, label: "Lịch chiếu" },
+  { path: "/admin/showtimes", icon: CalendarClock, label: "Xếp lịch chiếu" },
   { path: "/ticket-prices", icon: Tags, label: "Giá vé" },
 ]
 

@@ -201,3 +201,15 @@ Kết quả: **4/4 test H2 đạt**, gồm chèn trước ghế cũ, đánh lạ
 File bổ sung sửa: `backend/.../repository/ShowtimeSeatRepository.java`, `backend/.../service/impl/CinemaRoomServiceImpl.java`, `backend/src/test/java/com/cinemamanagement/CinemaRoomLayoutTests.java`, `frontend/src/pages/admin/rooms/CinemaRoomForm.tsx`, `frontend/tests/admin-ui.test.mjs`. Frontend có giải thích Khoảng trống là xóa ghế khi lưu.
 
 Kết quả mới nhất: **5/5 backend H2 test đạt**, **41/41 frontend test đạt**, build frontend và TypeScript đạt. Test frontend kiểm tra bỏ đúng ghế giữa hàng, giữ tọa độ các ô còn lại, hiển thị lỗi và giữ bản chỉnh sửa khi lưu bị từ chối. Test backend xác nhận ghế và liên kết suất chiếu không bị xóa khi trả conflict. Chưa tái hiện bằng browser hoặc gửi thao tác ghi lên database thật của người dùng.
+
+## Bổ sung chức năng xếp lịch chiếu Admin
+
+Mục Lịch chiếu trước đây dùng trang xem lịch cho khách hàng. Đã thêm `/admin/showtimes` với nhãn sidebar **Xếp lịch chiếu**; Admin vào đường dẫn cũ `/showtimes` được chuyển sang trang quản lý. Trang xem lịch của khách hàng giữ nguyên.
+
+Chức năng mới: danh sách theo ngày (bao gồm suất đã hủy/quá giờ), lọc phòng/trạng thái/tên, tạo và sửa suất, xác nhận hủy. Chọn phim đang/sắp chiếu và phòng hoạt động; giờ Việt Nam; backend tự tính giờ kết thúc từ thời lượng phim. Kiểm tra trùng phòng và khoảng dọn phòng 15 phút, kể cả suất qua nửa đêm. Định dạng phải được phòng hỗ trợ. Khi tạo, chỉ khởi tạo ghế hoạt động cho suất.
+
+Sửa suất giữ nguyên phòng và ID ghế suất chiếu; muốn đổi phòng cần hủy và xếp suất mới. Chặn sửa/hủy suất đã bắt đầu, có đặt vé hoặc ghế đang giữ/đã bán. Hủy dùng trạng thái CANCELLED, giữ bản ghi và đặt ghế suất thành CANCELLED để ngừng mở bán. Khóa room/showtime/seat trong transaction để tuần tự hóa thay đổi lịch; chưa có stress test đồng thời nhiều request.
+
+API mới: `GET/POST /api/admin/showtimes`, `PUT /api/admin/showtimes/{id}`, `POST /api/admin/showtimes/{id}/cancel`. Không đổi schema. Dùng cơ chế phân quyền Admin hiện có của dự án; không bổ sung hệ thống xác thực backend mới trong thay đổi này.
+
+Test: **9/9 H2 test xếp lịch** và **5/5 H2 test sơ đồ phòng** đạt; **46/46 frontend test DOM/mock API** đạt, gồm tạo, tính giờ kết thúc, chặn submit lặp, lỗi trùng lịch giữ draft, sửa PUT, xác nhận hủy, lỗi do đã đặt vé, hủy thành công, tìm kiếm và retry sau mất kết nối. Frontend build và TypeScript đạt; lint exit 0, còn cảnh báo React trong codebase. Chưa kiểm tra browser/responsive thực tế hoặc ghi vào MySQL thật; các giới hạn schema thực tế đã nêu phía trên vẫn cần kiểm tra khi chạy ứng dụng. Khởi động lại backend để đăng ký API mới.

@@ -9,6 +9,7 @@ import MovieCreate from "../pages/admin/movies/MovieCreate"
 import MovieEdit from "../pages/admin/movies/MovieEdit"
 import MovieList from "../pages/admin/movies/MovieList"
 import EmployeeList from "../pages/admin/employees/EmployeeList"
+import ShowtimeManagement from "../pages/admin/showtimes/ShowtimeManagement"
 import type { NavigateHandler } from "../types/admin"
 
 function useAppNavigate(): NavigateHandler {
@@ -56,6 +57,7 @@ function EmployeeListRoute() {
 }
 
 export const adminRoutes = [
+  { path: "/admin/showtimes", element: <ShowtimeManagement /> },
   {
     path: "/admin",
     element: <MovieListRoute />,
