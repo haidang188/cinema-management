@@ -1,6 +1,5 @@
 ﻿import type { ReactNode } from "react"
 import {
-  CalendarClock,
   Clapperboard,
   Percent,
   Tags,
@@ -27,7 +26,6 @@ const navItems = [
   { path: "/admin/cinema-rooms", icon: Ticket, label: "Phòng chiếu" },
   { path: "/admin/employees", icon: UserRound, label: "Nhân viên" },
   { path: "/admin/promotions", icon: Percent, label: "Khuyến mãi" },
-  { path: "/showtimes", icon: CalendarClock, label: "Lịch chiếu" },
   { path: "/ticket-prices", icon: Tags, label: "Giá vé" },
 ]
 

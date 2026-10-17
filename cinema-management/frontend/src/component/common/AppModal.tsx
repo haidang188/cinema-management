@@ -1,5 +1,6 @@
 import { useEffect, useId, type MouseEvent, type ReactNode } from "react"
 import { createPortal } from "react-dom"
+import { CircleCheck, TriangleAlert, X } from "lucide-react"
 
 interface AppModalAction {
   label: string
@@ -66,7 +67,9 @@ function AppModal({
 }: AppModalProps) {
   const titleId = useId()
   const subtitleId = useId()
-  const modalSize = size || (variant === "warning" ? "sm" : "md")
+  const isNotice = !children && !footer
+  const modalSize = size || (isNotice || variant === "warning" ? "sm" : "md")
+  const StatusIcon = variant === "warning" ? TriangleAlert : CircleCheck
   const bodyContent = children || (typeof message === "string" ? <p>{message}</p> : message)
   const footerContent =
     footer ||
@@ -123,9 +126,9 @@ function AppModal({
   if (!open) return null
 
   return createPortal(
-    <div className="modal-overlay modal-backdrop" role="presentation" onMouseDown={handleOverlayClick}>
+    <div className="modal-overlay" role="presentation" onMouseDown={handleOverlayClick}>
       <section
-        className={`modal app-modal modal--${modalSize} modal-${variant}`}
+        className={`modal app-modal modal--${modalSize} modal-${variant}${isNotice ? " app-modal--notice" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
@@ -133,13 +136,14 @@ function AppModal({
         onMouseDown={stopModalClick}
       >
         <header className="modal__header">
-          <div>
+          <div className="modal__heading">
+            {isNotice && <span className="modal__status" aria-hidden="true"><StatusIcon size={24} strokeWidth={1.8} /></span>}
             <h2 id={titleId}>{title}</h2>
             {subtitle && <p id={subtitleId}>{subtitle}</p>}
           </div>
           {onClose && (
-            <button type="button" className="modal__close" aria-label="Dong modal" onClick={onClose}>
-              x
+            <button type="button" className="modal__close" aria-label="Đóng hộp thoại" onClick={onClose}>
+              <X size={18} aria-hidden="true" />
             </button>
           )}
         </header>
