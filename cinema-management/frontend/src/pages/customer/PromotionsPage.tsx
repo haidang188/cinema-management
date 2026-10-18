@@ -3,10 +3,8 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { getActivePromotions } from "../../service/customerService"
 import type { CustomerPromotion } from "../../types/customer"
+import { formatDate, formatVnd } from "../../utils/format"
 import "./customer-pages.css"
-
-const money = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value)
-const date = (value: string) => new Date(value).toLocaleDateString("vi-VN")
 
 function PromotionsPage() {
   const [items, setItems] = useState<CustomerPromotion[]>([])
@@ -41,9 +39,9 @@ function PromotionsPage() {
     <div className="promotion-grid">{filteredItems.slice(0, showAll ? filteredItems.length : 6).map((item, index) => <article className={`promotion-card promotion-card--${index % 4}`} key={item.id}>
       <div className="promotion-card__icon"><Gift /></div>
       <div className="promotion-card__body">
-        <div className="promotion-card__value">{item.discountType === "PERCENTAGE" ? `Giảm ${item.discountValue}%` : `Giảm ${money(item.discountValue)}`}</div>
+        <div className="promotion-card__value">{item.discountType === "PERCENTAGE" ? `Giảm ${item.discountValue}%` : `Giảm ${formatVnd(item.discountValue)}`}</div>
         <h2>{item.title}</h2><p>{item.description || "Ưu đãi áp dụng cho đơn hàng đủ điều kiện."}</p>
-        <div className="promotion-card__terms"><span><CalendarDays size={14} /> Hạn dùng: <b>{date(item.endDate)}</b></span>{item.minOrderAmount ? <span>Đơn tối thiểu: <b>{money(item.minOrderAmount)}</b></span> : null}</div>
+        <div className="promotion-card__terms"><span><CalendarDays size={14} /> Hạn dùng: <b>{formatDate(item.endDate)}</b></span>{item.minOrderAmount ? <span>Đơn tối thiểu: <b>{formatVnd(item.minOrderAmount)}</b></span> : null}</div>
         <div className="promotion-card__actions"><code>{item.code}</code><button type="button" onClick={() => copyCode(item.code)}><Copy size={14} /> {copied === item.code ? "Đã chép" : "Sao chép"}</button><Link to="/showtimes">Dùng ngay</Link></div>
       </div>
     </article>)}</div>

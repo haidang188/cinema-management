@@ -1,8 +1,8 @@
 import { Client } from "@stomp/stompjs"
 import type { SeatStatusEvent } from "../../types/booking"
+import { WS_URL } from "../apiBase"
 
-const API_ROOT = (import.meta.env.VITE_API_URL || "http://localhost:8080/api").replace(/\/api\/?$/, "")
-const SOCKET_URL = API_ROOT.replace(/^http/, "ws") + "/ws"
+const SOCKET_URL = WS_URL
 
 type SeatStateMessage = {
   showtimeSeatId?: number

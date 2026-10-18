@@ -1,0 +1,1796 @@
+/* =========================================================
+   ĐẶT VÉ ONLINE — 3 bước (Chọn ghế · Xác nhận · Hoàn tất)
+   ---------------------------------------------------------
+   Cùng ngôn ngữ thiết kế với màn bán vé tại quầy (cs-*):
+   đen - xám than - đỏ, Inter 13px, bo góc 10-14px.
+   Mọi quy tắc nằm dưới .bf-page để không ảnh hưởng trang khác.
+   ========================================================= */
+
+.bf-page {
+  --red: #e50914;
+  --red-hover: #ff1f2b;
+  --red-soft: rgba(229, 9, 20, 0.14);
+  --red-line: rgba(229, 9, 20, 0.45);
+  --green: #22c07a;
+  --green-soft: rgba(34, 192, 122, 0.12);
+  --green-line: rgba(34, 192, 122, 0.45);
+  --amber: #e0a43a;
+  --amber-soft: rgba(224, 164, 58, 0.12);
+  --amber-line: rgba(224, 164, 58, 0.45);
+  --gold: #d4a44c;
+  --bg: #0b0e12;
+  --panel: #14181d;
+  --panel-2: #1a1f25;
+  --panel-3: #20262d;
+  --border: #2b3139;
+  --border-strong: #4a525b;
+  --text: #f5f7f8;
+  --muted: #9ca5af;
+  --faint: #6c757e;
+
+  width: min(1320px, calc(100% - 32px));
+  min-height: 70vh;
+  margin: 0 auto;
+  padding: 16px 0 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--text);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-anchor: none;
+}
+
+.bf-page *,
+.bf-page *::before,
+.bf-page *::after {
+  box-sizing: border-box;
+}
+
+.bf-page :is(h1, h2, h3, p, ul, ol, dl, dd) {
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.bf-page :is(ul, ol) {
+  list-style: none;
+}
+
+/* Bootstrap reboot in đậm <dt>; ở đây nhãn luôn nhẹ hơn giá trị. */
+.bf-page dt {
+  font-weight: 500;
+}
+
+.bf-page :is(button, input) {
+  font-family: inherit;
+}
+
+.bf-page :is(button, input, a):focus-visible {
+  outline: 2px solid var(--red-hover);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   STEPPER + THANH THÔNG TIN SUẤT CHIẾU
+   ========================================================= */
+
+.bf-page .bf-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  padding: 10px 14px;
+  background: rgba(12, 15, 19, 0.92);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.bf-page .bf-steps {
+  display: flex;
+  align-items: center;
+}
+
+.bf-page .bf-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--faint);
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.bf-page .bf-step-line {
+  width: 36px;
+  height: 2px;
+  margin: 0 6px;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.bf-page .bf-step.is-done .bf-step-line,
+.bf-page .bf-step.is-active .bf-step-line {
+  background: var(--red);
+}
+
+.bf-page .bf-step-dot {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--faint);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.bf-page .bf-step.is-done {
+  color: #d7dce1;
+}
+
+.bf-page .bf-step.is-done .bf-step-dot {
+  color: #fff;
+  background: var(--red-soft);
+  border-color: var(--red-line);
+}
+
+.bf-page .bf-step.is-active {
+  color: #fff;
+}
+
+.bf-page .bf-step.is-active .bf-step-dot {
+  color: #fff;
+  background: var(--red);
+  border-color: var(--red);
+  box-shadow: 0 0 0 4px var(--red-soft);
+}
+
+.bf-page .bf-stepper-info {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.bf-page .bf-stepper-thumb {
+  width: 28px;
+  height: 40px;
+  flex: 0 0 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--faint);
+  background: var(--panel-3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.bf-page .bf-stepper-thumb img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.bf-page .bf-stepper-movie {
+  min-width: 0;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.25;
+}
+
+.bf-page .bf-stepper-movie b {
+  overflow: hidden;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.bf-page .bf-stepper-movie small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-page .bf-timer {
+  height: 32px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 4px;
+  padding: 0 12px;
+  color: #ffc9cc;
+  background: var(--red-soft);
+  border: 1px solid var(--red-line);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.bf-page .bf-timer b {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-page .bf-timer.is-warning {
+  color: #fff;
+  background: rgba(229, 9, 20, 0.28);
+  border-color: var(--red);
+}
+
+.bf-page .bf-timer.is-warning b {
+  color: #ff8a90;
+}
+
+/* =========================================================
+   CHUNG: CARD / NÚT / CHIP
+   ========================================================= */
+
+.bf-page .bf-card {
+  min-width: 0;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.bf-page .bf-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.bf-page .bf-card-head h2,
+.bf-page .bf-card > h2 {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.bf-page .bf-card > h2 {
+  margin-bottom: 12px;
+}
+
+.bf-page .bf-card-head > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bf-page .bf-btn {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.bf-page .bf-btn:disabled {
+  cursor: not-allowed;
+}
+
+.bf-page .bf-btn-block {
+  width: 100%;
+}
+
+.bf-page .bf-btn-primary {
+  color: #fff;
+  background: var(--red);
+  border: 0;
+}
+
+.bf-page .bf-btn-primary:hover:not(:disabled) {
+  background: var(--red-hover);
+}
+
+.bf-page .bf-btn-primary:disabled {
+  color: rgba(255, 255, 255, 0.5);
+  background: #3a1215;
+}
+
+.bf-page .bf-btn-ghost {
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+.bf-page .bf-btn-ghost:hover:not(:disabled) {
+  background: var(--panel-2);
+  border-color: var(--border-strong);
+}
+
+.bf-page .bf-btn-ghost:disabled {
+  opacity: 0.45;
+}
+
+.bf-page .bf-btn-lg {
+  min-height: 46px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.bf-page .bf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  color: #ff8a90;
+  background: none;
+  border: 0;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bf-page .bf-link:hover {
+  color: #fff;
+}
+
+.bf-page .bf-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bf-page .bf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  color: #c9d0d6;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.bf-page .bf-chip-strong {
+  color: #fff;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-page .bf-chip-red {
+  color: #fff;
+  background: var(--red-soft);
+  border-color: var(--red-line);
+}
+
+.bf-page .bf-chip-green {
+  color: #8fe3b9;
+  background: var(--green-soft);
+  border-color: var(--green-line);
+}
+
+.bf-page .bf-chip-amber {
+  color: #f3cf8c;
+  background: var(--amber-soft);
+  border-color: var(--amber-line);
+}
+
+/* Ghế đã chọn — cùng kiểu chip "vé" của quầy */
+.bf-page .bf-seat-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bf-page .bf-seat {
+  min-width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 7px 10px 6px;
+  background: var(--red-soft);
+  border: 1px solid var(--red-line);
+  border-bottom-width: 3px;
+  border-radius: 9px 9px 6px 6px;
+  line-height: 1.25;
+}
+
+.bf-page .bf-seat b {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.bf-page .bf-seat small {
+  color: #ffc9cc;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.bf-page .bf-seat em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-page .bf-seat.is-vip {
+  background: rgba(212, 164, 76, 0.1);
+  border-color: rgba(212, 164, 76, 0.6);
+}
+
+.bf-page .bf-seat.is-vip small {
+  color: var(--gold);
+}
+
+.bf-page .bf-seat.is-couple {
+  background: rgba(214, 92, 160, 0.1);
+  border-color: rgba(214, 92, 160, 0.55);
+}
+
+.bf-page .bf-seat.is-couple small {
+  color: #f0a6cf;
+}
+
+/* Danh sách thông tin dạng nhãn - giá trị */
+.bf-page .bf-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 16px;
+}
+
+.bf-page .bf-info-grid dt {
+  margin-bottom: 3px;
+  color: var(--faint);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.bf-page .bf-info-grid dd {
+  overflow-wrap: anywhere;
+  color: #e3e7ea;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bf-page .bf-info-grid dd.is-empty {
+  color: var(--faint);
+  font-weight: 500;
+}
+
+/* Bảng giá */
+.bf-page .bf-price {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bf-page .bf-price > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12.5px;
+}
+
+.bf-page .bf-price dt,
+.bf-page .bf-price > div > span {
+  color: var(--muted);
+}
+
+.bf-page .bf-price dd,
+.bf-page .bf-price > div > strong {
+  color: #fff;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-page .bf-price .is-discount {
+  color: #8fd19e;
+}
+
+.bf-page .bf-price .is-points {
+  color: var(--gold);
+}
+
+.bf-page .bf-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.bf-page .bf-total span {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.bf-page .bf-total strong {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-page .bf-error {
+  padding: 9px 11px;
+  color: #ff8a90;
+  background: rgba(229, 9, 20, 0.08);
+  border: 1px solid rgba(229, 9, 20, 0.3);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.bf-page .bf-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--faint);
+  font-size: 11.5px;
+  text-align: center;
+}
+
+/* Trạng thái tải / lỗi toàn trang */
+.bf-page .bf-state {
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: var(--muted);
+  font-size: 13.5px;
+  text-align: center;
+}
+
+.bf-page .bf-spinner {
+  width: 28px;
+  height: 28px;
+  display: inline-block;
+  border: 3px solid rgba(229, 9, 20, 0.25);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: bf-spin 0.7s linear infinite;
+}
+
+@keyframes bf-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =========================================================
+   BƯỚC 2 — XÁC NHẬN
+   ========================================================= */
+
+.bf-page .bf-confirm-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  align-items: start;
+  gap: 14px;
+}
+
+.bf-page .bf-confirm-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bf-page .bf-movie {
+  display: flex;
+  gap: 14px;
+  border-top: 3px solid var(--red);
+}
+
+.bf-page .bf-poster {
+  width: 72px;
+  height: 108px;
+  flex: 0 0 72px;
+  overflow: hidden;
+  background: var(--panel-3);
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.bf-page .bf-poster img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.bf-page .bf-movie-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.bf-page .bf-eyebrow {
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.bf-page .bf-movie-info h2 {
+  color: #fff;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+.bf-page .bf-movie-time {
+  color: #e3e7ea;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bf-page .bf-movie-time b {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-page .bf-methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.bf-page .bf-method {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.bf-page .bf-method:hover {
+  border-color: var(--border-strong);
+}
+
+.bf-page .bf-method input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bf-page .bf-method:has(input:focus-visible) {
+  outline: 2px solid var(--red-hover);
+  outline-offset: 2px;
+}
+
+.bf-page .bf-method.is-selected {
+  background: var(--red-soft);
+  border-color: var(--red);
+  box-shadow: inset 0 0 0 1px var(--red);
+}
+
+.bf-page .bf-method.is-disabled {
+  cursor: not-allowed;
+}
+
+.bf-page .bf-method.is-disabled:not(.is-selected) {
+  opacity: 0.45;
+}
+
+.bf-page .bf-method-icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: var(--panel-3);
+  border-radius: 9px;
+}
+
+.bf-page .bf-method.is-selected .bf-method-icon {
+  background: var(--red);
+}
+
+.bf-page .bf-method-text {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bf-page .bf-method-text b {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.bf-page .bf-method-text small {
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.bf-page .bf-method-check {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 50%;
+}
+
+.bf-page .bf-method.is-selected .bf-method-check {
+  color: #fff;
+  background: var(--red);
+  border-color: var(--red);
+}
+
+/* Tóm tắt (phải) */
+.bf-page .bf-summary {
+  position: sticky;
+  top: 84px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bf-page .bf-summary .bf-card-head {
+  margin-bottom: 0;
+}
+
+.bf-page .bf-hold {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  color: #d7dce1;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.bf-page .bf-hold > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.bf-page .bf-hold b {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-page .bf-hold.is-warning {
+  background: rgba(229, 9, 20, 0.1);
+  border-color: var(--red-line);
+}
+
+.bf-page .bf-hold.is-warning b,
+.bf-page .bf-hold.is-warning svg {
+  color: #ff6a72;
+}
+
+.bf-page .bf-promo {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.bf-page .bf-field-label {
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.bf-page .bf-promo-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+}
+
+.bf-page .bf-input {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 12px;
+  color: #fff;
+  background: #0f1216;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  outline: none;
+}
+
+.bf-page .bf-input::placeholder {
+  color: #5d656e;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.bf-page .bf-input:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-soft);
+}
+
+.bf-page .bf-input:disabled {
+  opacity: 0.55;
+}
+
+.bf-page .bf-promo-row .bf-btn {
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.bf-page .bf-promo-feedback {
+  color: #ff8a90;
+  font-size: 11.5px;
+}
+
+.bf-page .bf-promo-feedback.is-ok {
+  color: #8fd19e;
+}
+
+.bf-page .bf-promo .bf-link {
+  align-self: flex-start;
+}
+
+.bf-page .bf-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.bf-page .bf-consent input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin: 1px 0 0;
+  accent-color: var(--red);
+  cursor: pointer;
+}
+
+.bf-page .bf-summary-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bf-page .bf-created {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px;
+  color: #d7dce1;
+  background: var(--amber-soft);
+  border: 1px solid var(--amber-line);
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+/* =========================================================
+   BƯỚC 3 — KẾT QUẢ
+   ========================================================= */
+
+.bf-page .bf-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.bf-page .bf-banner.is-success {
+  background:
+    radial-gradient(ellipse 420px 160px at 0 50%, rgba(34, 192, 122, 0.18), transparent 70%),
+    linear-gradient(90deg, #0d1a15, #111418 60%);
+  border-color: var(--green-line);
+}
+
+.bf-page .bf-banner.is-pending {
+  background:
+    radial-gradient(ellipse 420px 160px at 0 50%, rgba(224, 164, 58, 0.16), transparent 70%),
+    linear-gradient(90deg, #1a150c, #111418 60%);
+  border-color: var(--amber-line);
+}
+
+.bf-page .bf-banner.is-failed {
+  background:
+    radial-gradient(ellipse 420px 160px at 0 50%, rgba(229, 9, 20, 0.2), transparent 70%),
+    linear-gradient(90deg, #1a0a0c, #111418 60%);
+  border-color: var(--red-line);
+}
+
+.bf-page .bf-banner-icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border-radius: 50%;
+  animation: bf-pop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+
+.bf-page .is-success .bf-banner-icon {
+  color: #07130d;
+  background: var(--green);
+  box-shadow: 0 0 0 6px rgba(34, 192, 122, 0.16);
+}
+
+.bf-page .is-pending .bf-banner-icon {
+  color: #1d1406;
+  background: var(--amber);
+  box-shadow: 0 0 0 6px rgba(224, 164, 58, 0.16);
+}
+
+.bf-page .is-failed .bf-banner-icon {
+  background: var(--red);
+  box-shadow: 0 0 0 6px rgba(229, 9, 20, 0.18);
+}
+
+@keyframes bf-pop {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.bf-page .bf-banner-text {
+  min-width: 0;
+  flex: 1 1 260px;
+}
+
+.bf-page .bf-banner-text h1 {
+  color: #fff;
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.bf-page .bf-banner-text p {
+  margin-top: 3px;
+  color: #c9d0d6;
+  font-size: 12.5px;
+}
+
+.bf-page .bf-code {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 12px;
+  background: #0f1216;
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+}
+
+.bf-page .bf-code small {
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.bf-page .bf-code code {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #fff;
+  font-family: Consolas, "SFMono-Regular", monospace;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.bf-page .bf-icon-btn {
+  height: 30px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  color: #d7dce1;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bf-page .bf-icon-btn:hover {
+  color: #fff;
+  border-color: var(--border-strong);
+}
+
+.bf-page .bf-icon-btn.is-done {
+  color: #8fe3b9;
+  border-color: var(--green-line);
+}
+
+.bf-page .bf-result-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  align-items: start;
+  gap: 14px;
+}
+
+.bf-page .bf-result-side {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- Vé điện tử ---------- */
+
+.bf-page .bf-ticket {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 0 0, rgba(229, 9, 20, 0.1), transparent 45%),
+    var(--panel);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--red);
+  border-radius: 14px;
+}
+
+.bf-page .bf-ticket-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+}
+
+.bf-page .bf-ticket-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bf-page .bf-ticket-brand > span:first-child {
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
+
+.bf-page .bf-ticket-movie {
+  display: flex;
+  gap: 14px;
+}
+
+.bf-page .bf-ticket-movie .bf-poster {
+  width: 84px;
+  height: 126px;
+  flex-basis: 84px;
+}
+
+.bf-page .bf-ticket-seats {
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+
+.bf-page .bf-result-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bf-page .bf-ticket-stub {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px 16px;
+  background: #0f1216;
+  border-left: 2px dashed var(--border);
+  text-align: center;
+}
+
+/* Lỗ xé vé */
+.bf-page .bf-ticket-stub::before,
+.bf-page .bf-ticket-stub::after {
+  content: "";
+  position: absolute;
+  left: -11px;
+  width: 20px;
+  height: 20px;
+  background: #0c1112;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+}
+
+.bf-page .bf-ticket-stub::before {
+  top: -12px;
+}
+
+.bf-page .bf-ticket-stub::after {
+  bottom: -11px;
+}
+
+.bf-page .bf-qr {
+  padding: 8px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 0 4px rgba(229, 9, 20, 0.2);
+}
+
+.bf-page .bf-qr svg {
+  display: block;
+}
+
+.bf-page .bf-ticket-stub code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: #fff;
+  font-family: Consolas, "SFMono-Regular", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.bf-page .bf-ticket-stub small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.bf-page .bf-qr-locked {
+  width: 140px;
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--faint);
+  background: var(--panel-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.bf-page .bf-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bf-page .bf-result-actions .bf-btn {
+  flex: 1 1 0;
+  min-height: 44px;
+}
+
+.bf-page .bf-result-actions .bf-btn-primary {
+  flex-grow: 1.4;
+}
+
+.bf-page .bf-customer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bf-page .bf-customer-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 12.5px;
+}
+
+.bf-page .bf-customer-list dt {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.bf-page .bf-customer-list dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #fff;
+  font-weight: 600;
+  text-align: right;
+}
+
+.bf-page .bf-points {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  color: #f0d49a;
+  background: rgba(212, 164, 76, 0.1);
+  border: 1px solid rgba(212, 164, 76, 0.4);
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.bf-page .bf-points b {
+  color: #fff;
+}
+
+/* =========================================================
+   HỘP THOẠI (BookingModal + vé điện tử) — nằm trong .bf-page
+   ========================================================= */
+
+.bf-page .premiere-modal {
+  width: min(460px, calc(100% - 32px));
+  max-height: 88vh;
+  padding: 0;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--red);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 13px;
+}
+
+.bf-page .premiere-modal::backdrop {
+  background: rgba(3, 4, 6, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.bf-page .premiere-modal > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bf-page .premiere-modal h2 {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.bf-page .premiere-modal > header button {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.bf-page .premiere-modal > header button:hover {
+  color: #fff;
+  background: var(--panel-2);
+}
+
+.bf-page .premiere-modal-body {
+  padding: 16px 18px 18px;
+}
+
+.bf-page .premiere-modal > footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+}
+
+.bf-page .premiere-modal > footer button {
+  height: 36px;
+  padding: 0 16px;
+  color: #fff;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bf-page .premiere-modal > footer button:hover {
+  background: var(--panel-2);
+}
+
+/* Danh sách mã khuyến mãi */
+.bf-page .bf-promo-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bf-page .bf-promo-modal > p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.bf-page .bf-promo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bf-page .bf-promo-item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+}
+
+.bf-page .bf-promo-item > span {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  background: var(--panel-3);
+  border-radius: 9px;
+}
+
+.bf-page .bf-promo-item.is-empty > span {
+  color: var(--faint);
+}
+
+.bf-page .bf-promo-item > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bf-page .bf-promo-item strong {
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 800;
+}
+
+.bf-page .bf-promo-item small {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.bf-page .bf-promo-item .bf-btn {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+
+/* VietQR */
+.bf-page .bf-vietqr {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bf-page .bf-vietqr > img {
+  width: min(240px, 100%);
+  aspect-ratio: 1;
+  align-self: center;
+  padding: 8px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 0 4px rgba(229, 9, 20, 0.22);
+}
+
+.bf-page .bf-vietqr .bf-customer-list {
+  padding: 12px;
+  background: #0f1216;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.bf-page .bf-vietqr > p {
+  color: #f3cf8c;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+/* Vé điện tử phóng to */
+.bf-page .bf-modal-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(3, 4, 6, 0.78);
+  backdrop-filter: blur(4px);
+}
+
+.bf-page .bf-ticket-modal {
+  width: min(440px, 100%);
+  max-height: 92vh;
+  overflow: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--red);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+.bf-page .bf-ticket-modal > header {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.bf-page .bf-ticket-modal > header h2 {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.bf-page .bf-ticket-modal > header small {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.bf-page .bf-ticket-modal > header > div:last-child {
+  display: flex;
+  gap: 6px;
+}
+
+.bf-page .bf-eticket-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+}
+
+.bf-page .bf-eticket {
+  overflow: hidden;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.bf-page .bf-eticket > * {
+  padding: 14px 16px;
+}
+
+.bf-page .bf-eticket-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 800;
+  border-bottom: 1px dashed var(--border);
+}
+
+.bf-page .bf-eticket-head small {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.bf-page .bf-eticket-movie {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bf-page .bf-eticket-movie .bf-poster {
+  width: 56px;
+  height: 84px;
+  flex-basis: 56px;
+}
+
+.bf-page .bf-eticket-movie h3 {
+  margin-top: 3px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.bf-page .bf-eticket .bf-info-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px dashed var(--border);
+}
+
+.bf-page .bf-eticket .bf-info-grid dd.is-seat {
+  color: #ff8a90;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.bf-page .bf-eticket-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11.5px;
+  border-top: 1px dashed var(--border);
+}
+
+.bf-page .bf-eticket-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px dashed var(--border);
+}
+
+.bf-page .bf-eticket-total span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.bf-page .bf-eticket-total strong {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.bf-page .bf-eticket-total code {
+  color: var(--faint);
+  font-family: Consolas, "SFMono-Regular", monospace;
+  font-size: 11px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1080px) {
+  .bf-page .bf-result-body {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+
+  .bf-page .bf-ticket {
+    grid-template-columns: minmax(0, 1fr) 190px;
+  }
+}
+
+@media (max-width: 960px) {
+  .bf-page .bf-confirm-body,
+  .bf-page .bf-result-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bf-page .bf-summary {
+    position: static;
+  }
+
+  /* Một cột: vé → chi tiết thanh toán → các nút thao tác */
+  .bf-page .bf-result-main {
+    display: contents;
+  }
+
+  .bf-page .bf-result-side {
+    order: 1;
+  }
+
+  .bf-page .bf-result-actions {
+    order: 2;
+  }
+
+  .bf-page .bf-step-label {
+    display: none;
+  }
+
+  .bf-page .bf-step.is-active .bf-step-label {
+    display: inline;
+  }
+
+  .bf-page .bf-stepper-info {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .bf-page .bf-stepper-movie {
+    flex: 1;
+    max-width: none;
+  }
+
+  .bf-page .bf-timer {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .bf-page {
+    width: calc(100% - 32px);
+    padding-top: 12px;
+  }
+
+  .bf-page .bf-stepper {
+    padding: 10px 12px;
+  }
+
+  .bf-page .bf-step-line {
+    width: 18px;
+    margin: 0 4px;
+  }
+
+  .bf-page .bf-timer > span {
+    display: none;
+  }
+
+  .bf-page .bf-card {
+    padding: 14px;
+  }
+
+  .bf-page .bf-methods,
+  .bf-page .bf-info-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bf-page .bf-info-grid > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .bf-page .bf-info-grid dd {
+    text-align: right;
+  }
+
+  .bf-page .bf-eticket .bf-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bf-page .bf-eticket .bf-info-grid > div {
+    display: block;
+  }
+
+  .bf-page .bf-eticket .bf-info-grid dd {
+    text-align: left;
+  }
+
+  .bf-page .bf-banner {
+    padding: 14px;
+  }
+
+  .bf-page .bf-banner-icon {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+  }
+
+  .bf-page .bf-banner-text {
+    flex: 1 1 0;
+  }
+
+  .bf-page .bf-banner-text h1 {
+    font-size: 17px;
+  }
+
+  .bf-page .bf-code small {
+    display: none;
+  }
+
+  .bf-page .bf-code {
+    width: 100%;
+  }
+
+  .bf-page .bf-code code {
+    flex: 1;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+  }
+
+  .bf-page .bf-result-actions .bf-btn {
+    flex: 1 1 calc(50% - 4px);
+  }
+
+  .bf-page .bf-result-actions .bf-btn-primary {
+    flex-basis: 100%;
+  }
+
+  .bf-page .bf-ticket {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bf-page .bf-ticket-stub {
+    border-left: 0;
+    border-top: 2px dashed var(--border);
+  }
+
+  .bf-page .bf-ticket-stub::before,
+  .bf-page .bf-ticket-stub::after {
+    top: -11px;
+    left: auto;
+    bottom: auto;
+  }
+
+  .bf-page .bf-ticket-stub::before {
+    left: -11px;
+  }
+
+  .bf-page .bf-ticket-stub::after {
+    right: -11px;
+  }
+
+  .bf-page .bf-total strong {
+    font-size: 22px;
+  }
+}
+
+.bf-page .bf-price + .bf-total {
+  margin-top: 12px;
+}

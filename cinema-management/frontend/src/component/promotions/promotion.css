@@ -1,9 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  --font-heading: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --font-body: 'Be Vietnam Pro', Arial, Helvetica, sans-serif;
-  --font-mono: 'JetBrains Mono', Consolas, monospace;
+  --font-heading: Inter, "Segoe UI", Arial, sans-serif;
+  --font-body: Inter, "Segoe UI", Arial, sans-serif;
+  --font-mono: Consolas, "SFMono-Regular", monospace;
 
   /* Typography scale */
   --text-xs: 11px;
@@ -24,7 +23,7 @@
   --cinema-text: #f4eee4;
   --cinema-muted: #969b9c;
   --cinema-red: #e50914;
-  --cinema-red-hover: #ff1b25;
+  --cinema-red-hover: #ff1f2b;
   --cinema-gold: #e6caa3;
 }
 
@@ -69,11 +68,12 @@
 .promotion-section-kicker {
   display: block;
   margin-bottom: 9px;
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-family: var(--ui-font);
+  font-size: 10px;
   font-weight: 700;
   line-height: 1.45;
-  letter-spacing: 1px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
   color: var(--cinema-red);
 }
 
@@ -310,7 +310,7 @@
   border-bottom: 1px solid var(--cinema-border);
 }
 
-.promotion-search {
+.promotion-page .promotion-search {
   position: relative;
 }
 
@@ -328,7 +328,7 @@
   pointer-events: none;
 }
 
-.promotion-search input {
+.promotion-page .promotion-search input {
   width: 100%;
   height: 46px;
   padding: 0 16px 0 42px;
@@ -342,13 +342,13 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.promotion-search input::placeholder,
+.promotion-page .promotion-search input::placeholder,
 .form-group input::placeholder,
 .form-group textarea::placeholder {
   color: #6f7475;
 }
 
-.promotion-search input:focus,
+.promotion-page .promotion-search input:focus,
 .promotion-filter-control:focus,
 .form-group input:focus,
 .form-group textarea:focus,

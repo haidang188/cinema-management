@@ -9,8 +9,8 @@
   --text-primary: #f5f7f8;
   --text-secondary: #a8b3bb;
   --text-muted: #76838d;
-  --accent: #f3123f;
-  --accent-hover: #d90f37;
+  --accent: #e50914;
+  --accent-hover: #ff1f2b;
   --success: #1f9d62;
   --warning: #d29a21;
   --danger: #e53935;
@@ -24,12 +24,6 @@
   font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
   min-height: 100%;
   padding: 24px 28px 36px;
-}
-
-.admin-sidebar button.is-employee-active {
-  background: rgba(243, 18, 63, 0.12);
-  border-left: 3px solid #f3123f;
-  color: #ff5f7b;
 }
 
 .admin-content .employee-page-header {
@@ -370,7 +364,7 @@
 
 .admin-content .employee-admin-page .primary-button,
 .employee-admin-form .primary-button {
-  background: #f3123f;
+  background: #e50914;
   border: 1px solid transparent;
   border-radius: 8px;
   color: #ffffff;
@@ -662,7 +656,7 @@
 
 .employee-confirm-icon {
   align-items: center;
-  border: 3px solid rgba(243, 18, 63, 0.6);
+  border: 3px solid rgba(229, 9, 20, 0.6);
   border-radius: 50%;
   color: #ff5f7b;
   display: inline-flex;
@@ -723,7 +717,7 @@
 /* Align employee management with the existing admin/member layout. */
 .admin-content .employee-admin-page {
   background:
-    radial-gradient(circle at 18% 0%, rgba(243, 18, 63, 0.08), transparent 28rem),
+    radial-gradient(circle at 18% 0%, rgba(229, 9, 20, 0.08), transparent 28rem),
     linear-gradient(180deg, #090d10 0%, #0b1014 100%);
   color: var(--text-primary, #f5f7f8);
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
@@ -906,8 +900,8 @@
 
 .admin-content .employee-admin-page .primary-button,
 .employee-admin-form .primary-button {
-  background: var(--accent, #f3123f);
-  border: 1px solid var(--accent, #f3123f);
+  background: var(--accent, #e50914);
+  border: 1px solid var(--accent, #e50914);
   color: #ffffff;
 }
 
@@ -922,8 +916,8 @@
 
 .admin-content .employee-admin-page .primary-button:hover:not(:disabled),
 .employee-admin-form .primary-button:hover:not(:disabled) {
-  background: var(--accent-hover, #d90f37);
-  border-color: var(--accent-hover, #d90f37);
+  background: var(--accent-hover, #ff1f2b);
+  border-color: var(--accent-hover, #ff1f2b);
   transform: translateY(-1px);
 }
 
@@ -1033,8 +1027,8 @@
 }
 
 .admin-content .employee-pagination .pagination-button.is-active {
-  background: var(--accent, #f3123f);
-  border-color: var(--accent, #f3123f);
+  background: var(--accent, #e50914);
+  border-color: var(--accent, #e50914);
   color: #ffffff;
 }
 

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { API_ORIGIN, WS_URL } from "../apiBase";
 
 /*
  * GIỮ GHẾ (frontend)
@@ -9,10 +10,8 @@ import axios from "axios";
  * Nếu dự án có axios instance dùng chung (kèm token đăng nhập), thay `client` bằng instance đó.
  */
 
-const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
-
-export const API_BASE_URL = env.VITE_API_BASE_URL ?? "http://localhost:8080";
-export const WS_URL = env.VITE_WS_URL ?? `${API_BASE_URL.replace(/^http/, "ws")}/ws`;
+export const API_BASE_URL = API_ORIGIN;
+export { WS_URL };
 
 export const client = axios.create({ baseURL: API_BASE_URL, withCredentials: true, });
 

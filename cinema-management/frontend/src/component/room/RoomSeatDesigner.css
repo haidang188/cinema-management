@@ -1,0 +1,247 @@
+/* =========================================================
+   SƠ ĐỒ GHẾ PHÒNG CHIẾU (ADMIN)
+   ---------------------------------------------------------
+   Dùng lại giao diện sơ đồ ghế của trang Bán vé tại quầy
+   (CounterSaleSeats.css, scope .cs-seats-page). File này chỉ:
+   - bỏ layout cấp trang của .cs-seats-page;
+   - thêm các trạng thái riêng của admin (ô trống, ngừng
+     hoạt động, chưa lưu) và thanh công cụ.
+   Mọi selector đều nằm dưới .cs-seats-page.room-seat-designer.
+   ========================================================= */
+
+.cs-seats-page.room-seat-designer {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    gap: 0;
+}
+
+.cs-seats-page.room-seat-designer .cs-seatmap-card {
+    padding: 16px 18px 18px;
+}
+
+.cs-seats-page.room-seat-designer .cs-seatmap-toolbar p {
+    flex-wrap: wrap;
+    max-width: 520px;
+    line-height: 1.5;
+}
+
+.cs-seats-page.room-seat-designer .cs-seatmap-scroll {
+    margin-top: 14px;
+}
+
+.cs-seats-page.room-seat-designer .cs-seatmap {
+    padding: 0 4px 6px;
+}
+
+/* Admin-ui ép font cho mọi button/h2 trong .app-shell: giữ font của sơ đồ */
+#pl-main .admin-content .cs-seats-page.room-seat-designer :is(button, h2, p, span, li) {
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+/* ---------- Thanh công cụ (giống cs-tool-btn) ---------- */
+
+.cs-seats-page.room-seat-designer .rsd-tools {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+#pl-main .cs-seats-page.room-seat-designer .rsd-tool {
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    color: #c9d0d6;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+#pl-main .cs-seats-page.room-seat-designer .rsd-tool:hover {
+    color: #fff;
+    border-color: var(--red);
+}
+
+#pl-main .cs-seats-page.room-seat-designer .rsd-tool.is-active {
+    color: #fff;
+    background: var(--red-soft);
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.16);
+}
+
+/* ---------- Thống kê dạng chip ---------- */
+
+.cs-seats-page.room-seat-designer .rsd-stats {
+    margin-top: 14px;
+    padding-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    border-top: 1px solid var(--border-soft);
+}
+
+.cs-seats-page.room-seat-designer .rsd-stat {
+    padding: 4px 10px;
+    color: var(--muted);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.cs-seats-page.room-seat-designer .rsd-stat b {
+    margin-left: 4px;
+    color: #fff;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-seats-page.room-seat-designer .rsd-stat.is-strong {
+    color: #fff;
+    background: var(--red-soft);
+    border-color: var(--red-line);
+}
+
+.cs-seats-page.room-seat-designer .rsd-stat.is-vip b {
+    color: #f0d49a;
+}
+
+.cs-seats-page.room-seat-designer .rsd-selected-count {
+    padding: 1px 8px;
+    color: #fff;
+    background: var(--red-soft);
+    border: 1px solid var(--red-line);
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+/* ---------- Ghế: trạng thái riêng của admin ---------- */
+
+.cs-seats-page.room-seat-designer .cs-seat {
+    touch-action: none;
+}
+
+/* Ô trống: viền đứt, hiện "+" khi rê chuột để thêm ghế */
+.cs-seats-page.room-seat-designer .cs-seat.rsd-empty {
+    color: transparent;
+    background: transparent;
+    border: 1px dashed #2f363e;
+    border-radius: 9px 9px 5px 5px;
+}
+
+.cs-seats-page.room-seat-designer .cs-seat.rsd-empty::after {
+    content: "+";
+    color: transparent;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.cs-seats-page.room-seat-designer .cs-seat.rsd-empty:hover {
+    background: rgba(229, 9, 20, 0.06);
+    border-color: var(--red-line);
+}
+
+.cs-seats-page.room-seat-designer .cs-seat.rsd-empty:hover::after {
+    color: #ff6a72;
+}
+
+/* Ngừng hoạt động: mờ + gạch chéo */
+.cs-seats-page.room-seat-designer .cs-seat.rsd-inactive {
+    color: #5d656e;
+    background:
+            linear-gradient(45deg, transparent 47%, #3a4048 47%, #3a4048 53%, transparent 53%),
+            #171b20;
+    border-color: #2a3037;
+    border-style: dashed;
+    border-bottom-style: solid;
+    opacity: 0.8;
+}
+
+.cs-seats-page.room-seat-designer .cs-seat.rsd-inactive.is-vip {
+    color: #7a6a48;
+    border-color: #4a3f2a;
+}
+
+.cs-seats-page.room-seat-designer .cs-seat.rsd-inactive:hover {
+    opacity: 1;
+    border-color: var(--red);
+}
+
+/* Ô trống trong chế độ xem (giữ thẳng cột) */
+.cs-seats-page.room-seat-designer .rsd-slot-gap {
+    width: var(--seat-w);
+    height: var(--seat-h);
+    flex: 0 0 auto;
+}
+
+/* Chưa lưu: chấm hổ phách góc trên phải */
+.cs-seats-page.room-seat-designer .cs-seat.rsd-changed::after {
+    content: "";
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 9px;
+    height: 9px;
+    background: #f5a524;
+    border: 2px solid var(--panel);
+    border-radius: 50%;
+}
+
+/* Đang chọn luôn thắng trạng thái ngừng hoạt động / VIP */
+.cs-seats-page.room-seat-designer .cs-seat.is-selected,
+.cs-seats-page.room-seat-designer .cs-seat.is-selected:hover {
+    color: #fff;
+    background: var(--red);
+    border-style: solid;
+    border-color: #ff4d56;
+    border-bottom-color: #9c0610;
+    opacity: 1;
+}
+
+.cs-seats-page.room-seat-designer .cs-seat.rsd-inactive.is-selected {
+    background:
+            linear-gradient(45deg, transparent 47%, rgba(255, 255, 255, 0.35) 47%, rgba(255, 255, 255, 0.35) 53%, transparent 53%),
+            var(--red);
+}
+
+/* ---------- Legend bổ sung ---------- */
+
+.cs-seats-page.room-seat-designer .cs-legend-seat.rsd-legend-inactive {
+    background:
+            linear-gradient(45deg, transparent 44%, #4a525b 44%, #4a525b 56%, transparent 56%),
+            #171b20;
+    border-color: #3a424b;
+    border-style: dashed;
+}
+
+.cs-seats-page.room-seat-designer .cs-legend-seat.rsd-legend-empty {
+    background: transparent;
+    border-color: #4a525b;
+    border-style: dashed;
+}
+
+.cs-seats-page.room-seat-designer .cs-legend-seat.rsd-legend-changed {
+    position: relative;
+}
+
+.cs-seats-page.room-seat-designer .cs-legend-seat.rsd-legend-changed::after {
+    content: "";
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 7px;
+    height: 7px;
+    background: #f5a524;
+    border-radius: 50%;
+}

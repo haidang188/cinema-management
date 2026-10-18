@@ -4,7 +4,7 @@ function HomeFooter() {
       <div className="home-logo home-logo--footer">
         PREMIERE <span>CINEMAS</span>
       </div>
-      <p>© 2026 Premiere Cinemas. All rights reserved.</p>
+      <p>© {new Date().getFullYear()} Premiere Cinemas. Bảo lưu mọi quyền.</p>
       <nav aria-label="Liên kết cuối trang">
         <a href="#terms">Điều khoản sử dụng</a>
         <a href="#privacy">Chính sách bảo mật</a>

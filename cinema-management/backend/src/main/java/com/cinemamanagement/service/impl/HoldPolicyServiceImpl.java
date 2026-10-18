@@ -21,7 +21,8 @@ public class HoldPolicyServiceImpl implements HoldPolicyService {
         Optional<CounterOrder> found = counterOrderRepository.findByHoldOwner(holdOwner);
 
         if (found.isEmpty()) {
-            return new Rule(ONLINE_MAX_SEATS, ONLINE_DURATION, null);
+            // Giữ ghế tại quầy luôn phải gắn với một đơn quầy (tạo qua /api/counter-orders).
+            throw new IllegalStateException("Vui lòng tạo đơn bán vé tại quầy trước khi giữ ghế");
         }
 
         CounterOrder order = found.get();

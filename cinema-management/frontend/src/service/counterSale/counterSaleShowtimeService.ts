@@ -1,21 +1,11 @@
 import axios from "axios";
 
 import type { ShowtimeData } from "../../types/showtime/showtime";
-
-const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
+import { API_ORIGIN } from "../apiBase";
 
 const client = axios.create({
-    baseURL: env.VITE_API_BASE_URL ?? "http://localhost:8080",
-});
-
-client.interceptors.request.use((config) => {
-    const token = localStorage.getItem("token") ?? localStorage.getItem("accessToken");
-
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
+    baseURL: API_ORIGIN,
+    withCredentials: true,
 });
 
 export type SeatSummaryDto = {

@@ -64,6 +64,53 @@ export interface ShowtimePreview {
   totalSeats: number
 }
 
+export interface BusySlot {
+  id: number
+  movieTitle: string
+  startTime: string
+  endTime: string
+  readyAt: string
+}
+
+export interface FreeSlot {
+  from: string
+  to: string
+  earliestStart: string
+  latestStart: string
+}
+
+export interface RoomAvailability {
+  roomId: number
+  roomName: string
+  movieId: number
+  movieTitle: string
+  durationMinutes: number
+  date: string
+  dayStart: string
+  lastStart: string
+  turnaroundMinutes: number
+  available: boolean
+  message: string
+  busy: BusySlot[]
+  freeSlots: FreeSlot[]
+  suggestedStarts: string[]
+}
+
+export interface CreateShowtimeBatch {
+  movieId: number
+  roomId: number
+  startTimes: string[]
+  format: string
+}
+
+export interface BatchPreviewItem {
+  startTime: string
+  endTime: string | null
+  readyAt: string | null
+  ok: boolean
+  message: string
+}
+
 export class ShowtimeError extends Error {
   constructor(
     public status: number,
@@ -144,6 +191,35 @@ export const previewShowtime = (
 export const createShowtime = (
   data: CreateShowtime,
 ) => request<AdminShowtime>("", {
+  method: "POST",
+  body: JSON.stringify(data),
+})
+
+export function getRoomAvailability(
+  movieId: number,
+  roomId: number,
+  date: string,
+  signal?: AbortSignal,
+) {
+  const query = new URLSearchParams({
+    movieId: String(movieId),
+    roomId: String(roomId),
+    date,
+  })
+
+  return request<RoomAvailability>(`/availability?${query}`, { signal })
+}
+
+export const previewShowtimeBatch = (
+  data: CreateShowtimeBatch,
+) => request<BatchPreviewItem[]>("/batch/preview", {
+  method: "POST",
+  body: JSON.stringify(data),
+})
+
+export const createShowtimeBatch = (
+  data: CreateShowtimeBatch,
+) => request<{ created: AdminShowtime[] }>("/batch", {
   method: "POST",
   body: JSON.stringify(data),
 })

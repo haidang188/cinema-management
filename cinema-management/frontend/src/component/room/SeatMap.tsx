@@ -1,3 +1,5 @@
+import "../counter-sale/CounterSaleSeats.css"
+import "./RoomSeatDesigner.css"
 import type { Seat } from "../../types/admin"
 
 const SEAT_TYPE_LABELS: Record<string, string> = {
@@ -87,83 +89,112 @@ function buildPositionedSeats(seats: Seat[]) {
 function SeatMap({ seats, pendingSeats, selectedSeatIds, onSelectSeat }: SeatMapProps) {
   const { positionedSeats, maxRow, maxColumn } = buildPositionedSeats(seats)
   const selectedSeatIdSet = new Set(selectedSeatIds)
+  const seatByPosition = new Map(positionedSeats.map((item) => [`${item.gridRow}:${item.gridColumn}`, item.seat]))
+
+  function renderSeat(seat: Seat) {
+    const draft = pendingSeats[seat.id]
+    const seatType = draft?.seatType || seat.seatType
+    const status = draft?.status || seat.status
+    const isInactive = status !== "ACTIVE"
+    const changed = Boolean(draft)
+    const selected = selectedSeatIdSet.has(seat.id)
+    const typeLabel = getSeatTypeLabel(seatType)
+    const statusLabel = getSeatStatusLabel(status)
+
+    return (
+      <button
+        key={seat.id}
+        type="button"
+        className={[
+          "cs-seat",
+          "is-available",
+          seatType === "VIP" ? "is-vip" : "",
+          isInactive ? "rsd-inactive" : "",
+          changed ? "rsd-changed" : "",
+          selected ? "is-selected" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        onClick={() => onSelectSeat(seat)}
+        title={`${seat.seatName} - ${typeLabel} - ${statusLabel}${changed ? " - Chưa lưu" : ""}`}
+        aria-pressed={selected}
+        aria-label={`${seat.seatName}, ${typeLabel}, ${statusLabel}${selected ? ", đang chọn" : ""}${changed ? ", chưa lưu" : ""}`}
+      >
+        {seat.seatNumber}
+      </button>
+    )
+  }
 
   return (
-    <section className="seat-map-panel">
-      <div className="seat-screen">
-        <span>MÀN HÌNH</span>
-      </div>
+    <section className="cs-seats-page room-seat-designer is-viewer" aria-label="Sơ đồ ghế">
+      <div className="cs-seatmap-card">
+        <div className="cs-seatmap-toolbar">
+          <div>
+            <p>
+              {seats.length} ghế · Bấm ghế để chọn, bấm lại để bỏ chọn
+              {selectedSeatIds.length > 0 && <span className="rsd-selected-count">Đang chọn {selectedSeatIds.length}</span>}
+            </p>
+          </div>
 
-      <div className="seat-legend" aria-label="Chú thích ghế">
-        <span className="legend-item">
-          <i className="legend-normal" aria-hidden="true" />
-          Ghế thường
-        </span>
-        <span className="legend-item">
-          <i className="legend-vip" aria-hidden="true" />
-          Ghế VIP
-        </span>
-        <span className="legend-item">
-          <i className="legend-inactive" aria-hidden="true" />
-          Ghế ngừng hoạt động
-        </span>
-        <span className="legend-item">
-          <i className="legend-changed" aria-hidden="true" />
-          Chưa lưu
-        </span>
-      </div>
+          <ul className="cs-legend" aria-label="Chú thích ghế">
+            <li>
+              <i className="cs-legend-seat is-available" />
+              Thường
+            </li>
+            <li>
+              <i className="cs-legend-seat is-vip" />
+              VIP
+            </li>
+            <li>
+              <i className="cs-legend-seat rsd-legend-inactive" />
+              Ngừng hoạt động
+            </li>
+            <li>
+              <i className="cs-legend-seat is-selected" />
+              Đang chọn
+            </li>
+            <li>
+              <i className="cs-legend-seat is-available rsd-legend-changed" />
+              Chưa lưu
+            </li>
+          </ul>
+        </div>
 
-      <div className="seat-map-scroll">
-        <div className="seat-position-grid" style={{ gridTemplateColumns: `40px repeat(${maxColumn + 1}, 54px)` }}>
-          <div className="seat-grid-corner" aria-hidden="true" />
-          {Array.from({ length: maxColumn + 1 }, (_, columnIndex) => (
-            <div key={`column-${columnIndex}`} className="seat-grid-column-label">
-              {columnIndex + 1}
+        <div className="cs-seatmap-scroll">
+          <div className="cs-seatmap">
+            <div className="cs-screen" aria-hidden="true">
+              <span>Màn hình</span>
             </div>
-          ))}
-          {Array.from({ length: maxRow + 1 }, (_, rowIndex) => (
-            <div
-              key={`row-${rowIndex}`}
-              className="seat-grid-row-label"
-              style={{ gridRow: rowIndex + 2, gridColumn: 1 }}
-            >
-              {String.fromCharCode("A".charCodeAt(0) + rowIndex)}
-            </div>
-          ))}
-          {positionedSeats.map(({ seat, gridRow, gridColumn }) => {
-            const draft = pendingSeats[seat.id]
-            const seatType = draft?.seatType || seat.seatType
-            const status = draft?.status || seat.status
-            const isInactive = status !== "ACTIVE"
-            const changed = Boolean(draft)
-            const selected = selectedSeatIdSet.has(seat.id)
-            const typeLabel = getSeatTypeLabel(seatType)
-            const statusLabel = getSeatStatusLabel(status)
 
-            return (
-              <button
-                key={seat.id}
-                type="button"
-                className={[
-                  "seat-button",
-                  "seat-positioned-button",
-                  seatType === "VIP" ? "seat-vip" : "seat-normal",
-                  isInactive ? "seat-inactive" : "",
-                  changed ? "seat-changed" : "",
-                  selected ? "seat-selected" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                style={{ gridRow: gridRow + 2, gridColumn: gridColumn + 2 }}
-                onClick={() => onSelectSeat(seat)}
-                title={`${seat.seatName} - ${typeLabel} - ${statusLabel}`}
-                aria-pressed={selected}
-                aria-label={`${seat.seatName}, ${typeLabel}, ${statusLabel}${selected ? ", đang chọn" : ""}${changed ? ", chưa lưu" : ""}`}
-              >
-                <span className="seat-cell-icon" aria-hidden="true" />
-              </button>
-            )
-          })}
+            {seats.length === 0 ? (
+              <div className="cs-seatmap-state">
+                <strong>Phòng chưa có ghế</strong>
+                <span>Vào trang chỉnh sửa để thiết kế sơ đồ ghế.</span>
+              </div>
+            ) : (
+              <div className="cs-rows">
+                {Array.from({ length: maxRow + 1 }, (_, rowIndex) => {
+                  const rowLabel = String.fromCharCode("A".charCodeAt(0) + rowIndex)
+                  return (
+                    <div className="cs-row" key={`row-${rowIndex}`}>
+                      <span className="cs-row-label">{rowLabel}</span>
+                      <div className="cs-row-seats">
+                        {Array.from({ length: maxColumn + 1 }, (_, columnIndex) => {
+                          const seat = seatByPosition.get(`${rowIndex}:${columnIndex}`)
+                          return seat ? (
+                            renderSeat(seat)
+                          ) : (
+                            <span key={`gap-${rowIndex}-${columnIndex}`} className="rsd-slot-gap" aria-hidden="true" />
+                          )
+                        })}
+                      </div>
+                      <span className="cs-row-label">{rowLabel}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>

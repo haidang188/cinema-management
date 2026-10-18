@@ -377,65 +377,6 @@
   opacity: 0.45;
 }
 
-.admin-layout {
-  grid-template-columns: 220px minmax(0, 1fr);
-}
-
-.admin-sidebar {
-  width: 220px;
-  padding: 14px 12px;
-}
-
-.admin-sidebar nav {
-  display: grid;
-  gap: 8px;
-}
-
-.admin-sidebar button:not(.admin-brand):not(.admin-logout) {
-  align-items: center;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 36px minmax(0, 1fr);
-  justify-content: start;
-  min-height: 44px;
-  padding: 8px 12px;
-  text-align: left;
-  width: 100%;
-}
-
-.admin-sidebar .admin-nav-icon {
-  align-items: center;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
-  color: #9fb0bb;
-  display: inline-flex;
-  height: 34px;
-  justify-content: center;
-  width: 34px;
-}
-
-.admin-sidebar .admin-nav-label {
-  color: inherit;
-  display: block;
-  height: auto;
-  line-height: 1.25;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  width: auto;
-}
-
-.admin-sidebar button:hover .admin-nav-icon,
-.admin-sidebar button.is-active .admin-nav-icon {
-  background: rgba(255, 19, 78, 0.16);
-  border-color: rgba(255, 19, 78, 0.34);
-  color: #ff4974;
-}
-
-.admin-sidebar-footer .admin-logout {
-  width: 100%;
-}
-
 .admin-content .movie-admin-page .movie-delete-button,
 .admin-content .room-admin-page .room-delete-button,
 .admin-content .employee-admin-page .danger-button,
@@ -561,17 +502,6 @@
 }
 
 @media (max-width: 767px) {
-  .admin-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-sidebar {
-    width: 100%;
-  }
-
-  .admin-sidebar nav {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  }
 
   .admin-content .movie-admin-page,
   .admin-content .room-admin-page,

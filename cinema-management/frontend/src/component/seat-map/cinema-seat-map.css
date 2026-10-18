@@ -1,0 +1,65 @@
+/* Nhúng sơ đồ ghế của màn quầy vào trang khác: bỏ bố cục cấp trang của .cs-seats-page. */
+.cs-seats-page.cinema-seat-map {
+    width: 100%;
+    margin: 0;
+    gap: 0;
+}
+
+.cs-seats-page.cinema-seat-map .cs-seatmap-card {
+    min-width: 0;
+}
+
+/* Bước chọn ghế của khách đặt online (BookingSeatsPage) */
+.cs-seats-page.booking-seat-step {
+    margin-top: 14px;
+}
+
+.cs-seats-page.booking-seat-step .booking-seat-movie {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.cs-seats-page.booking-seat-step .booking-seat-movie img {
+    flex: 0 0 54px;
+    width: 54px;
+    height: 78px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.cs-seats-page.booking-seat-step .booking-seat-movie div {
+    display: grid;
+    align-content: center;
+    gap: 3px;
+    min-width: 0;
+}
+
+.cs-seats-page.booking-seat-step .booking-seat-movie strong {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.cs-seats-page.booking-seat-step .booking-seat-movie span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.cs-seats-page.booking-seat-step .booking-seat-note {
+    display: block;
+    margin-top: 10px;
+    color: var(--faint);
+    font-size: 11.5px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* Chip ghế của quầy viết hoa nhãn loại ghế; ở đây hiển thị giá nên giữ "đ" thường. */
+.cs-seats-page.booking-seat-step .cs-seat-chip small {
+    text-transform: none;
+    letter-spacing: 0;
+}

@@ -1,8 +1,9 @@
 import { request } from "../httpClient"
 import type { AdminMovie, Genre, MoviePayload, PageResponse } from "../../types/admin"
 import type { Movie } from "../../types/movie"
+import { API_BASE_URL } from "../apiBase"
 
-const MOVIE_API_BASE_URL = "http://localhost:8080/api/movies"
+const MOVIE_API_BASE_URL = `${API_BASE_URL}/movies`
 
 interface MovieSearchParams {
   page?: number

@@ -269,29 +269,61 @@ Frontend cũ giả định luôn có `showtimeSeatIds`, gọi `.includes()` và 
 
 Không được bỏ phần chuẩn hóa này trừ khi backend đã được thống nhất về đúng một schema và toàn bộ client đã chuyển theo.
 
-## 6. Nghiệp vụ giữ ghế: điểm cần xử lý tiếp
+## 6. Nghiệp vụ giữ ghế (cập nhật 17/10/2026)
 
-Nghiệp vụ đã chốt trong trao đổi:
+Chính sách cũ "giữ online 5 phút, không giới hạn số ghế" cho phép một tài khoản giữ cả phòng rồi bỏ đi, nên đã thay bằng:
 
-- Giữ ghế online 5 phút.
-- Không giới hạn số ghế được chọn trong một lần.
+| Kênh | Tối đa ghế | Hạn giữ | Ghi chú |
+|---|---|---|---|
+| Online (thành viên) | 8 ghế/lượt | 10 phút cho cả chọn ghế và thanh toán | Mỗi thành viên chỉ giữ ở 1 suất tại một thời điểm; giữ suất mới sẽ tự nhả lượt giữ chưa tạo đơn ở suất cũ |
+| Quầy - thường | 20 | 5 phút, gia hạn +2 phút x 2 | Phải tạo đơn quầy trước, bắt buộc đăng nhập nhân viên |
+| Quầy - đơn đoàn | Không giới hạn | 15 phút | Nhóm lớn hơn 8 người mua tại quầy |
 
-Nhưng code hiện tại trong `backend/src/main/java/com/cinemamanagement/service/HoldPolicyService.java` đang là:
+Chống chiếm ghế online: trong 60 phút, nếu một thành viên để hết hạn 3 lượt giữ (giữ ghế/tạo đơn mà không thanh toán) thì bị chặn giữ ghế online 30 phút kể từ lượt hết hạn gần nhất. Lượt tự huỷ và lượt đã thanh toán không bị tính.
+
+Các con số online cấu hình trong `application.properties`:
 
 ```text
-ONLINE_MAX_SEATS = 10
-ONLINE_DURATION = 10 phút
+booking.seat-hold-duration-minutes=10
+booking.online-max-seats=8
+booking.abuse-window-minutes=60
+booking.abuse-max-expired-holds=3
+booking.abuse-block-minutes=30
 ```
 
-Đây là sai lệch cần quyết định và sửa đồng bộ trước khi coi chức năng hoàn tất. Khi sửa phải kiểm tra:
+Frontend `BookingSeatsPage` có hằng `ONLINE_MAX_SEATS = 8`, phải đổi cùng lúc nếu sửa `booking.online-max-seats`. Luật quầy nằm trong `HoldPolicyService`.
 
-- `HoldPolicyService` và `HoldPolicyServiceImpl`.
-- `SeatHoldServiceImpl`.
-- thời gian countdown ở frontend.
-- `booking.*` trong `application.properties` nếu có.
-- thông báo validation và test liên quan.
+API `/api/showtimes/{id}/holds` (quầy) bắt buộc phiên đăng nhập nhân viên và phải có đơn quầy; trước đây API này mở, ai cũng sinh token để giữ ghế ẩn danh được.
+
+Web chỉ cho khách hàng tự đăng ký. Tài khoản nhân viên được tạo trong database/trang quản trị; backend bỏ qua `accountType` gửi lên khi đăng ký.
 
 `BookingType` hiện vẫn tồn tại trong code vì hệ thống có cả online và bán tại quầy. Trước đây đã có thảo luận rằng khách chỉ mua online nên không cần trường này, nhưng module quầy đã được thêm sau đó; không xóa enum/trường này khi chưa kiểm tra toàn bộ luồng quầy.
+
+## 6b. Xếp lịch chiếu và thêm nhanh suất (cập nhật 18/10/2026)
+
+Trang `/admin/showtimes/create`: chọn phim + phòng + ngày thì backend trả lịch trong ngày của phòng, các khoảng trống đủ cho phim và các giờ gợi ý xếp liền nhau. Admin bấm chọn nhiều giờ (hoặc "Xếp kín ngày", hoặc tự nhập giờ), bấm "Kiểm tra lịch", rồi thêm tất cả trong một lần.
+
+Luật (cấu hình trong `application.properties`):
+
+```text
+cinema.showtime.turnaround-minutes=15   # dọn phòng giữa hai suất
+cinema.showtime.open-time=08:00         # suất sớm nhất
+cinema.showtime.last-start-time=23:30   # suất cuối bắt đầu muộn nhất (được kết thúc sau nửa đêm)
+```
+
+- Giờ gợi ý làm tròn lên bội số 5 phút; suất mới phải bắt đầu sau hiện tại ít nhất 5 phút.
+- Không xếp trước ngày khởi chiếu của phim, phòng phải ACTIVE, có ghế và đủ giá vé cho loại ngày.
+- Thêm nhanh tối đa 20 suất/lần; một giờ không hợp lệ thì không lưu giờ nào (một transaction, khóa phòng khi tạo).
+
+API (chỉ ADMIN, theo session):
+
+```text
+GET  /api/admin/showtimes/availability?movieId=&roomId=&date=YYYY-MM-DD
+POST /api/admin/showtimes/batch/preview   {movieId, roomId, startTimes[], format}
+POST /api/admin/showtimes/batch           {movieId, roomId, startTimes[], format}
+```
+
+Các API cũ `POST /api/admin/showtimes` và `/preview` (một suất) vẫn giữ.
 
 ## 7. Thanh toán
 
@@ -481,7 +513,7 @@ Các warning lint có sẵn cần phân biệt với lỗi mới. Vite có thể
 
 ## 15. Điểm cần kiểm tra khi tiếp tục
 
-1. Chốt và đồng bộ lại giữ ghế online: 5 phút/không giới hạn hay giữ chính sách code hiện tại 10 phút/tối đa 10.
+1. Chính sách giữ ghế đã chốt ở mục 6 (online 10 phút, tối đa 8 ghế, chặn khi để hết hạn nhiều lần); nếu đổi số phải đổi cả backend lẫn `ONLINE_MAX_SEATS` ở frontend.
 2. Kiểm tra toàn bộ luồng chọn ghế sau mỗi lần pull/merge; đặc biệt không làm mất `normalizeSeatEvents()`.
 3. Test đồng thời hai trình duyệt chọn cùng ghế để xác nhận khóa DB, WebSocket và nhả ghế.
 4. Test hết hạn khi đang ở trang ghế và trang xác nhận.
@@ -520,9 +552,9 @@ Hãy đọc README_PROJECT_CONTEXT.md, README.md và docs/THANH_TOAN_LOCAL.md tr
 Sau đó kiểm tra code hiện tại, không giả định tài liệu luôn đúng sau các lần pull/merge.
 Dự án là Spring Boot + React/Vite + MySQL. Chức năng đang tập trung là đặt vé online,
 giữ ghế thời gian thực, VietQR, vé điện tử và đánh giá phim.
-Trước khi sửa, hãy đối chiếu nghiệp vụ đã chốt với HoldPolicyService vì hiện có sai lệch
-về thời gian giữ ghế và số ghế tối đa. Không xóa normalizeSeatEvents ở frontend nếu
-backend vẫn phát hai schema WebSocket.
+Chính sách giữ ghế đã chốt ở mục 6 (cấu hình booking.* trong application.properties).
+Backend hiện chỉ phát một schema WebSocket ({showtimeId, seats[]}) sau khi commit;
+normalizeSeatEvents ở frontend vẫn hỗ trợ cả schema cũ, giữ lại để an toàn.
 ```
 
 ## 18. Nguyên tắc khi sửa tiếp

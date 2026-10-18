@@ -53,4 +53,53 @@ public record AdminShowtimeResponse(
             int turnaroundMinutes,
             int totalSeats
     ) {}
+
+    /** Một suất đang chiếm phòng (kể cả thời gian dọn phòng sau suất). */
+    public record BusySlot(
+            long id,
+            String movieTitle,
+            LocalDateTime startTime,
+            LocalDateTime endTime,
+            LocalDateTime readyAt
+    ) {}
+
+    /**
+     * Khoảng trống của phòng: from/to là khoảng phòng rảnh,
+     * earliestStart/latestStart là khoảng giờ bắt đầu hợp lệ cho phim đã chọn.
+     */
+    public record FreeSlot(
+            LocalDateTime from,
+            LocalDateTime to,
+            LocalDateTime earliestStart,
+            LocalDateTime latestStart
+    ) {}
+
+    public record Availability(
+            long roomId,
+            String roomName,
+            long movieId,
+            String movieTitle,
+            int durationMinutes,
+            LocalDate date,
+            LocalDateTime dayStart,
+            LocalDateTime lastStart,
+            int turnaroundMinutes,
+            boolean available,
+            String message,
+            List<BusySlot> busy,
+            List<FreeSlot> freeSlots,
+            List<LocalDateTime> suggestedStarts
+    ) {}
+
+    public record BatchPreviewItem(
+            LocalDateTime startTime,
+            LocalDateTime endTime,
+            LocalDateTime readyAt,
+            boolean ok,
+            String message
+    ) {}
+
+    public record BatchResult(
+            List<AdminShowtimeResponse> created
+    ) {}
 }

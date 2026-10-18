@@ -47,7 +47,7 @@ interface HomePageProps {
   onRegisterClick: () => void
 }
 
-function HomePage({ currentUser, onLogout, onLoginClick, onRegisterClick }: HomePageProps) {
+function HomePage({ currentUser, onLogout, onLoginClick }: HomePageProps) {
   const [movies, setMovies] = useState<Movie[]>([])
   const [searchKeyword, setSearchKeyword] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -113,7 +113,7 @@ function HomePage({ currentUser, onLogout, onLoginClick, onRegisterClick }: Home
       />
       <div className="home-content">
         <p className="breadcrumb">Trang chủ - Premiere Cinemas</p>
-        <HomeHero movies={movies} isLoading={isLoading} onBookingClick={onRegisterClick} />
+        <HomeHero movies={movies} isLoading={isLoading} />
         <MovieSection
           movies={filteredMovies}
           isLoading={isLoading}

@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL } from "../apiBase";
 
-const URL = import.meta.env.VITE_API_URL;
+const URL = API_BASE_URL;
 
 export interface CounterSaleRequest {
     showtimeId: number;
@@ -56,17 +57,13 @@ export async function previewSale(
 }
 
 export async function sellTickets(
-    request: CounterSaleRequest,
-    employeeId: number
+    request: CounterSaleRequest
 ): Promise<CounterSaleResponse> {
+    // Backend xác định nhân viên bán từ session đăng nhập, nên phải gửi kèm cookie.
     const response = await axios.post<CounterSaleResponse>(
         `${URL}/counter-sales`,
         request,
-        {
-            params: {
-                employeeId,
-            },
-        }
+        { withCredentials: true }
     );
 
     return response.data;

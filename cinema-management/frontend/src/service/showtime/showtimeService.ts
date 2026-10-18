@@ -1,8 +1,9 @@
 import axios from "axios";
 import { request } from "../httpClient";
 import type {ShowtimeData} from "../../types/showtime/showtime";
+import { API_BASE_URL } from "../apiBase";
 
-const URL: string = import.meta.env.VITE_API_URL;
+const URL: string = API_BASE_URL;
 
 export const getShowtimesByDate = async (
     date: string

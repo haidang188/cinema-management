@@ -22,6 +22,7 @@ import type {
 } from '../../service/promotion/promotionService'
 
 
+import { formatVnd } from '../../utils/format'
 import './promotion.css'
 
 interface PromotionLocationState {
@@ -59,10 +60,7 @@ function formatMoney(
     return '-'
   }
 
-  return (
-    new Intl.NumberFormat('vi-VN')
-      .format(value) + 'đ'
-  )
+  return formatVnd(value)
 }
 
 function formatDiscount(
@@ -97,14 +95,14 @@ function getStatusLabel(
     string,
     string
   > = {
-    ACTIVE: 'ĐANG ÁP DỤNG',
-    UPCOMING: 'SẮP DIỄN RA',
-    EXPIRED: 'ĐÃ HẾT HẠN',
-    INACTIVE: 'ĐÃ TẮT'
+    ACTIVE: 'Đang áp dụng',
+    UPCOMING: 'Sắp diễn ra',
+    EXPIRED: 'Đã hết hạn',
+    INACTIVE: 'Đã tắt'
   }
 
   if (!status) {
-    return 'KHÔNG XÁC ĐỊNH'
+    return 'Không xác định'
   }
 
   return (
@@ -395,8 +393,8 @@ export function PromotionList() {
       <div className="promotion-page-header premium-header">
         <div className="promotion-header-copy">
           <span className="promotion-eyebrow">
-            PREMIERE CINEMAS /
-            PROMOTIONS
+            Premiere Cinemas /
+            Khuyến mãi
           </span>
 
           <h1>
@@ -417,14 +415,14 @@ export function PromotionList() {
             +
           </span>
 
-          THÊM KHUYẾN MÃI
+          Thêm khuyến mãi
         </button>
       </div>
 
       <div className="promotion-section-heading">
         <div>
           <span className="promotion-section-kicker">
-            OVERVIEW
+            Tổng quan
           </span>
 
           <h2>
@@ -444,7 +442,7 @@ export function PromotionList() {
         <article className="promotion-stat-card">
           <div className="promotion-stat-topline">
             <span>
-              TỔNG KHUYẾN MÃI
+              Tổng khuyến mãi
             </span>
             <i>01</i>
           </div>
@@ -463,7 +461,7 @@ export function PromotionList() {
         <article className="promotion-stat-card accent">
           <div className="promotion-stat-topline">
             <span>
-              ĐANG ÁP DỤNG
+              Đang áp dụng
             </span>
             <i>02</i>
           </div>
@@ -482,7 +480,7 @@ export function PromotionList() {
         <article className="promotion-stat-card">
           <div className="promotion-stat-topline">
             <span>
-              SẮP DIỄN RA
+              Sắp diễn ra
             </span>
             <i>03</i>
           </div>
@@ -501,7 +499,7 @@ export function PromotionList() {
         <article className="promotion-stat-card">
           <div className="promotion-stat-topline">
             <span>
-              SẮP HẾT HẠN
+              Sắp hết hạn
             </span>
             <i>04</i>
           </div>
@@ -521,7 +519,7 @@ export function PromotionList() {
       <div className="promotion-section-heading promotion-list-heading">
         <div>
           <span className="promotion-section-kicker">
-            PROMOTION DIRECTORY
+            Danh sách khuyến mãi
           </span>
 
           <h2>
@@ -563,7 +561,7 @@ export function PromotionList() {
           <div className="promotion-filter-row">
             <div className="promotion-filter-field">
               <label>
-                TRẠNG THÁI
+                Trạng thái
               </label>
 
               <select
@@ -603,7 +601,7 @@ export function PromotionList() {
 
             <div className="promotion-filter-field">
               <label>
-                LOẠI GIẢM
+                Loại giảm
               </label>
 
               <select
@@ -638,7 +636,7 @@ export function PromotionList() {
 
             <div className="promotion-filter-field">
               <label>
-                TỪ NGÀY
+                Từ ngày
               </label>
 
               <input
@@ -658,7 +656,7 @@ export function PromotionList() {
 
             <div className="promotion-filter-field">
               <label>
-                ĐẾN NGÀY
+                Đến ngày
               </label>
 
               <input
@@ -683,7 +681,7 @@ export function PromotionList() {
                 resetFilters
               }
             >
-              ĐẶT LẠI
+              Đặt lại
             </button>
           </div>
         </div>
@@ -725,26 +723,26 @@ export function PromotionList() {
                     <thead>
                       <tr>
                         <th>
-                          KHUYẾN
-                          MÃI
+                          Khuyến
+                          mãi
                         </th>
 
                         <th>
-                          THỜI
-                          GIAN
+                          Thời
+                          gian
                         </th>
 
                         <th>
-                          ƯU ĐÃI
+                          Ưu đãi
                         </th>
 
                         <th>
-                          SỬ DỤNG
+                          Sử dụng
                         </th>
 
                         <th>
-                          TRẠNG
-                          THÁI
+                          Trạng
+                          thái
                         </th>
 
                         <th />
@@ -787,8 +785,8 @@ export function PromotionList() {
                                       />
                                     ) : (
                                       <span>
-                                        NO
-                                        IMAGE
+                                        Chưa có
+                                        ảnh
                                       </span>
                                     )}
                                   </div>
@@ -912,7 +910,7 @@ export function PromotionList() {
                                     )
                                   }
                                 >
-                                  XEM{' '}
+                                  Xem{' '}
                                   <span>
                                     →
                                   </span>

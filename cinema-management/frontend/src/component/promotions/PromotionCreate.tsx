@@ -1,3 +1,4 @@
+import { formatVnd } from '../../utils/format'
 import {
   useEffect,
   useMemo,
@@ -38,13 +39,7 @@ function formatMoney(
     return '-'
   }
 
-  return (
-    new Intl.NumberFormat(
-      'vi-VN'
-    ).format(
-      Number(value)
-    ) + 'đ'
-  )
+  return formatVnd(Number(value))
 }
 
 function formatPreviewDiscount(
@@ -60,7 +55,7 @@ function formatPreviewDiscount(
     form.discountType ===
     'PERCENTAGE'
   ) {
-    return `GIẢM ${new Intl.NumberFormat(
+    return `Giảm ${new Intl.NumberFormat(
       'vi-VN'
     ).format(
       Number(
@@ -69,9 +64,9 @@ function formatPreviewDiscount(
     )}%`
   }
 
-  return `GIẢM ${formatMoney(
+  return `Giảm ${formatMoney(
     form.discountValue
-  ).toUpperCase()}`
+  )}`
 }
 
 function formatPreviewDate(
@@ -317,13 +312,13 @@ export function PromotionCreate() {
               leaveForm
             }
           >
-            ← QUẢN LÝ
-            KHUYẾN MÃI
+            ← Quản lý
+            khuyến mãi
           </button>
 
           <span className="promotion-eyebrow">
-            PREMIERE CINEMAS /
-            CREATE PROMOTION
+            Premiere Cinemas /
+            Thêm khuyến mãi
           </span>
 
           <h1>
@@ -353,9 +348,9 @@ export function PromotionCreate() {
             <div className="panel-heading panel-heading-premium">
               <div>
                 <span>
-                  01 / THÔNG
-                  TIN CHƯƠNG
-                  TRÌNH
+                  01 / Thông
+                  tin chương
+                  trình
                 </span>
 
                 <h2>
@@ -372,7 +367,7 @@ export function PromotionCreate() {
             <div className="form-grid">
               <div className="form-group full">
                 <label>
-                  TIÊU ĐỀ{' '}
+                  Tiêu đề{' '}
                   <span>*</span>
                 </label>
 
@@ -407,8 +402,8 @@ export function PromotionCreate() {
 
               <div className="form-group">
                 <label>
-                  MÃ KHUYẾN
-                  MÃI{' '}
+                  Mã khuyến
+                  mãi{' '}
                   <span>*</span>
                 </label>
 
@@ -445,8 +440,8 @@ export function PromotionCreate() {
 
               <div className="form-group">
                 <label>
-                  LOẠI GIẢM
-                  GIÁ{' '}
+                  Loại giảm
+                  giá{' '}
                   <span>*</span>
                 </label>
 
@@ -498,8 +493,8 @@ export function PromotionCreate() {
 
               <div className="form-group full">
                 <label>
-                  CHI TIẾT
-                  CHƯƠNG TRÌNH{' '}
+                  Chi tiết
+                  chương trình{' '}
                   <span>*</span>
                 </label>
 
@@ -547,8 +542,8 @@ export function PromotionCreate() {
             <div className="panel-heading panel-heading-premium">
               <div>
                 <span>
-                  02 / THIẾT
-                  LẬP ƯU ĐÃI
+                  02 / Thiết
+                  lập ưu đãi
                 </span>
 
                 <h2>
@@ -570,7 +565,7 @@ export function PromotionCreate() {
             <div className="form-grid">
               <div className="form-group">
                 <label>
-                  MỨC GIẢM GIÁ{' '}
+                  Mức giảm giá{' '}
                   <span>*</span>
                 </label>
 
@@ -614,7 +609,7 @@ export function PromotionCreate() {
                     {form.discountType ===
                       'PERCENTAGE'
                       ? '%'
-                      : 'VNĐ'}
+                      : 'đ'}
                   </span>
                 </div>
 
@@ -629,8 +624,8 @@ export function PromotionCreate() {
 
               <div className="form-group">
                 <label>
-                  ĐƠN HÀNG TỐI
-                  THIỂU
+                  Đơn hàng tối
+                  thiểu
                 </label>
 
                 <div className="money-input">
@@ -654,7 +649,7 @@ export function PromotionCreate() {
                   />
 
                   <span>
-                    VNĐ
+                    đ
                   </span>
                 </div>
 
@@ -671,7 +666,7 @@ export function PromotionCreate() {
                 'PERCENTAGE' && (
                   <div className="form-group">
                     <label>
-                      GIẢM TỐI ĐA
+                      Giảm tối đa
                     </label>
 
                     <div className="money-input">
@@ -695,7 +690,7 @@ export function PromotionCreate() {
                       />
 
                       <span>
-                        VNĐ
+                        đ
                       </span>
                     </div>
 
@@ -711,8 +706,8 @@ export function PromotionCreate() {
 
               <div className="form-group">
                 <label>
-                  GIỚI HẠN SỬ
-                  DỤNG
+                  Giới hạn sử
+                  dụng
                 </label>
 
                 <input
@@ -749,8 +744,8 @@ export function PromotionCreate() {
             <div className="panel-heading panel-heading-premium">
               <div>
                 <span>
-                  03 / THỜI
-                  GIAN ÁP DỤNG
+                  03 / Thời
+                  gian áp dụng
                 </span>
 
                 <h2>
@@ -772,8 +767,8 @@ export function PromotionCreate() {
             <div className="form-grid">
               <div className="form-group">
                 <label>
-                  THỜI GIAN BẮT
-                  ĐẦU{' '}
+                  Thời gian bắt
+                  đầu{' '}
                   <span>*</span>
                 </label>
 
@@ -804,8 +799,8 @@ export function PromotionCreate() {
 
               <div className="form-group">
                 <label>
-                  THỜI GIAN KẾT
-                  THÚC{' '}
+                  Thời gian kết
+                  thúc{' '}
                   <span>*</span>
                 </label>
 
@@ -863,7 +858,7 @@ export function PromotionCreate() {
                   leaveForm
                 }
               >
-                HỦY
+                Hủy
               </button>
 
               <button
@@ -874,8 +869,8 @@ export function PromotionCreate() {
                 }
               >
                 {submitting
-                  ? 'ĐANG THÊM...'
-                  : '+ THÊM KHUYẾN MÃI'}
+                  ? 'Đang thêm...'
+                  : '+ Thêm khuyến mãi'}
               </button>
             </div>
           </div>
@@ -887,7 +882,7 @@ export function PromotionCreate() {
               <div className="panel-heading panel-heading-premium compact-heading">
                 <div>
                   <span>
-                    HÌNH ẢNH
+                    Hình ảnh
                   </span>
 
                   <h2>
@@ -912,8 +907,8 @@ export function PromotionCreate() {
                     </div>
 
                     <strong>
-                      CHỌN HÌNH
-                      ẢNH
+                      Chọn hình
+                      ảnh
                     </strong>
 
                     <span>
@@ -958,8 +953,8 @@ export function PromotionCreate() {
                 <div className="selected-file premium-selected-file">
                   <div>
                     <span>
-                      TỆP ĐÃ
-                      CHỌN
+                      Tệp đã
+                      chọn
                     </span>
 
                     <strong>
@@ -989,12 +984,12 @@ export function PromotionCreate() {
             <section className="promotion-side-card preview-side-card">
               <div className="promotion-preview-heading">
                 <span>
-                  XEM TRƯỚC
-                  CHƯƠNG TRÌNH
+                  Xem trước
+                  chương trình
                 </span>
 
                 <small>
-                  LIVE PREVIEW
+                  Xem trước
                 </small>
               </div>
 
@@ -1010,18 +1005,18 @@ export function PromotionCreate() {
                   ) : (
                     <div className="promotion-preview-placeholder">
                       <span>
-                        PREMIERE
+                        Premiere
                       </span>
 
                       <strong>
-                        CINEMAS
+                        Cinemas
                       </strong>
                     </div>
                   )}
 
                   <span className="preview-cinema-mark">
-                    PREMIERE
-                    CINEMAS
+                    Premiere
+                    Cinemas
                   </span>
                 </div>
 
@@ -1047,7 +1042,7 @@ export function PromotionCreate() {
                   <div className="preview-meta-grid">
                     <div>
                       <span>
-                        THỜI GIAN
+                        Thời gian
                       </span>
 
                       <p>
@@ -1063,7 +1058,7 @@ export function PromotionCreate() {
 
                     <div>
                       <span>
-                        ĐIỀU KIỆN
+                        Điều kiện
                       </span>
 
                       <p>
@@ -1085,8 +1080,8 @@ export function PromotionCreate() {
                       0 && (
                         <div>
                           <span>
-                            GIẢM TỐI
-                            ĐA
+                            Giảm tối
+                            đa
                           </span>
 
                           <p>
@@ -1099,7 +1094,7 @@ export function PromotionCreate() {
 
                     <div>
                       <span>
-                        LƯỢT DÙNG
+                        Lượt dùng
                       </span>
 
                       <p>

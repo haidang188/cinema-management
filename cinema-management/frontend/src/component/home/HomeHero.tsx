@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import type { Movie } from '../../types/movie'
 
 interface HomeHeroProps {
   movies: Movie[]
   isLoading: boolean
-  onBookingClick: () => void
 }
 
-function HomeHero({ movies, isLoading, onBookingClick }: HomeHeroProps) {
+function HomeHero({ movies, isLoading }: HomeHeroProps) {
+  const navigate = useNavigate()
   const [activeIndex, setActiveIndex] = useState(0)
   const activeMovie = useMemo(() => movies[activeIndex] ?? null, [activeIndex, movies])
 
@@ -57,7 +57,7 @@ function HomeHero({ movies, isLoading, onBookingClick }: HomeHeroProps) {
                 <span>{movie.language}</span>
               </div>
               <div className="hero-buttons">
-                <button type="button" onClick={onBookingClick}>
+                <button type="button" onClick={() => navigate(`/movies/${movie.id}#movie-showtimes`)}>
                   Đặt vé ngay
                 </button>
                 <a className="outline-button" href={movie.trailerUrl} target="_blank" rel="noreferrer">

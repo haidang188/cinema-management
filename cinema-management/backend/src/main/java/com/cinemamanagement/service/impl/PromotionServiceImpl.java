@@ -81,7 +81,7 @@ public class PromotionServiceImpl implements PromotionService {
     public PromotionResponse getPromotion(Long id) {
         Promotion promotion = promotionRepository.findById(id)
                 .orElseThrow(() -> new PromotionNotFoundException(
-                        "Khong tim thay khuyen mai co ID " + id));
+                        "Không tìm thấy khuyến mãi có ID " + id));
 
         return toResponse(promotion);
     }
@@ -133,7 +133,7 @@ public class PromotionServiceImpl implements PromotionService {
         Map<String, String> errors = new TreeMap<>();
 
         if (request == null) {
-            errors.put("promotion", "Du lieu khuyen mai khong duoc de trong");
+            errors.put("promotion", "Dữ liệu khuyến mãi không được để trống");
         } else {
             String title = trimToNull(request.getTitle());
             String code = trimToNull(request.getCode());
@@ -141,55 +141,55 @@ public class PromotionServiceImpl implements PromotionService {
             String discountType = normalizeUpper(request.getDiscountType());
 
             if (title == null) {
-                errors.put("title", "Tieu de khong duoc de trong");
+                errors.put("title", "Tiêu đề không được để trống");
             } else if (title.length() > 150) {
-                errors.put("title", "Tieu de khong duoc vuot qua 150 ky tu");
+                errors.put("title", "Tiêu đề không được vượt quá 150 ký tự");
             }
 
             if (code == null) {
-                errors.put("code", "Ma khuyen mai khong duoc de trong");
+                errors.put("code", "Mã khuyến mãi không được để trống");
             } else if (code.length() > 50) {
-                errors.put("code", "Ma khuyen mai khong duoc vuot qua 50 ky tu");
+                errors.put("code", "Mã khuyến mãi không được vượt quá 50 ký tự");
             } else if (!code.matches("[A-Za-z0-9_-]+")) {
-                errors.put("code", "Ma khuyen mai chi gom chu, so, dau gach ngang hoac gach duoi");
+                errors.put("code", "Mã khuyến mãi chỉ gồm chữ, số, dấu gạch ngang hoặc gạch dưới");
             } else if (promotionRepository.existsByCodeIgnoreCase(code)) {
-                errors.put("code", "Ma khuyen mai da ton tai");
+                errors.put("code", "Mã khuyến mãi đã tồn tại");
             }
 
             if (description == null) {
-                errors.put("description", "Chi tiet khong duoc de trong");
+                errors.put("description", "Chi tiết không được để trống");
             } else if (description.length() > MAX_DESCRIPTION_LENGTH) {
-                errors.put("description", "Chi tiet khong duoc vuot qua 2000 ky tu");
+                errors.put("description", "Chi tiết không được vượt quá 2000 ký tự");
             }
 
             if (request.getStartDate() == null) {
-                errors.put("startDate", "Thoi gian bat dau khong duoc de trong");
+                errors.put("startDate", "Thời gian bắt đầu không được để trống");
             } else if (request.getStartDate().isBefore(LocalDateTime.now().minusMinutes(1))) {
-                errors.put("startDate", "Thoi gian bat dau khong duoc nam trong qua khu");
+                errors.put("startDate", "Thời gian bắt đầu không được nằm trong quá khứ");
             }
 
             if (request.getEndDate() == null) {
-                errors.put("endDate", "Thoi gian ket thuc khong duoc de trong");
+                errors.put("endDate", "Thời gian kết thúc không được để trống");
             }
 
             if (request.getStartDate() != null
                     && request.getEndDate() != null
                     && !request.getEndDate().isAfter(request.getStartDate())) {
-                errors.put("endDate", "Thoi gian ket thuc phai sau thoi gian bat dau");
+                errors.put("endDate", "Thời gian kết thúc phải sau thời gian bắt đầu");
             }
 
             if (discountType == null || !DISCOUNT_TYPES.contains(discountType)) {
-                errors.put("discountType", "Vui long chon loai giam gia hop le");
+                errors.put("discountType", "Vui lòng chọn loại giảm giá hợp lệ");
             }
 
             BigDecimal discountValue = request.getDiscountValue();
             if (discountValue == null) {
-                errors.put("discountValue", "Muc giam gia khong duoc de trong");
+                errors.put("discountValue", "Mức giảm giá không được để trống");
             } else if (discountValue.compareTo(BigDecimal.ZERO) <= 0) {
-                errors.put("discountValue", "Muc giam gia phai lon hon 0");
+                errors.put("discountValue", "Mức giảm giá phải lớn hơn 0");
             } else if ("PERCENTAGE".equals(discountType)
                     && discountValue.compareTo(MAX_PERCENTAGE) > 0) {
-                errors.put("discountValue", "Muc giam theo phan tram khong duoc vuot qua 100%");
+                errors.put("discountValue", "Mức giảm theo phần trăm không được vượt quá 100%");
             } else if ("FIXED".equals(discountType)
                     && discountValue.compareTo(MAX_FIXED_DISCOUNT) > 0) {
                 errors.put("discountValue", "Muc giam co dinh khong duoc vuot qua 5.000.000 VNĐ");
@@ -197,29 +197,29 @@ public class PromotionServiceImpl implements PromotionService {
 
             BigDecimal minOrderAmount = request.getMinOrderAmount();
             if (minOrderAmount != null && minOrderAmount.compareTo(BigDecimal.ZERO) < 0) {
-                errors.put("minOrderAmount", "Gia tri don toi thieu khong duoc am");
+                errors.put("minOrderAmount", "Giá trị đơn tối thiểu không được âm");
             }
 
             BigDecimal maxDiscountAmount = request.getMaxDiscountAmount();
             if (maxDiscountAmount != null && maxDiscountAmount.compareTo(BigDecimal.ZERO) <= 0) {
-                errors.put("maxDiscountAmount", "Muc giam toi da phai lon hon 0");
+                errors.put("maxDiscountAmount", "Mức giảm tối đa phải lớn hơn 0");
             }
 
             if (request.getUsageLimit() != null && request.getUsageLimit() <= 0) {
-                errors.put("usageLimit", "Gioi han su dung phai lon hon 0");
+                errors.put("usageLimit", "Giới hạn sử dụng phải lớn hơn 0");
             }
 
             if (request.getImage() == null || request.getImage().isEmpty()) {
-                errors.put("image", "Vui long chon anh khuyen mai");
+                errors.put("image", "Vui lòng chọn ảnh khuyến mãi");
             } else if (request.getImage().getSize() > MAX_IMAGE_SIZE) {
-                errors.put("image", "Anh khuyen mai khong duoc vuot qua 5MB");
+                errors.put("image", "Ảnh khuyến mãi không được vượt quá 5MB");
             } else if (!IMAGE_CONTENT_TYPES.contains(request.getImage().getContentType())) {
-                errors.put("image", "Chi chap nhan anh JPG, PNG hoac WEBP");
+                errors.put("image", "Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP");
             }
         }
 
         if (!errors.isEmpty()) {
-            throw new PromotionValidationException("Du lieu khong hop le", errors);
+            throw new PromotionValidationException("Dữ liệu không hợp lệ", errors);
         }
     }
 

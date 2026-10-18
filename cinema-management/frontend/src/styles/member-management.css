@@ -1,6 +1,6 @@
 .admin-content .member-page {
   background:
-    radial-gradient(circle at 18% 0%, rgba(243, 18, 63, 0.08), transparent 28rem),
+    radial-gradient(circle at 18% 0%, rgba(229, 9, 20, 0.08), transparent 28rem),
     linear-gradient(180deg, #090d10 0%, #0b1014 100%);
   color: var(--text-primary, #f5f7f8);
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
@@ -219,8 +219,8 @@
 
 .admin-content .member-page .primary-button,
 .app-modal .primary-button {
-  background: var(--accent, #f3123f);
-  border: 1px solid var(--accent, #f3123f);
+  background: var(--accent, #e50914);
+  border: 1px solid var(--accent, #e50914);
   color: #ffffff;
 }
 
@@ -235,8 +235,8 @@
 
 .admin-content .member-page .primary-button:hover:not(:disabled),
 .app-modal .primary-button:hover:not(:disabled) {
-  background: var(--accent-hover, #d90f37);
-  border-color: var(--accent-hover, #d90f37);
+  background: var(--accent-hover, #ff1f2b);
+  border-color: var(--accent-hover, #ff1f2b);
   transform: translateY(-1px);
 }
 
@@ -422,8 +422,8 @@
 }
 
 .admin-content .member-pagination .pagination-button.is-active {
-  background: var(--accent, #f3123f);
-  border-color: var(--accent, #f3123f);
+  background: var(--accent, #e50914);
+  border-color: var(--accent, #e50914);
   color: #ffffff;
 }
 
@@ -438,8 +438,8 @@
 
 .admin-content .member-empty-icon {
   align-items: center;
-  background: rgba(243, 18, 63, 0.12);
-  border: 1px solid rgba(243, 18, 63, 0.28);
+  background: rgba(229, 9, 20, 0.12);
+  border: 1px solid rgba(229, 9, 20, 0.28);
   border-radius: 999px;
   color: #ff6f8d;
   display: inline-flex;

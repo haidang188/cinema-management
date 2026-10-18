@@ -1,4 +1,5 @@
 import "./TicketPrice.css";
+import { formatVnd } from "../../utils/format";
 import { useEffect, useState } from "react";
 import { getTicketPrices } from "../../service/ticket-price/ticketPriceService";
 
@@ -66,7 +67,7 @@ function TicketPrice() {
 
     const formatPrice = (price: number): string => {
 
-        return new Intl.NumberFormat("vi-VN").format(price) + "đ";
+        return formatVnd(price);
 
     };
 
@@ -113,7 +114,7 @@ function TicketPrice() {
             <div className="ticket-price-header">
 
                 <h1>
-                    GIÁ VÉ THAM KHẢO
+                    Giá vé tham khảo
                 </h1>
 
                 <p>

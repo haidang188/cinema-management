@@ -1,3 +1,4 @@
+import { formatVnd } from '../../utils/format'
 import {
   useEffect,
   useState
@@ -56,11 +57,7 @@ function formatMoney(
     return '-'
   }
 
-  return (
-    new Intl.NumberFormat(
-      'vi-VN'
-    ).format(value) + 'đ'
-  )
+  return formatVnd(value)
 }
 
 function formatDiscount(
@@ -74,14 +71,14 @@ function formatDiscount(
     item.discountType ===
     'PERCENTAGE'
   ) {
-    return `GIẢM ${new Intl.NumberFormat(
+    return `Giảm ${new Intl.NumberFormat(
       'vi-VN'
     ).format(
       item.discountValue
     )}%`
   }
 
-  return `GIẢM ${formatMoney(
+  return `Giảm ${formatMoney(
     item.discountValue
   )}`
 }
@@ -93,14 +90,14 @@ function getStatusLabel(
     string,
     string
   > = {
-    ACTIVE: 'ĐANG ÁP DỤNG',
-    UPCOMING: 'SẮP DIỄN RA',
-    EXPIRED: 'ĐÃ HẾT HẠN',
-    INACTIVE: 'ĐÃ TẮT'
+    ACTIVE: 'Đang áp dụng',
+    UPCOMING: 'Sắp diễn ra',
+    EXPIRED: 'Đã hết hạn',
+    INACTIVE: 'Đã tắt'
   }
 
   if (!status) {
-    return 'KHÔNG XÁC ĐỊNH'
+    return 'Không xác định'
   }
 
   return (
@@ -243,7 +240,7 @@ export function PromotionDetail() {
                 />
               ) : (
                 <div className="promotion-detail-simple-placeholder">
-                  ẢNH KHUYẾN MÃI
+                  Ảnh khuyến mãi
                 </div>
               )}
             </div>

@@ -1,5 +1,6 @@
 package com.cinemamanagement.controller;
 
+import com.cinemamanagement.request.AdminShowtimeBatchRequest;
 import com.cinemamanagement.request.AdminShowtimeRequest;
 import com.cinemamanagement.service.AdminShowtimeService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -99,6 +100,55 @@ public class AdminShowtimeController {
                 : ResponseEntity.status(201)
                 .cacheControl(CacheControl.noStore())
                 .body(service.create(body));
+    }
+
+    /** Lịch trong ngày của phòng và các giờ trống cho phim đã chọn. */
+    @GetMapping("/availability")
+    public ResponseEntity<?> availability(
+            @RequestParam Long movieId,
+            @RequestParam Long roomId,
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate date,
+            HttpServletRequest request
+    ) {
+        var error = denied(request);
+
+        return error != null
+                ? error
+                : ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(service.availability(movieId, roomId, date));
+    }
+
+    /** Kiểm tra danh sách giờ thêm nhanh, không lưu. */
+    @PostMapping("/batch/preview")
+    public ResponseEntity<?> previewBatch(
+            @Valid @RequestBody AdminShowtimeBatchRequest body,
+            HttpServletRequest request
+    ) {
+        var error = denied(request);
+
+        return error != null
+                ? error
+                : ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(service.previewBatch(body));
+    }
+
+    /** Thêm nhanh nhiều suất; lỗi một suất thì không lưu suất nào. */
+    @PostMapping("/batch")
+    public ResponseEntity<?> createBatch(
+            @Valid @RequestBody AdminShowtimeBatchRequest body,
+            HttpServletRequest request
+    ) {
+        var error = denied(request);
+
+        return error != null
+                ? error
+                : ResponseEntity.status(201)
+                .cacheControl(CacheControl.noStore())
+                .body(service.createBatch(body));
     }
 
     private ResponseEntity<?> denied(

@@ -1,6 +1,8 @@
 import type { ApiRequestError } from "../types/admin"
+import { API_ORIGIN } from "./apiBase"
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"
+// Các service dùng request() truyền path dạng "/api/...", nên ghép với origin của backend.
+const API_BASE_URL = API_ORIGIN
 
 export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers)
@@ -10,6 +12,7 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
   }
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
+    credentials: "include",
     ...options,
     headers,
   })
@@ -18,7 +21,7 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
   const data = text ? JSON.parse(text) : null
 
   if (!response.ok) {
-    const error = new Error(data?.message || "Co loi xay ra, vui long thu lai") as ApiRequestError
+    const error = new Error(data?.message || "Có lỗi xảy ra, vui lòng thử lại") as ApiRequestError
     error.status = response.status
     error.fieldErrors = data?.fieldErrors
     throw error

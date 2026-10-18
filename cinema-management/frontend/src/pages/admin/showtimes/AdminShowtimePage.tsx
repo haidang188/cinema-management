@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import type { FormEvent } from "react"
 import {
   useLocation,
@@ -7,26 +7,28 @@ import {
 } from "react-router-dom"
 
 import {
-  calculateEnd,
-  createShowtime,
+  createShowtimeBatch,
   displayTime,
   getAdminShowtimes,
+  getRoomAvailability,
   getShowtimeOptions,
-  previewShowtime,
+  previewShowtimeBatch,
   ShowtimeError,
   vietnamNow,
 } from "../../../service/showtime/adminShowtimeService"
 
 import type {
-  CreateShowtime,
+  BatchPreviewItem,
+  CreateShowtimeBatch,
+  RoomAvailability,
   ShowtimeFilters,
   ShowtimeOptions,
   ShowtimePageData,
-  ShowtimePreview,
 } from "../../../service/showtime/adminShowtimeService"
 
 import "../statistics/statistics.css"
 import "./admin-showtimes.css"
+import { clearStoredUser } from "../../../hooks/useAuth"
 
 const statusLabels: Record<string, string> = {
   OPEN: "Mở bán",
@@ -57,7 +59,7 @@ function ErrorNotice({
         <button
           type="button"
           onClick={() => {
-            localStorage.removeItem("cinema.currentUser")
+            clearStoredUser()
             window.location.assign("/login")
           }}
         >
@@ -115,7 +117,7 @@ export function AdminShowtimePage({
 
           <p>
             {create
-              ? "Kiểm tra phòng và thời gian trước khi mở bán."
+              ? "Chọn phim, phòng và ngày để xem giờ trống, rồi thêm nhanh nhiều suất cùng lúc."
               : "Tra cứu suất chiếu theo ngày, phim và phòng. Giờ hiển thị theo Việt Nam."}
           </p>
         </div>
@@ -510,25 +512,38 @@ function ShowtimeList({ options }: { options: ShowtimeOptions }) {
   )
 }
 
+// Giờ dạng "YYYY-MM-DDTHH:mm" (giờ Việt Nam, không múi giờ) <-> số phút, để so sánh và cộng thời lượng.
+const toMinutes = (value: string) =>
+  Math.round(Date.parse(`${value.slice(0, 16)}:00Z`) / 60000)
+
+const fromMinutes = (minutes: number) =>
+  new Date(minutes * 60000).toISOString().slice(0, 16)
+
+const hourOf = (value: string) => value.slice(11, 16)
+
 function ShowtimeCreate({ options }: { options: ShowtimeOptions }) {
   const navigate = useNavigate()
-  const formRef = useRef<HTMLFormElement>(null)
-  const submitting = useRef(false)
+  const today = vietnamNow().slice(0, 10)
 
   const [form, setForm] = useState({
     movieId: "",
     roomId: "",
-    startTime: "",
+    date: today,
     format: "",
   })
 
+  const [availability, setAvailability] = useState<RoomAvailability | null>(null)
+  const [loadingSlots, setLoadingSlots] = useState(false)
+  const [slotError, setSlotError] = useState<unknown>(null)
+  const [reload, setReload] = useState(0)
+
+  const [selected, setSelected] = useState<string[]>([])
+  const [customTime, setCustomTime] = useState("")
+  const [customError, setCustomError] = useState("")
+
   const [busy, setBusy] = useState<"preview" | "save" | null>(null)
   const [error, setError] = useState<unknown>(null)
-
-  const [checked, setChecked] = useState<{
-    key: string
-    result: ShowtimePreview
-  } | null>(null)
+  const [previewItems, setPreviewItems] = useState<BatchPreviewItem[] | null>(null)
 
   const movies = options.movies.filter(
     movie =>
@@ -537,95 +552,178 @@ function ShowtimeCreate({ options }: { options: ShowtimeOptions }) {
   )
 
   const rooms = options.rooms.filter(room => room.status === "ACTIVE")
+  const movie = movies.find(item => String(item.id) === form.movieId)
+  const room = rooms.find(item => String(item.id) === form.roomId)
+  const ready = Boolean(movie && room && form.date)
 
-  const movie = movies.find(
-    item => String(item.id) === form.movieId,
-  )
+  // Chọn đủ phim + phòng + ngày thì tải lịch của phòng; đổi lựa chọn thì bỏ các giờ đã chọn.
+  useEffect(() => {
+    setSelected([])
+    setPreviewItems(null)
+    setError(null)
+    setCustomError("")
 
-  const room = rooms.find(
-    item => String(item.id) === form.roomId,
-  )
-
-  const payload: CreateShowtime = {
-    movieId: Number(form.movieId),
-    roomId: Number(form.roomId),
-    startTime: form.startTime,
-    format: form.format.trim(),
-  }
-
-  const key = JSON.stringify(payload)
-  const validPreview = checked?.key === key ? checked.result : null
-
-  const end =
-    validPreview?.endTime ||
-    (movie
-      ? calculateEnd(form.startTime, movie.durationMinutes || 0)
-      : "")
-
-  const readyAt =
-    validPreview?.roomReadyAt ||
-    (end
-      ? calculateEnd(end.slice(0, 16), options.turnaroundMinutes)
-      : "")
-
-  async function submit(save: boolean) {
-    if (
-      submitting.current ||
-      !formRef.current?.reportValidity()
-    ) {
+    if (!ready) {
+      setAvailability(null)
       return
     }
 
-    submitting.current = true
-    setBusy(save ? "save" : "preview")
+    const controller = new AbortController()
+    setLoadingSlots(true)
+    setSlotError(null)
+
+    getRoomAvailability(
+      Number(form.movieId),
+      Number(form.roomId),
+      form.date,
+      controller.signal,
+    )
+      .then(result => {
+        if (!controller.signal.aborted) setAvailability(result)
+      })
+      .catch(cause => {
+        if (!controller.signal.aborted) {
+          setAvailability(null)
+          setSlotError(cause)
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoadingSlots(false)
+      })
+
+    return () => controller.abort()
+  }, [ready, form.movieId, form.roomId, form.date, reload])
+
+  const duration = availability?.durationMinutes || movie?.durationMinutes || 0
+  const gap = availability?.turnaroundMinutes ?? options.turnaroundMinutes
+
+  /** Giờ bắt đầu này có đè lên giờ khác đã chọn không (tính cả thời gian dọn phòng). */
+  function clashesWithSelected(start: string, ignore?: string) {
+    const begin = toMinutes(start)
+    const end = begin + duration
+
+    return selected.some(other => {
+      if (other === ignore) return false
+      const otherBegin = toMinutes(other)
+      const otherEnd = otherBegin + duration
+      return otherBegin < end + gap && otherEnd > begin - gap
+    })
+  }
+
+  function fitsFreeSlot(start: string) {
+    const value = toMinutes(start)
+    return (availability?.freeSlots || []).some(
+      slot =>
+        value >= toMinutes(slot.earliestStart) &&
+        value <= toMinutes(slot.latestStart),
+    )
+  }
+
+  function toggle(start: string) {
+    setPreviewItems(null)
     setError(null)
-    setChecked(null)
+    setSelected(current =>
+      current.includes(start)
+        ? current.filter(item => item !== start)
+        : [...current, start].sort(),
+    )
+  }
+
+  function fillDay() {
+    setPreviewItems(null)
+    setError(null)
+    // Các giờ gợi ý đã được xếp liền nhau, không đè nhau.
+    setSelected([...(availability?.suggestedStarts || [])].map(item => item.slice(0, 16)).sort())
+  }
+
+  function addCustomTime() {
+    if (!customTime) return
+
+    const start = `${form.date}T${customTime}`
+
+    if (selected.includes(start)) {
+      setCustomError(`Giờ ${customTime} đã có trong danh sách.`)
+      return
+    }
+
+    if (!fitsFreeSlot(start)) {
+      setCustomError(
+        `Giờ ${customTime} không nằm trong khoảng trống của phòng (phim ${duration} phút, ` +
+          `cần dọn phòng ${gap} phút).`,
+      )
+      return
+    }
+
+    if (clashesWithSelected(start)) {
+      setCustomError(`Giờ ${customTime} trùng với một suất đã chọn.`)
+      return
+    }
+
+    setCustomError("")
+    setCustomTime("")
+    toggle(start)
+  }
+
+  const payload: CreateShowtimeBatch = {
+    movieId: Number(form.movieId),
+    roomId: Number(form.roomId),
+    startTimes: selected,
+    format: form.format.trim(),
+  }
+
+  async function check() {
+    if (busy || !selected.length) return
+    setBusy("preview")
+    setError(null)
 
     try {
-      if (save) {
-        const created = await createShowtime(payload)
-        const date = created.startTime.slice(0, 10)
-
-        const query = new URLSearchParams({
-          from: date,
-          to: date,
-          roomId: String(created.roomId),
-        })
-
-        navigate(`/admin/showtimes?${query}`, {
-          replace: true,
-          state: {
-            notice:
-              `Đã thêm suất #${created.id} và tạo ` +
-              `${created.totalSeats} ghế. Suất đang mở bán.`,
-          },
-        })
-      } else {
-        const result = await previewShowtime(payload)
-        setChecked({ key, result })
-      }
+      setPreviewItems(await previewShowtimeBatch(payload))
     } catch (cause) {
       setError(cause)
     } finally {
-      submitting.current = false
+      setBusy(null)
+    }
+  }
+
+  async function save() {
+    if (busy || !selected.length) return
+    setBusy("save")
+    setError(null)
+
+    try {
+      const { created } = await createShowtimeBatch(payload)
+      const query = new URLSearchParams({
+        from: form.date,
+        to: form.date,
+        roomId: form.roomId,
+      })
+
+      navigate(`/admin/showtimes?${query}`, {
+        replace: true,
+        state: {
+          notice:
+            `Đã thêm ${created.length} suất chiếu "${movie?.title}" tại ${room?.name} ` +
+            `(${created.map(show => hourOf(show.startTime)).join(", ")}). Các suất đang mở bán.`,
+        },
+      })
+    } catch (cause) {
+      setError(cause)
+      setReload(value => value + 1)
+    } finally {
       setBusy(null)
     }
   }
 
   function update(field: keyof typeof form, value: string) {
     setForm(current => ({ ...current, [field]: value }))
-    setError(null)
   }
 
+  const suggestions = (availability?.suggestedStarts || []).map(item => item.slice(0, 16))
+  const extraSelected = selected.filter(item => !suggestions.includes(item))
+  const invalidCount = previewItems?.filter(item => !item.ok).length || 0
+
   return (
-    <form
-      ref={formRef}
-      className="statistics-panel ast-create"
-      onSubmit={event => {
-        event.preventDefault()
-        void submit(true)
-      }}
-    >
+    <section className="statistics-panel ast-create ast-quick">
       <h2>Thông tin suất chiếu</h2>
 
       {(!movies.length || !rooms.length) && (
@@ -634,11 +732,8 @@ function ShowtimeCreate({ options }: { options: ShowtimeOptions }) {
         </p>
       )}
 
-      <fieldset
-        disabled={busy !== null}
-        className="ast-fieldset"
-      >
-        <div className="statistics-filter-fields ast-create-grid">
+      <fieldset disabled={busy !== null} className="ast-fieldset">
+        <div className="statistics-filter-fields ast-quick-grid">
           <label>
             Phim
             <select
@@ -647,7 +742,6 @@ function ShowtimeCreate({ options }: { options: ShowtimeOptions }) {
               onChange={event => update("movieId", event.target.value)}
             >
               <option value="">Chọn phim</option>
-
               {movies.map(item => (
                 <option key={item.id} value={item.id}>
                   {item.title} · {item.durationMinutes} phút
@@ -664,7 +758,6 @@ function ShowtimeCreate({ options }: { options: ShowtimeOptions }) {
               onChange={event => update("roomId", event.target.value)}
             >
               <option value="">Chọn phòng</option>
-
               {rooms.map(item => (
                 <option key={item.id} value={item.id}>
                   {item.name} · {item.roomType}
@@ -674,17 +767,14 @@ function ShowtimeCreate({ options }: { options: ShowtimeOptions }) {
           </label>
 
           <label>
-            Bắt đầu (giờ Việt Nam)
+            Ngày chiếu
             <input
               required
-              type="datetime-local"
-              step="60"
-              min={calculateEnd(vietnamNow(), 6)}
-              max="9998-12-30T23:59"
-              value={form.startTime}
-              onChange={event =>
-                update("startTime", event.target.value)
-              }
+              type="date"
+              min={today}
+              max="9998-12-30"
+              value={form.date}
+              onChange={event => update("date", event.target.value)}
             />
           </label>
 
@@ -700,70 +790,294 @@ function ShowtimeCreate({ options }: { options: ShowtimeOptions }) {
         </div>
       </fieldset>
 
-      <p className="statistics-note">
-        Giờ kết thúc được tính theo thời lượng phim. Cần cách suất
-        liền kề ít nhất {options.turnaroundMinutes} phút để chuẩn bị
-        phòng. Suất mới phải bắt đầu sau hiện tại ít nhất 5 phút.
-      </p>
-
       {movie?.releaseDate && (
         <p className="statistics-note">
-          Ngày khởi chiếu của phim:{" "}
-          {movie.releaseDate.split("-").reverse().join("/")}
+          Ngày khởi chiếu của phim: {movie.releaseDate.split("-").reverse().join("/")}
         </p>
       )}
 
-      <dl className="ast-preview">
-        <div>
-          <dt>Phim / phòng</dt>
-          <dd>
-            {movie?.title || "Chưa chọn phim"} ·{" "}
-            {room?.name || "Chưa chọn phòng"}
-          </dd>
-        </div>
-
-        <div>
-          <dt>Kết thúc dự kiến</dt>
-          <dd>
-            {end ? displayTime(end) : "Chọn phim và giờ bắt đầu"}
-          </dd>
-        </div>
-
-        <div>
-          <dt>Phòng sẵn sàng sau suất này</dt>
-          <dd>
-            {readyAt ? displayTime(readyAt) : "Chưa xác định"}
-          </dd>
-        </div>
-      </dl>
-
-      {validPreview && (
-        <p className="ast-success" role="status">
-          Lịch hợp lệ tại thời điểm kiểm tra; có{" "}
-          {validPreview.totalSeats} ghế. Hệ thống sẽ kiểm tra lại khi lưu.
+      {!ready && (
+        <p className="ast-hint">
+          Chọn phim, phòng và ngày để xem lịch của phòng và các giờ còn trống.
         </p>
+      )}
+
+      {ready && loadingSlots && (
+        <p className="statistics-state" role="status">
+          Đang kiểm tra lịch của phòng…
+        </p>
+      )}
+
+      {ready && !loadingSlots && slotError != null && (
+        <ErrorNotice error={slotError} retry={() => setReload(value => value + 1)} />
+      )}
+
+      {ready && !loadingSlots && availability && (
+        <>
+          <p
+            className={availability.available ? "ast-banner is-ok" : "ast-banner is-full"}
+            role="status"
+          >
+            {availability.message}
+          </p>
+
+          <RoomTimeline
+            availability={availability}
+            selected={selected}
+            duration={duration}
+          />
+
+          {availability.freeSlots.length > 0 && (
+            <div className="ast-block">
+              <h3>Khoảng trống của phòng</h3>
+              <ul className="ast-free-list">
+                {availability.freeSlots.map(slot => (
+                  <li key={slot.earliestStart}>
+                    <b>
+                      {hourOf(slot.from)} – {hourOf(slot.to)}
+                    </b>
+                    <span>
+                      Bắt đầu được từ {hourOf(slot.earliestStart)} đến{" "}
+                      {hourOf(slot.latestStart)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {suggestions.length > 0 && (
+            <div className="ast-block">
+              <div className="ast-block-head">
+                <h3>Giờ chiếu gợi ý</h3>
+                <div className="ast-actions">
+                  <button type="button" onClick={fillDay} disabled={busy !== null}>
+                    Xếp kín ngày ({suggestions.length} suất)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelected([])
+                      setPreviewItems(null)
+                    }}
+                    disabled={busy !== null || !selected.length}
+                  >
+                    Bỏ chọn
+                  </button>
+                </div>
+              </div>
+
+              <p className="statistics-note">
+                Các giờ được xếp liền nhau: phim {duration} phút + {gap} phút dọn phòng. Bấm để
+                chọn hoặc bỏ chọn.
+              </p>
+
+              <div className="ast-chips">
+                {suggestions.map(start => {
+                  const isSelected = selected.includes(start)
+                  const blocked = !isSelected && clashesWithSelected(start)
+                  const end = fromMinutes(toMinutes(start) + duration)
+
+                  return (
+                    <button
+                      key={start}
+                      type="button"
+                      className={isSelected ? "ast-chip is-selected" : "ast-chip"}
+                      aria-pressed={isSelected}
+                      disabled={blocked || busy !== null}
+                      title={blocked ? "Trùng với giờ đã chọn" : `Kết thúc ${hourOf(end)}`}
+                      onClick={() => toggle(start)}
+                    >
+                      <b>{hourOf(start)}</b>
+                      <small>→ {hourOf(end)}</small>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {availability.freeSlots.length > 0 && (
+            <div className="ast-block">
+              <h3>Thêm giờ khác</h3>
+              <div className="ast-custom">
+                <input
+                  type="time"
+                  step="300"
+                  value={customTime}
+                  onChange={event => {
+                    setCustomTime(event.target.value)
+                    setCustomError("")
+                  }}
+                />
+                <button type="button" onClick={addCustomTime} disabled={!customTime || busy !== null}>
+                  Thêm giờ
+                </button>
+              </div>
+              {customError && (
+                <p className="statistics-error" role="alert">
+                  {customError}
+                </p>
+              )}
+              {extraSelected.length > 0 && (
+                <div className="ast-chips">
+                  {extraSelected.map(start => (
+                    <button
+                      key={start}
+                      type="button"
+                      className="ast-chip is-selected"
+                      onClick={() => toggle(start)}
+                      title="Bỏ giờ này"
+                    >
+                      <b>{hourOf(start)}</b>
+                      <small>→ {hourOf(fromMinutes(toMinutes(start) + duration))} ×</small>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+
+      {previewItems && (
+        <div className="ast-block">
+          <h3>
+            Kết quả kiểm tra:{" "}
+            {invalidCount ? `${invalidCount} suất chưa hợp lệ` : "tất cả hợp lệ"}
+          </h3>
+          <ul className="ast-check-list">
+            {previewItems.map(item => (
+              <li key={item.startTime} className={item.ok ? "is-ok" : "is-error"}>
+                <b>
+                  {hourOf(item.startTime)}
+                  {item.endTime ? ` – ${hourOf(item.endTime)}` : ""}
+                </b>
+                <span>{item.message}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {error != null && <ErrorNotice error={error} />}
 
       <div className="ast-actions ast-create-actions">
+        <span className="ast-selected-count">
+          {selected.length
+            ? `Đã chọn ${selected.length} suất: ${selected.map(hourOf).join(", ")}`
+            : "Chưa chọn giờ chiếu"}
+        </span>
+
         <button
           type="button"
-          disabled={busy !== null || !movies.length || !rooms.length}
-          onClick={() => void submit(false)}
+          disabled={busy !== null || !selected.length}
+          onClick={() => void check()}
         >
           {busy === "preview" ? "Đang kiểm tra…" : "Kiểm tra lịch"}
         </button>
 
         <button
           className="statistics-primary"
-          type="submit"
-          disabled={busy !== null || !movies.length || !rooms.length}
+          type="button"
+          disabled={busy !== null || !selected.length || invalidCount > 0}
+          onClick={() => void save()}
         >
-          {busy === "save" ? "Đang lưu…" : "Thêm và mở bán"}
+          {busy === "save"
+            ? "Đang lưu…"
+            : `Thêm ${selected.length || ""} suất và mở bán`}
         </button>
       </div>
-    </form>
+    </section>
+  )
+}
+
+/** Dải thời gian trong ngày của phòng: suất đã có (xám), thời gian dọn phòng, suất mới đang chọn (đỏ). */
+function RoomTimeline({
+  availability,
+  selected,
+  duration,
+}: {
+  availability: RoomAvailability
+  selected: string[]
+  duration: number
+}) {
+  const gap = availability.turnaroundMinutes
+  const begin = Math.min(
+    toMinutes(availability.dayStart),
+    ...availability.busy.map(show => toMinutes(show.startTime)),
+  )
+  const finish = Math.max(
+    toMinutes(availability.lastStart) + duration,
+    ...availability.busy.map(show => toMinutes(show.readyAt)),
+  )
+  const span = Math.max(finish - begin, 60)
+
+  const left = (value: number) => `${((Math.max(value, begin) - begin) / span) * 100}%`
+  const width = (from: number, to: number) =>
+    `${((Math.min(to, finish) - Math.max(from, begin)) / span) * 100}%`
+
+  const ticks: number[] = []
+  for (let hour = Math.ceil(begin / 60) * 60; hour <= finish; hour += 120) {
+    ticks.push(hour)
+  }
+
+  return (
+    <div className="ast-block">
+      <h3>Lịch trong ngày của {availability.roomName}</h3>
+
+      <div className="ast-timeline" role="img" aria-label="Lịch sử dụng phòng trong ngày">
+        {availability.busy.map(show => {
+          const start = toMinutes(show.startTime)
+          const end = toMinutes(show.endTime)
+          return (
+            <span key={`busy-${show.id}`}>
+              <span
+                className="ast-tl-busy"
+                style={{ left: left(start), width: width(start, end) }}
+                title={`#${show.id} ${show.movieTitle}: ${hourOf(show.startTime)}–${hourOf(show.endTime)}`}
+              >
+                {show.movieTitle}
+              </span>
+              <span
+                className="ast-tl-gap"
+                style={{ left: left(end), width: width(end, end + gap) }}
+                title={`Dọn phòng đến ${hourOf(show.readyAt)}`}
+              />
+            </span>
+          )
+        })}
+
+        {selected.map(start => {
+          const from = toMinutes(start)
+          const to = from + duration
+          return (
+            <span
+              key={`new-${start}`}
+              className="ast-tl-new"
+              style={{ left: left(from), width: width(from, to) }}
+              title={`Suất mới ${hourOf(start)}–${hourOf(fromMinutes(to))}`}
+            >
+              {hourOf(start)}
+            </span>
+          )
+        })}
+      </div>
+
+      <div className="ast-timeline-scale" aria-hidden="true">
+        {ticks.map(tick => (
+          <span key={tick} style={{ left: left(tick) }}>
+            {fromMinutes(tick).slice(11, 16)}
+          </span>
+        ))}
+      </div>
+
+      <div className="ast-legend">
+        <span><i className="ast-tl-busy" /> Suất đã có</span>
+        <span><i className="ast-tl-gap" /> Dọn phòng {gap} phút</span>
+        <span><i className="ast-tl-new" /> Suất mới đang chọn</span>
+      </div>
+    </div>
   )
 }
 

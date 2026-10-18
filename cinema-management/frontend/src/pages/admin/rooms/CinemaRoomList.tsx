@@ -128,7 +128,7 @@ function CinemaRoomList({ onNavigate }: CinemaRoomListProps) {
     <main className="app-shell room-admin-page room-list-page">
       <header className="room-page-header">
         <div>
-          <p className="room-page-eyebrow">Sprint 2</p>
+          <p className="room-page-eyebrow">Quản trị rạp</p>
           <h1>Quản lý phòng chiếu</h1>
           <p>Quản lý danh sách phòng và cấu hình sơ đồ ghế.</p>
         </div>

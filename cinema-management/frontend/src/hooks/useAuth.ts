@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useSyncExternalStore } from "react"
 import { useNavigate } from "react-router-dom"
 
 import {
@@ -17,18 +17,59 @@ import type {
 
 const STORAGE_KEY = "cinema.currentUser"
 
+// Dùng chung một nguồn state cho mọi nơi gọi useAuth(), tránh mỗi trang giữ một bản
+// riêng (đăng xuất ở trang bán vé nhưng router gốc vẫn tưởng còn đăng nhập).
+const listeners = new Set<() => void>()
+let cachedRaw: string | null | undefined
+let cachedUser: AuthResponse | null = null
+
 function readStoredUser(): AuthResponse | null {
-  const rawUser = window.localStorage.getItem(STORAGE_KEY)
+  let rawUser: string | null = null
+
+  try {
+    rawUser = window.localStorage.getItem(STORAGE_KEY)
+  } catch {
+    rawUser = null
+  }
+
+  if (rawUser === cachedRaw) {
+    return cachedUser
+  }
+
+  cachedRaw = rawUser
 
   if (!rawUser) {
+    cachedUser = null
     return null
   }
 
   try {
-    return JSON.parse(rawUser) as AuthResponse
+    cachedUser = JSON.parse(rawUser) as AuthResponse
   } catch {
     window.localStorage.removeItem(STORAGE_KEY)
-    return null
+    cachedRaw = null
+    cachedUser = null
+  }
+
+  return cachedUser
+}
+
+function notifyAuthChanged() {
+  listeners.forEach((listener) => listener())
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener)
+
+  function onStorage(event: StorageEvent) {
+    if (event.key === STORAGE_KEY) listener()
+  }
+
+  window.addEventListener("storage", onStorage)
+
+  return () => {
+    listeners.delete(listener)
+    window.removeEventListener("storage", onStorage)
   }
 }
 
@@ -38,10 +79,16 @@ function storeUser(user: AuthResponse | null) {
       STORAGE_KEY,
       JSON.stringify(user),
     )
-    return
+  } else {
+    window.localStorage.removeItem(STORAGE_KEY)
   }
 
-  window.localStorage.removeItem(STORAGE_KEY)
+  notifyAuthChanged()
+}
+
+/** Xoá phiên đăng nhập phía client (dùng khi backend trả 401). */
+export function clearStoredUser() {
+  storeUser(null)
 }
 
 export function getHomePath(user: AuthResponse | null): string {
@@ -62,8 +109,7 @@ export function getHomePath(user: AuthResponse | null): string {
 export function useAuth() {
   const navigate = useNavigate()
 
-  const [currentUser, setCurrentUser] =
-    useState<AuthResponse | null>(() => readStoredUser())
+  const currentUser = useSyncExternalStore(subscribe, readStoredUser)
 
   const [authMessage, setAuthMessage] = useState("")
   const [authFieldErrors, setAuthFieldErrors] =
@@ -76,7 +122,6 @@ export function useAuth() {
   }
 
   function updateCurrentUser(user: AuthResponse | null) {
-    setCurrentUser(user)
     storeUser(user)
   }
 
@@ -91,16 +136,16 @@ export function useAuth() {
   }
 
   async function logout() {
+    const wasStaff = currentUser?.role === "ADMIN" || currentUser?.role === "EMPLOYEE"
+
     try {
       await logoutSession()
+    } catch {
+      // Phiên phía server có thể đã hết hạn hoặc backend không phản hồi;
+      // vẫn đăng xuất phía client để người dùng không bị kẹt.
+    } finally {
       updateCurrentUser(null)
-      navigate("/")
-    } catch (error) {
-      window.alert(
-        error instanceof Error
-          ? error.message
-          : "Không thể đăng xuất. Vui lòng thử lại.",
-      )
+      navigate(wasStaff ? "/login" : "/", { replace: true })
     }
   }
 

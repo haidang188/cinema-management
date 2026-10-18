@@ -51,4 +51,12 @@ public interface SeatHoldRepository extends JpaRepository<SeatHold, Long> {
     );
 
     boolean existsByHoldToken(String holdToken);
+
+    List<SeatHold> findAllByUserIdAndStatus(Long userId, String status);
+
+    List<SeatHold> findAllByUserIdAndStatusAndExpiresAtAfter(
+            Long userId,
+            String status,
+            LocalDateTime expiresAfter
+    );
 }

@@ -287,7 +287,7 @@ function EmployeeFormPage({ employeeId, onNavigate }: EmployeeFormPageProps) {
     <main className="app-shell employee-admin-page employee-form-page">
       <header className="employee-page-header">
         <div>
-          <p className="employee-page-eyebrow">Sprint 3</p>
+          <p className="employee-page-eyebrow">Quản trị nhân sự</p>
           <h1>{isEditMode ? "Chỉnh sửa nhân viên" : "Thêm nhân viên"}</h1>
           <p>Quản lý thông tin tài khoản và nhân viên trong hệ thống</p>
         </div>

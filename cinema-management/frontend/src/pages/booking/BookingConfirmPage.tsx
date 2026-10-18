@@ -1,4 +1,4 @@
-import { ArrowLeft, BadgePercent, Building2, Clock3, QrCode, ShieldCheck, WalletCards } from "lucide-react"
+import { ArrowLeft, BadgePercent, Building2, Check, Clock3, QrCode, ShieldCheck, WalletCards } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {
@@ -10,8 +10,12 @@ import {
 import type { AuthResponse } from "../../types/auth"
 import type { BookingPreview, OnlineBookingResult, PaymentMethod, PromotionQuote } from "../../types/booking"
 import { BOOKING_DRAFT_KEY } from "./BookingSeatsPage"
-import "./booking.css"
+import { formatTime, formatVnd } from "../../utils/format"
+import { seatKind } from "../../component/seat-map/seatMapUtils"
 import BookingModal from "../../component/BookingModal"
+import BookingStepper from "./BookingStepper"
+import { formatCountdown, seatTypeLabel } from "./bookingFlowUtils"
+import "./booking-flow.css"
 
 interface BookingConfirmPageProps {
   currentUser: AuthResponse
@@ -24,14 +28,10 @@ interface BookingDraft {
   expiresAt: string
 }
 
-function formatMoney(value: number) {
-  return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value)
-}
-
-function formatDateTime(value: string) {
-  return new Date(value).toLocaleString("vi-VN", {
-    weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
-  })
+/** "Thứ bảy, 24/10/2026" */
+function formatShowDate(value: string) {
+  const text = new Date(value).toLocaleDateString("vi-VN", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" })
+  return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
 function BookingConfirmPage({ currentUser }: BookingConfirmPageProps) {
@@ -138,66 +138,128 @@ function BookingConfirmPage({ currentUser }: BookingConfirmPageProps) {
   }
 
   if (!draft) {
-    return <section className="booking-page booking-state">Không có lượt giữ ghế. Vui lòng chọn suất chiếu và ghế trước.</section>
+    return (
+      <section className="bf-page">
+        <BookingStepper current={2} />
+        <div className="bf-state">
+          <p>Không có lượt giữ ghế. Vui lòng chọn suất chiếu và ghế trước.</p>
+          <button type="button" className="bf-btn bf-btn-ghost" onClick={() => navigate("/")}>Về trang chủ</button>
+        </div>
+      </section>
+    )
   }
-  if (!preview && !error) return <section className="booking-page booking-state">Đang chuẩn bị đơn đặt vé...</section>
-  if (!preview) return <section className="booking-page booking-state"><p>{error}</p><button onClick={() => navigate(-1)}>Quay lại</button></section>
+  if (!preview && !error) {
+    return (
+      <section className="bf-page">
+        <BookingStepper current={2} />
+        <div className="bf-state"><span className="bf-spinner" aria-hidden="true" />Đang chuẩn bị đơn đặt vé…</div>
+      </section>
+    )
+  }
+  if (!preview) {
+    return (
+      <section className="bf-page">
+        <BookingStepper current={2} />
+        <div className="bf-state">
+          <p className="bf-error" role="alert">{error}</p>
+          <button type="button" className="bf-btn bf-btn-ghost" onClick={() => navigate(-1)}><ArrowLeft size={16} /> Quay lại</button>
+        </div>
+      </section>
+    )
+  }
 
-  const seatTypes = Array.from(new Set(preview.seats.map((seat) => seat.seatType))).join(", ")
+  const holdWarning = secondsLeft <= 120
+  const promotionOk = Boolean(appliedPromotionCode) && preview.discountAmount > 0
 
   return (
-    <section className="booking-page">
-      <div className="booking-steps"><span>1. Chọn ghế</span><i /><span className="is-active">2. Xác nhận</span><i /><span>3. Hoàn tất</span></div>
-      <header className="confirm-heading"><h1>Xác Nhận Đặt Vé</h1></header>
+    <section className="bf-page">
+      <BookingStepper current={2} showtime={preview} expiresAt={preview.expiresAt} secondsLeft={secondsLeft} />
 
-      <div className="booking-layout booking-layout--confirm">
-        <div className="confirm-sections">
-          <article className="confirm-card">
-            <h2>Thông Tin Phim</h2>
-            <div className="confirm-movie">
-              <img src={preview.posterUrl} alt={preview.movieTitle} />
-              <div><h3>{preview.movieTitle}</h3><span>{preview.roomName}</span><span>{preview.format || "2D"}</span><strong>{formatDateTime(preview.startTime)}</strong></div>
+      <div className="bf-confirm-body">
+        <div className="bf-confirm-main">
+          <article className="bf-card bf-movie" aria-label="Phim và suất chiếu">
+            <div className="bf-poster">{preview.posterUrl && <img src={preview.posterUrl} alt={preview.movieTitle} />}</div>
+            <div className="bf-movie-info">
+              <span className="bf-eyebrow">Phim & suất chiếu</span>
+              <h2>{preview.movieTitle}</h2>
+              <p className="bf-movie-time"><b>{formatTime(preview.startTime)}</b> · {formatShowDate(preview.startTime)}</p>
+              <div className="bf-chips">
+                <span className="bf-chip bf-chip-red">{preview.roomName}</span>
+                <span className="bf-chip">{preview.format || "2D"}</span>
+              </div>
             </div>
           </article>
 
-          <article className="confirm-card">
-            <h2>Thông Tin Vé</h2>
-            <div className="ticket-info-row">
-              <span><small>Ghế đã chọn</small><strong>{preview.seats.map((seat) => seat.seatName).join(", ")}</strong></span>
-              <span><small>Loại vé</small><strong>{seatTypes} × {preview.seats.length}</strong></span>
+          <article className="bf-card">
+            <div className="bf-card-head">
+              <h2>Ghế</h2>
+              <span>{preview.seats.length} ghế · {formatVnd(preview.subtotal)}</span>
             </div>
+            <ul className="bf-seat-list">
+              {preview.seats.map((seat) => (
+                <li key={seat.showtimeSeatId} className={`bf-seat is-${seatKind(seat.seatType)}`}>
+                  <b>{seat.seatName}</b>
+                  <small>{seatTypeLabel(seat.seatType)}</small>
+                  <em>{formatVnd(seat.price)}</em>
+                </li>
+              ))}
+            </ul>
           </article>
 
-          <article className="confirm-card">
-            <h2>Thông Tin Khách Hàng</h2>
-            <dl className="customer-details"><div><dt>Họ và tên</dt><dd>{currentUser.fullName || "Chưa cập nhật"}</dd></div><div><dt>Email</dt><dd>{currentUser.email}</dd></div><div><dt>Số điện thoại</dt><dd>{currentUser.phone || "Chưa cập nhật"}</dd></div></dl>
+          <article className="bf-card">
+            <h2>Thông tin khách hàng</h2>
+            <dl className="bf-info-grid">
+              <div><dt>Họ và tên</dt><dd className={currentUser.fullName ? "" : "is-empty"}>{currentUser.fullName || "Chưa cập nhật"}</dd></div>
+              <div><dt>Email</dt><dd>{currentUser.email}</dd></div>
+              <div><dt>Số điện thoại</dt><dd className={currentUser.phone ? "" : "is-empty"}>{currentUser.phone || "Chưa cập nhật"}</dd></div>
+            </dl>
           </article>
 
-          <article className="confirm-card">
-            <h2>Phương Thức Thanh Toán</h2>
-            <label className={`payment-option ${method === "VIETQR" ? "is-selected" : ""}`}>
-              <input type="radio" name="payment" checked={method === "VIETQR"} onChange={() => setMethod("VIETQR")} disabled={Boolean(booking)} />
-              <QrCode /><span><strong>VietQR</strong><small>Quét mã bằng ứng dụng ngân hàng, đúng số tiền và nội dung</small></span>
-            </label>
-            <label className={`payment-option ${method === "VNPAY" ? "is-selected" : ""}`}>
-              <input type="radio" name="payment" checked={method === "VNPAY"} onChange={() => setMethod("VNPAY")} disabled={Boolean(booking)} />
-              <WalletCards /><span><strong>VNPay Sandbox</strong><small>Chuyển sang cổng thử nghiệm VNPay để thanh toán</small></span>
-            </label>
+          <article className="bf-card">
+            <h2>Phương thức thanh toán</h2>
+            <div className="bf-methods" role="radiogroup" aria-label="Phương thức thanh toán">
+              <label className={`bf-method${method === "VIETQR" ? " is-selected" : ""}${booking ? " is-disabled" : ""}`}>
+                <input type="radio" name="payment" checked={method === "VIETQR"} onChange={() => setMethod("VIETQR")} disabled={Boolean(booking)} />
+                <span className="bf-method-icon"><QrCode size={18} /></span>
+                <span className="bf-method-text"><b>VietQR</b><small>Quét mã bằng ứng dụng ngân hàng, đúng số tiền và nội dung</small></span>
+                <span className="bf-method-check" aria-hidden="true"><Check size={12} strokeWidth={3} /></span>
+              </label>
+              <label className={`bf-method${method === "VNPAY" ? " is-selected" : ""}${booking ? " is-disabled" : ""}`}>
+                <input type="radio" name="payment" checked={method === "VNPAY"} onChange={() => setMethod("VNPAY")} disabled={Boolean(booking)} />
+                <span className="bf-method-icon"><WalletCards size={18} /></span>
+                <span className="bf-method-text"><b>VNPay sandbox</b><small>Chuyển sang cổng thử nghiệm VNPay để thanh toán</small></span>
+                <span className="bf-method-check" aria-hidden="true"><Check size={12} strokeWidth={3} /></span>
+              </label>
+            </div>
           </article>
         </div>
 
-        <aside className="booking-summary-panel confirm-total">
-          <h2>Tổng Quan Đơn Hàng</h2>
-          <div className="hold-timer"><Clock3 size={17} /> Thời gian còn lại <strong>{Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, "0")}</strong></div>
-          <dl>
-            <div><dt>Giá vé ({preview.seats.length} vé)</dt><dd>{formatMoney(preview.subtotal)}</dd></div>
-            <div><dt>Phụ phí</dt><dd>{formatMoney(0)}</dd></div>
-            <div className="discount-row"><dt>Giảm giá</dt><dd>-{formatMoney(preview.discountAmount)}</dd></div>
+        <aside className="bf-card bf-summary" aria-label="Tóm tắt đơn hàng">
+          <div className="bf-card-head">
+            <h2>Đơn hàng</h2>
+            <span>{preview.seats.length} vé</span>
+          </div>
+
+          <div className={`bf-hold${holdWarning ? " is-warning" : ""}`} role="timer">
+            <span><Clock3 size={15} /> Giữ ghế còn</span>
+            <b>{formatCountdown(secondsLeft)}</b>
+          </div>
+
+          <dl className="bf-price">
+            <div><dt>Tiền vé ({preview.seats.length} vé)</dt><dd>{formatVnd(preview.subtotal)}</dd></div>
+            <div><dt>Phụ phí</dt><dd>{formatVnd(0)}</dd></div>
+            <div>
+              <dt>Giảm giá{appliedPromotionCode ? ` (${appliedPromotionCode})` : ""}</dt>
+              <dd className={preview.discountAmount > 0 ? "is-discount" : ""}>-{formatVnd(preview.discountAmount)}</dd>
+            </div>
           </dl>
-          <div className="promotion-block">
-            <span className="promotion-label">Mã khuyến mãi</span>
-            <div className="promotion-code-row">
+
+          <div className="bf-promo">
+            <label className="bf-field-label" htmlFor="bf-promo-code">Mã khuyến mãi</label>
+            <div className="bf-promo-row">
               <input
+                id="bf-promo-code"
+                className="bf-input"
                 type="text"
                 value={promotionCode}
                 onChange={(event) => { setPromotionCode(event.target.value); setPromotionFeedback("") }}
@@ -205,74 +267,98 @@ function BookingConfirmPage({ currentUser }: BookingConfirmPageProps) {
                 placeholder="Nhập mã khuyến mãi"
                 disabled={Boolean(booking)}
               />
-              <button type="button" onClick={() => applyPromotion()} disabled={Boolean(booking) || isSubmitting}>Áp dụng</button>
+              <button type="button" className="bf-btn bf-btn-ghost" onClick={() => applyPromotion()} disabled={Boolean(booking) || isSubmitting}>Áp dụng</button>
             </div>
-            {promotionFeedback && <p className="promotion-feedback">{promotionFeedback}</p>}
-            <button type="button" className="promotion-detail-button" onClick={() => setShowPromotions(true)}><BadgePercent size={15} />Xem danh sách mã khuyến mãi</button>
+            {promotionFeedback && <p className={`bf-promo-feedback${promotionOk ? " is-ok" : ""}`}>{promotionFeedback}</p>}
+            <button type="button" className="bf-link" onClick={() => setShowPromotions(true)}><BadgePercent size={14} /> Xem danh sách mã khuyến mãi</button>
           </div>
-          <div className="booking-grand-total"><span>Tổng cộng</span><strong>{formatMoney(preview.totalAmount)}</strong></div>
-          <label className="booking-consent"><input type="checkbox" checked={agreed} onChange={event => setAgreed(event.target.checked)} /> Tôi xác nhận thông tin phim, suất chiếu và ghế đã chọn là chính xác.</label>
 
-          {!booking && (
-            <button className="booking-primary" type="button" onClick={submitBooking} disabled={!agreed || isSubmitting || secondsLeft === 0}>
-              {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt vé"} <ShieldCheck size={18} />
-            </button>
-          )}
+          <div className="bf-total"><span>Tổng cộng</span><strong>{formatVnd(preview.totalAmount)}</strong></div>
 
-          {booking?.payment.method === "VIETQR" && booking.payment.qrImageUrl && (
-            <div className="payment-created-note">
-              <span>Đơn đã được tạo, vui lòng hoàn tất chuyển khoản.</span>
-              <button type="button" onClick={() => setShowVietQrPayment(true)}><QrCode size={16} /> Mở mã VietQR</button>
-            </div>
-          )}
+          <label className="bf-consent">
+            <input type="checkbox" checked={agreed} onChange={event => setAgreed(event.target.checked)} />
+            <span>Tôi xác nhận thông tin phim, suất chiếu và ghế đã chọn là chính xác.</span>
+          </label>
 
-          {error && <p className="booking-error">{error}</p>}
-          {!booking && <button className="booking-secondary" type="button" onClick={() => navigate(`/booking/showtimes/${draft.showtimeId}/seats`)}><ArrowLeft size={16} /> Quay lại chọn ghế</button>}
-          <div className="secure-note"><Building2 size={15} /> Kiểm tra thông tin trước khi chuyển tiền</div>
+          {error && <p className="bf-error" role="alert">{error}</p>}
+
+          <div className="bf-summary-actions">
+            {!booking && (
+              <button className="bf-btn bf-btn-primary bf-btn-lg bf-btn-block" type="button" onClick={submitBooking} disabled={!agreed || isSubmitting || secondsLeft === 0}>
+                <ShieldCheck size={17} /> {isSubmitting ? "Đang xử lý…" : secondsLeft === 0 ? "Hết thời gian giữ ghế" : "Xác nhận đặt vé"}
+              </button>
+            )}
+
+            {booking?.payment.method === "VIETQR" && booking.payment.qrImageUrl && (
+              <div className="bf-created">
+                <span>Đơn <b>{booking.bookingCode}</b> đã được tạo, vui lòng hoàn tất chuyển khoản.</span>
+                <button type="button" className="bf-btn bf-btn-primary bf-btn-block" onClick={() => setShowVietQrPayment(true)}><QrCode size={16} /> Mở mã VietQR</button>
+              </div>
+            )}
+
+            {!booking && (
+              <button className="bf-btn bf-btn-ghost bf-btn-block" type="button" onClick={() => navigate(`/booking/showtimes/${draft.showtimeId}/seats`)}>
+                <ArrowLeft size={16} /> Quay lại chọn ghế
+              </button>
+            )}
+          </div>
+          <p className="bf-note"><Building2 size={14} /> Kiểm tra thông tin trước khi chuyển tiền</p>
         </aside>
       </div>
+
       {showPromotions && (
-        <BookingModal title="Danh sách mã ưu đãi" onClose={() => setShowPromotions(false)}>
-          <div className="promotion-modal-content">
-            <p className="promotion-modal-note">Các mã khuyến mãi có thể áp dụng cho đơn hàng này</p>
-            <div className="promotion-code-row promotion-code-row--modal">
+        <BookingModal title="Danh sách mã khuyến mãi" onClose={() => setShowPromotions(false)}>
+          <div className="bf-promo-modal">
+            <p>Các mã khuyến mãi có thể áp dụng cho đơn hàng này.</p>
+            <div className="bf-promo-row">
               <input
+                className="bf-input"
                 type="text"
                 value={promotionCode}
                 onChange={(event) => { setPromotionCode(event.target.value); setPromotionFeedback("") }}
                 onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); applyPromotion() } }}
-                placeholder="Nhập mã voucher khác..."
+                placeholder="Nhập mã khác…"
+                aria-label="Mã khuyến mãi"
               />
-              <button type="button" onClick={() => applyPromotion()} disabled={isSubmitting}>Áp dụng</button>
+              <button type="button" className="bf-btn bf-btn-ghost" onClick={() => applyPromotion()} disabled={isSubmitting}>Áp dụng</button>
             </div>
-            {promotionFeedback && <p className="promotion-feedback">{promotionFeedback}</p>}
-            {promotionsLoading && <div className="promotion-empty-card"><span><BadgePercent size={19} /></span><div><strong>Đang tải mã khuyến mãi...</strong></div></div>}
-            {!promotionsLoading && promotions.length === 0 && <div className="promotion-empty-card"><span><BadgePercent size={19} /></span><div><strong>Không có mã phù hợp</strong><small>Đơn hàng hiện chưa đủ điều kiện cho mã nào.</small></div><button type="button" disabled>Không có mã</button></div>}
-            {!promotionsLoading && promotions.map((promotion) => (
-              <div className="promotion-empty-card promotion-option-card" key={promotion.promotionId}>
-                <span><BadgePercent size={19} /></span>
-                <div><strong>{promotion.code} · {promotion.title}</strong><small>{promotion.message} · Còn {formatMoney(promotion.finalAmount)}</small></div>
-                <button type="button" onClick={() => applyPromotion(promotion.code)} disabled={isSubmitting}>Chọn mã</button>
-              </div>
-            ))}
+            {promotionFeedback && <p className={`bf-promo-feedback${promotionOk ? " is-ok" : ""}`}>{promotionFeedback}</p>}
+            <div className="bf-promo-list">
+              {promotionsLoading && (
+                <div className="bf-promo-item is-empty"><span><BadgePercent size={18} /></span><div><strong>Đang tải mã khuyến mãi…</strong></div></div>
+              )}
+              {!promotionsLoading && promotions.length === 0 && (
+                <div className="bf-promo-item is-empty"><span><BadgePercent size={18} /></span><div><strong>Không có mã phù hợp</strong><small>Đơn hàng hiện chưa đủ điều kiện cho mã nào.</small></div></div>
+              )}
+              {!promotionsLoading && promotions.map((promotion) => (
+                <div className="bf-promo-item" key={promotion.promotionId}>
+                  <span><BadgePercent size={18} /></span>
+                  <div><strong>{promotion.code} · {promotion.title}</strong><small>{promotion.message} · còn {formatVnd(promotion.finalAmount)}</small></div>
+                  <button type="button" className="bf-btn bf-btn-primary" onClick={() => applyPromotion(promotion.code)} disabled={isSubmitting}>Chọn mã</button>
+                </div>
+              ))}
+            </div>
           </div>
         </BookingModal>
       )}
+
       {showVietQrPayment && booking?.payment.method === "VIETQR" && booking.payment.qrImageUrl && (
-        <BookingModal title="Thanh toán VietQR" className="vietqr-payment-modal" showFooter={false} onClose={() => setShowVietQrPayment(false)}>
-          <div className="vietqr-payment">
+        <BookingModal title="Thanh toán VietQR" showFooter={false} onClose={() => setShowVietQrPayment(false)}>
+          <div className="bf-vietqr">
             <img src={booking.payment.qrImageUrl} alt="Mã VietQR thanh toán" />
-            <dl>
-              <div><dt>Ngân hàng</dt><dd>{booking.payment.bankName || "-"}</dd></div>
+            <dl className="bf-customer-list">
+              <div><dt>Số tiền</dt><dd>{formatVnd(preview.totalAmount)}</dd></div>
+              <div><dt>Ngân hàng</dt><dd>{booking.payment.bankName || "—"}</dd></div>
               <div><dt>Số tài khoản</dt><dd>{booking.payment.accountNumber}</dd></div>
               <div><dt>Chủ tài khoản</dt><dd>{booking.payment.accountName}</dd></div>
               <div><dt>Nội dung</dt><dd>{booking.payment.transferContent}</dd></div>
             </dl>
             <p>Đây là chế độ xác nhận thủ công. Chỉ nhấn sau khi bạn đã chuyển khoản.</p>
-            <button className="booking-primary" type="button" onClick={finishVietQr} disabled={isSubmitting || secondsLeft === 0}>
-              {isSubmitting ? "Đang xác nhận..." : "Tôi đã thanh toán"}
+            {error && <p className="bf-error" role="alert">{error}</p>}
+            <button className="bf-btn bf-btn-primary bf-btn-lg bf-btn-block" type="button" onClick={finishVietQr} disabled={isSubmitting || secondsLeft === 0}>
+              {isSubmitting ? "Đang xác nhận…" : "Tôi đã thanh toán"}
             </button>
-            <div className="secure-note"><Building2 size={15} /> Kiểm tra đúng số tiền và nội dung trước khi chuyển</div>
+            <p className="bf-note"><Building2 size={14} /> Kiểm tra đúng số tiền và nội dung trước khi chuyển</p>
           </div>
         </BookingModal>
       )}

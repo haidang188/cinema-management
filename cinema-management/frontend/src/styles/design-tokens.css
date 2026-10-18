@@ -1,0 +1,146 @@
+/* =========================================================
+   DESIGN TOKENS — nguồn chuẩn duy nhất cho màu / font / bo góc.
+   Giá trị lấy từ thiết kế của chủ dự án:
+     common/layout/layout.css (:root --pl-*)
+     component/booking-management/BookingManagement.css (.bm-page --bm-*)
+   File này được import SAU CÙNG trong App.tsx nên khối :root dưới đây
+   thắng mọi khối :root cũ (App.css, admin-theme.css, cinema-room.css,
+   employee-admin.css, promotion.css, theme.css) có cùng độ ưu tiên.
+   ========================================================= */
+
+:root {
+  /* ---------- Token chuẩn ---------- */
+  --ui-red: #e50914;
+  --ui-red-hover: #ff1f2b;
+  --ui-red-soft: rgba(229, 9, 20, 0.14);
+  --ui-red-line: rgba(229, 9, 20, 0.45);
+  --ui-red-text: #ff8a90;
+
+  --ui-bg: #07090c;
+  --ui-sidebar: #0b0e12;
+  --ui-surface: #14181d;
+  --ui-surface-2: #1a1f25;
+  --ui-surface-sunken: #0f1216;
+  --ui-table-head: #11151a;
+  --ui-row-line: #1f252c;
+  --ui-row-hover: #191e24;
+  --ui-border: #2b3139;
+  --ui-border-strong: #2e353d;
+
+  --ui-text: #f5f7f8;
+  --ui-text-soft: #d7dce1;
+  --ui-muted: #9ca5af;
+  --ui-faint: #6c757e;
+  --ui-placeholder: #5d656e;
+
+  --ui-green: #22c07a;
+  --ui-green-soft: rgba(34, 192, 122, 0.12);
+  --ui-amber: #f5a524;
+  --ui-amber-soft: rgba(245, 165, 36, 0.12);
+  --ui-blue: #3fa7d6;
+  --ui-blue-soft: rgba(63, 167, 214, 0.14);
+
+  --ui-radius-sm: 8px;
+  --ui-radius-md: 10px;
+  --ui-radius-lg: 14px;
+  --ui-radius-xl: 16px;
+
+  --ui-font: Inter, "Segoe UI", Arial, sans-serif;
+  --ui-font-mono: Consolas, "SFMono-Regular", monospace;
+  --ui-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+
+  /* Tên phụ mà statistics.css đã tham chiếu sẵn (var(--ui-...)) */
+  --ui-soft: var(--ui-surface-2);
+  --ui-hover: var(--ui-row-hover);
+  --ui-line: var(--ui-border);
+  --ui-secondary: var(--ui-text-soft);
+  --ui-primary: var(--ui-red);
+  --ui-primary-hover: var(--ui-red-hover);
+  --ui-primary-soft: var(--ui-red-soft);
+  --ui-error: var(--ui-red-text);
+
+  /* ---------- Họ biến cũ: admin-theme.css / cinema-room.css / employee-admin.css ---------- */
+  --bg-app: var(--ui-bg);
+  --bg-sidebar: var(--ui-sidebar);
+  --bg-panel: var(--ui-surface);
+  --bg-panel-2: var(--ui-surface-2);
+  --bg-input: var(--ui-surface-2);
+  --bg-hover: var(--ui-row-hover);
+  --border: var(--ui-border);
+  --border-strong: var(--ui-border-strong);
+  --text-primary: var(--ui-text);
+  --text-secondary: var(--ui-muted);
+  --text-muted: var(--ui-faint);
+  --accent: var(--ui-red);
+  --accent-hover: var(--ui-red-hover);
+  --accent-soft: var(--ui-red-soft);
+  --success: var(--ui-green);
+  --warning: var(--ui-amber);
+  --danger: var(--ui-red);
+  --radius-sm: var(--ui-radius-sm);
+  --radius-md: var(--ui-radius-md);
+  --radius-lg: var(--ui-radius-lg);
+  --shadow-panel: none;
+
+  /* ---------- --cinema-* (App.css + promotion.css) ---------- */
+  --cinema-bg: var(--ui-bg);
+  --cinema-sidebar: var(--ui-sidebar);
+  --cinema-panel: var(--ui-surface);
+  --cinema-panel-soft: var(--ui-surface-2);
+  --cinema-border: var(--ui-border);
+  --cinema-text: var(--ui-text);
+  --cinema-muted: var(--ui-muted);
+  --cinema-line: var(--ui-border);
+  --cinema-red: var(--ui-red);
+  --cinema-red-hover: var(--ui-red-hover);
+  --cinema-red-dark: var(--ui-red-hover);
+  --cinema-gold: var(--ui-amber);
+
+  /* ---------- --admin-* (App.css — trước đây là bảng màu SÁNG + xanh #2563eb) ---------- */
+  --admin-bg: var(--ui-bg);
+  --admin-panel: var(--ui-surface);
+  --admin-text: var(--ui-text);
+  --admin-muted: var(--ui-muted);
+  --admin-line: var(--ui-border);
+  --admin-primary: var(--ui-red);
+  --admin-primary-soft: var(--ui-red-soft);
+  --admin-green-soft: var(--ui-green-soft);
+  --admin-amber-soft: var(--ui-amber-soft);
+  --admin-rose-soft: var(--ui-red-soft);
+  --shadow-sm: none;
+  --shadow-md: 0 18px 48px rgba(0, 0, 0, 0.45);
+
+  /* ---------- --theme-* (theme/theme.css) ---------- */
+  --theme-page: var(--ui-bg);
+  --theme-surface: var(--ui-surface);
+  --theme-surface-soft: var(--ui-surface-2);
+  --theme-surface-strong: var(--ui-surface-sunken);
+  --theme-text: var(--ui-text);
+  --theme-text-soft: var(--ui-text-soft);
+  --theme-muted: var(--ui-muted);
+  --theme-border: var(--ui-border);
+
+  /* ---------- Font của promotion.css (trước là Be Vietnam Pro / Cormorant Garamond) ---------- */
+  --font-heading: var(--ui-font);
+  --font-body: var(--ui-font);
+  --font-mono: var(--ui-font-mono);
+
+  /* ---------- Bootstrap (main.tsx import bootstrap.min.css) ---------- */
+  --bs-body-font-family: var(--ui-font);
+  --bs-body-bg: var(--ui-bg);
+  --bs-body-color: var(--ui-text);
+  --bs-border-color: var(--ui-border);
+
+  color-scheme: dark;
+}
+
+html,
+body {
+  font-family: var(--ui-font);
+}
+
+/* Trang đặt vé phía khách: đồng bộ đỏ thương hiệu */
+.booking-page {
+  --booking-red: var(--ui-red);
+  --booking-red-dark: #c4070f;
+}

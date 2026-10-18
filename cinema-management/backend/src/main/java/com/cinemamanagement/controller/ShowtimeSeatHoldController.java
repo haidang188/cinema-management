@@ -4,6 +4,8 @@ import com.cinemamanagement.request.SeatHoldRequest;
 import com.cinemamanagement.response.SeatHoldActionResponse;
 import com.cinemamanagement.response.SeatStateResponse;
 import com.cinemamanagement.service.SeatHoldService;
+import com.cinemamanagement.util.SessionEmployeeResolver;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,12 +25,17 @@ import java.util.List;
 public class ShowtimeSeatHoldController {
 
     private final SeatHoldService seatHoldService;
+    private final SessionEmployeeResolver sessionEmployeeResolver;
 
     @PostMapping("/holds")
     public ResponseEntity<SeatHoldActionResponse> hold(
             @PathVariable Long showtimeId,
-            @RequestBody SeatHoldRequest request
+            @RequestBody SeatHoldRequest request,
+            HttpServletRequest httpRequest
     ) {
+        // API giữ ghế này chỉ dành cho quầy; khách đặt online đi qua /api/seat-holds.
+        // Bắt buộc đăng nhập nhân viên để không ai sinh token ẩn danh và chiếm ghế hàng loạt.
+        sessionEmployeeResolver.requireEmployeeId(httpRequest);
         return ResponseEntity.ok(seatHoldService.hold(
                 showtimeId,
                 request.holdToken(),

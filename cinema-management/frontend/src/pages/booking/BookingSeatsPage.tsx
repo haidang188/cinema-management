@@ -1,4 +1,3 @@
-import { Armchair, CalendarDays, Clock3, MapPin, Monitor, Ticket } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { getShowtimeById } from "../../service/showtime/showtimeService"
@@ -12,7 +11,11 @@ import { subscribeToSeatStatus } from "../../service/booking/bookingSocketServic
 import type { AuthResponse } from "../../types/auth"
 import type { ShowtimeSeatData } from "../../types/booking"
 import type { ShowtimeData } from "../../types/showtime/showtime"
-import "./booking.css"
+import { formatVnd } from "../../utils/format"
+import CinemaSeatMap from "../../component/seat-map/CinemaSeatMap"
+import { seatKind, seatStateOf } from "../../component/seat-map/seatMapUtils"
+import BookingStepper from "./BookingStepper"
+import "./booking-flow.css"
 
 export const BOOKING_DRAFT_KEY = "cinema.bookingDraft"
 
@@ -37,20 +40,8 @@ function formatDateTime(value: string) {
   })
 }
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  })
-}
-
-function formatTime(value: string) {
-  return new Date(value).toLocaleTimeString("vi-VN", {
-    hour: "2-digit",
-    minute: "2-digit",
-  })
-}
+// Khớp booking.online-max-seats ở backend; nhóm đông hơn mua tại quầy (đơn đoàn).
+const ONLINE_MAX_SEATS = 8
 
 function haveSameSeatIds(left: number[], right: number[]) {
   if (left.length !== right.length) return false
@@ -161,6 +152,11 @@ function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
       ? selectedIds.filter((id) => id !== seat.id)
       : [...selectedIds, seat.id]
 
+    if (nextIds.length > ONLINE_MAX_SEATS) {
+      setError(`Mỗi lượt đặt online được chọn tối đa ${ONLINE_MAX_SEATS} ghế. Đặt nhóm đông hơn vui lòng liên hệ quầy vé.`)
+      return
+    }
+
     // Ở bước chọn ghế chỉ đánh dấu trên giao diện. Ghế chỉ được giữ trên
     // server khi khách bấm Tiếp tục để sang bước xác nhận.
     if (!holdToken) {
@@ -246,85 +242,155 @@ function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
     }
   }
 
-  if (isLoading) return <section className="booking-page booking-state">Đang tải sơ đồ ghế...</section>
-  if (!showtime) return <section className="booking-page booking-state">{error || "Không tìm thấy suất chiếu"}</section>
+  if (isLoading) {
+    return (
+      <section className="bf-page">
+        <BookingStepper current={1} />
+        <div className="bf-state"><span className="bf-spinner" aria-hidden="true" />Đang tải sơ đồ ghế…</div>
+      </section>
+    )
+  }
+  if (!showtime) {
+    return (
+      <section className="bf-page">
+        <BookingStepper current={1} />
+        <div className="bf-state">
+          <p>{error || "Không tìm thấy suất chiếu"}</p>
+          <button type="button" className="bf-btn bf-btn-ghost" onClick={() => navigate(-1)}>Quay lại</button>
+        </div>
+      </section>
+    )
+  }
 
   return (
-    <section className="booking-page">
-      <div className="booking-steps" aria-label="Tiến trình đặt vé">
-        <span className="is-active">1. Chọn ghế</span><i /><span>2. Xác nhận</span><i /><span>3. Hoàn tất</span>
-      </div>
+    <section className="bf-page">
+      <BookingStepper
+        current={1}
+        showtime={showtime}
+        expiresAt={expiresAt}
+        secondsLeft={secondsLeft}
+      />
 
-      <div className="booking-showtime-strip" aria-label="Thông tin suất chiếu đã chọn">
-        <span className="booking-showtime-movie"><Ticket size={15} />{showtime.movieTitle}</span>
-        <span><CalendarDays size={15} />{formatDate(showtime.startTime)}</span>
-        <span><Clock3 size={15} />{formatTime(showtime.startTime)}</span>
-        <span><MapPin size={15} />{showtime.roomName} · {showtime.format || "2D"}</span>
-        <span
-          className={`booking-showtime-timer ${expiresAt ? "" : "is-placeholder"}`}
-          aria-hidden={!expiresAt}
-        >
-          Giữ ghế <strong>{Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, "0")}</strong>
-        </span>
-      </div>
+      <div className="cs-seats-page cinema-seat-map booking-seat-step">
+        <div className="cs-seats-body">
+          <CinemaSeatMap
+            bare
+            seats={seats.map((seat) => ({
+              id: seat.id,
+              rowLabel: seat.rowLabel,
+              seatNumber: seat.seatNumber,
+              seatType: seat.seatType,
+              state: seatStateOf(seat.status),
+            }))}
+            selectedIds={selectedIds}
+            onSeatClick={(seat) => {
+              const original = seats.find((item) => item.id === seat.id)
+              if (original) void toggleSeat(original)
+            }}
+            disabled={isHolding}
+            subtitle={`${showtime.roomName} · ${showtime.format || "2D"} · tối đa ${ONLINE_MAX_SEATS} ghế mỗi lần đặt`}
+            legend={{ selected: "Bạn đang chọn", held: "Người khác giữ" }}
+          >
+            {error && (
+              <div className="cs-notice" role="alert">
+                <span>{error}</span>
+                <button type="button" onClick={() => setError("")} aria-label="Đóng">
+                  ×
+                </button>
+              </div>
+            )}
+          </CinemaSeatMap>
 
-      <div className="booking-layout">
-        <div className="booking-main-panel">
-          <div className="screen-indicator"><Monitor size={18} /><span>Màn hình</span></div>
-          <div className="seat-map" aria-label="Sơ đồ ghế">
-            {Object.entries(rows).sort(([a], [b]) => b.localeCompare(a)).map(([rowLabel, rowSeats]) => (
-              <div className="seat-row" key={rowLabel}>
-                <strong>{rowLabel}</strong>
-                <div>
-                  {rowSeats.map((seat) => {
-                    const selected = selectedIds.includes(seat.id)
+          <aside className="cs-summary" aria-label="Thông tin đơn">
+            <div className="cs-summary-head">
+              <h2>Đơn đặt vé</h2>
+              <span className="cs-summary-count">
+                {selectedSeats.length}/{ONLINE_MAX_SEATS} ghế
+              </span>
+            </div>
+
+            <div className="booking-seat-movie">
+              {showtime.posterUrl && <img src={showtime.posterUrl} alt={showtime.movieTitle} />}
+              <div>
+                <strong>{showtime.movieTitle}</strong>
+                <span>{formatDateTime(showtime.startTime)}</span>
+                <span>{showtime.roomName} · {showtime.format || "2D"}</span>
+              </div>
+            </div>
+
+            <div className="cs-summary-seats">
+              <div className="cs-summary-label">
+                <span>Ghế đã chọn</span>
+                {selectedSeats.length > 0 && !holdToken && (
+                  <button
+                    type="button"
+                    className="cs-link"
+                    onClick={() => {
+                      selectedIdsRef.current = []
+                      setSelectedIds([])
+                    }}
+                  >
+                    Bỏ chọn tất cả
+                  </button>
+                )}
+              </div>
+
+              {selectedSeats.length === 0 ? (
+                <p className="cs-summary-empty">
+                  Bấm vào ghế trống để chọn. Ghế được giữ {holdToken ? "" : "khi bạn bấm Tiếp tục, "}
+                  trong 10 phút để thanh toán.
+                </p>
+              ) : (
+                <ul className="cs-seat-chips">
+                  {selectedSeats.map((seat) => {
+                    const kind = seatKind(seat.seatType)
                     return (
-                      <button
-                        key={seat.id}
-                        type="button"
-                        className={`seat seat--${seat.seatType.toLowerCase()} ${selected ? "is-selected" : ""}`}
-                        disabled={seat.status === "SOLD" || (seat.status === "HELD" && !selected)}
-                        aria-pressed={selected}
-                        onClick={() => toggleSeat(seat)}
-                        title={`${seat.rowLabel}${seat.seatNumber} - ${seat.seatType}`}
-                      >
-                        {seat.rowLabel}{seat.seatNumber}
-                      </button>
+                      <li key={seat.id} className={`cs-seat-chip is-${kind}`}>
+                        <b>{seat.rowLabel}{seat.seatNumber}</b>
+                        <small>{formatVnd(seat.price)}</small>
+                        <button
+                          type="button"
+                          onClick={() => void toggleSeat(seat)}
+                          aria-label={`Bỏ chọn ghế ${seat.rowLabel}${seat.seatNumber}`}
+                        >
+                          ×
+                        </button>
+                      </li>
                     )
                   })}
-                </div>
-                <strong>{rowLabel}</strong>
+                </ul>
+              )}
+            </div>
+
+            <div className="cs-summary-price">
+              <div>
+                <span>Tiền vé</span>
+                <strong>{formatVnd(selectedSeats.reduce((sum, seat) => sum + (seat.price || 0), 0))}</strong>
               </div>
-            ))}
-          </div>
+              <div className="cs-summary-total">
+                <span>Tổng cộng</span>
+                <strong>{formatVnd(selectedSeats.reduce((sum, seat) => sum + (seat.price || 0), 0))}</strong>
+              </div>
+            </div>
 
-          <div className="seat-legend">
-            <span><i className="seat-swatch available" />Còn trống</span>
-            <span><i className="seat-swatch vip" />VIP</span>
-            <span><i className="seat-swatch selected" />Đang chọn</span>
-            <span><i className="seat-swatch unavailable" />Đã giữ/đã bán</span>
-          </div>
-          {error && <p className="booking-error">{error}</p>}
+            <button
+              type="button"
+              className="cs-btn cs-btn-primary cs-summary-cta"
+              disabled={selectedIds.length === 0 || isHolding}
+              onClick={continueBooking}
+            >
+              {selectedIds.length === 0
+                ? "Chọn ít nhất 1 ghế"
+                : isHolding
+                  ? "Đang giữ ghế…"
+                  : `Tiếp tục · ${selectedIds.length} ghế`}
+              <span aria-hidden="true">→</span>
+            </button>
+            <small className="booking-seat-note">
+              Khuyến mãi được áp dụng ở bước xác nhận. Tối đa {ONLINE_MAX_SEATS} ghế mỗi lần đặt.
+            </small>
+          </aside>
         </div>
-
-        <aside className="booking-summary-panel">
-          <h2>Tóm Tắt Đơn Hàng</h2>
-          <div className="booking-movie-mini">
-            <img src={showtime.posterUrl} alt={showtime.movieTitle} />
-            <div><strong>{showtime.movieTitle}</strong><span>{showtime.format || "2D"}</span><span>{showtime.roomName}</span></div>
-          </div>
-          <dl>
-            <div><dt>Suất chiếu</dt><dd>{formatDateTime(showtime.startTime)}</dd></div>
-            <div><dt>Ghế đã chọn</dt><dd>{selectedSeats.map((seat) => `${seat.rowLabel}${seat.seatNumber}`).join(", ") || "Chưa chọn"}</dd></div>
-            <div><dt>Số lượng</dt><dd>{selectedIds.length} vé</dd></div>
-          </dl>
-          <div className="selected-seat-prices">{selectedSeats.map(seat => <div key={seat.id}><span><Ticket size={14} /> {seat.rowLabel}{seat.seatNumber} · {seat.seatType}</span><strong>{seat.price?.toLocaleString("vi-VN")} đ</strong></div>)}</div>
-          <div className="booking-grand-total"><span>Tổng cộng</span><strong>{selectedSeats.reduce((sum, seat) => sum + (seat.price || 0), 0).toLocaleString("vi-VN")} đ</strong></div>
-          <button className="booking-primary" type="button" disabled={selectedIds.length === 0 || isHolding} onClick={continueBooking}>
-            {isHolding ? "Đang giữ ghế..." : "Tiếp tục"} <Armchair size={18} />
-          </button>
-          <small className="booking-note">Không giới hạn số ghế trong một lần đặt</small>
-        </aside>
       </div>
     </section>
   )

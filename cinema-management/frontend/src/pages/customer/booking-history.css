@@ -1,0 +1,703 @@
+/* Lịch sử đặt vé của khách — cùng ngôn ngữ thiết kế với các bước đặt vé (.bf-page) và màn quầy. */
+
+.bh-page {
+  --red: #e50914;
+  --red-hover: #ff1f2b;
+  --red-soft: rgba(229, 9, 20, 0.14);
+  --red-line: rgba(229, 9, 20, 0.45);
+  --green: #22c07a;
+  --green-soft: rgba(34, 192, 122, 0.12);
+  --amber: #e0a43a;
+  --amber-soft: rgba(224, 164, 58, 0.12);
+  --gold: #d4a44c;
+  --panel: #14181d;
+  --panel-2: #1a1f25;
+  --border: #2b3139;
+  --text: #f5f7f8;
+  --muted: #9ca5af;
+  --faint: #6c757e;
+
+  width: min(1320px, 100%);
+  margin: 0 auto;
+  padding: 4px 0 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--text);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.bh-page *,
+.bh-page *::before,
+.bh-page *::after {
+  box-sizing: border-box;
+}
+
+.bh-page :is(h1, h2, h3, p, ul) {
+  margin: 0;
+}
+
+.bh-page :is(button, input) {
+  font: inherit;
+}
+
+/* ---------- Đầu trang ---------- */
+
+.bh-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--faint);
+  font-size: 12.5px;
+}
+
+.bh-breadcrumb a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.bh-breadcrumb a:hover {
+  color: var(--text);
+}
+
+.bh-breadcrumb strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.bh-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.bh-title h1 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.bh-title p {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.bh-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(128px, 1fr));
+  gap: 10px;
+}
+
+.bh-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.bh-stat > svg {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.bh-stat div {
+  display: grid;
+}
+
+.bh-stat strong {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.bh-stat span {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.bh-stat.is-green > svg,
+.bh-stat.is-green strong {
+  color: var(--green);
+}
+
+.bh-stat.is-gold > svg,
+.bh-stat.is-gold strong {
+  color: var(--gold);
+}
+
+/* ---------- Thanh lọc ---------- */
+
+.bh-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.bh-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.bh-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 12px;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bh-tabs button b {
+  min-width: 20px;
+  padding: 1px 6px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  font-size: 11px;
+  text-align: center;
+}
+
+.bh-tabs button:hover {
+  color: var(--text);
+}
+
+.bh-tabs button.is-active {
+  color: #fff;
+  background: var(--red);
+}
+
+.bh-tabs button.is-active b {
+  color: #fff;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.bh-search {
+  flex: 1 1 220px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  color: var(--faint);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.bh-search:focus-within {
+  border-color: var(--red-line);
+}
+
+.bh-search input {
+  flex: 1;
+  min-width: 0;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  outline: none;
+}
+
+.bh-search input::placeholder {
+  color: var(--faint);
+}
+
+.bh-dates {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.bh-dates label {
+  display: grid;
+  gap: 3px;
+}
+
+.bh-dates span {
+  color: var(--faint);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.bh-dates input {
+  height: 34px;
+  padding: 0 10px;
+  color: var(--text);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color-scheme: dark;
+}
+
+.bh-dates button {
+  height: 34px;
+  padding: 0 16px;
+  color: #fff;
+  background: var(--red);
+  border: 0;
+  border-radius: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.bh-dates button:hover {
+  background: var(--red-hover);
+}
+
+.bh-alert {
+  padding: 10px 14px;
+  color: #ff8a90;
+  background: var(--red-soft);
+  border: 1px solid var(--red-line);
+  border-radius: 10px;
+}
+
+/* ---------- Danh sách ---------- */
+
+.bh-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  align-items: start;
+  gap: 14px;
+}
+
+.bh-list {
+  display: grid;
+  gap: 10px;
+}
+
+.bh-ticket {
+  position: relative;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 12px 14px 12px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  transition: border-color 0.15s ease;
+}
+
+.bh-ticket::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--faint);
+}
+
+.bh-ticket.is-amber::before { background: var(--amber); }
+.bh-ticket.is-green::before { background: var(--green); }
+
+.bh-ticket:hover {
+  border-color: #3a424c;
+}
+
+.bh-poster {
+  width: 64px;
+  height: 92px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--faint);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}
+
+.bh-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bh-info {
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.bh-info-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bh-info-top code {
+  color: var(--faint);
+  font-family: Consolas, "SFMono-Regular", monospace;
+  font-size: 11.5px;
+}
+
+.bh-status {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.bh-status.is-amber { color: var(--amber); background: var(--amber-soft); }
+.bh-status.is-green { color: var(--green); background: var(--green-soft); }
+.bh-status.is-muted { color: var(--muted); background: rgba(156, 165, 175, 0.12); }
+
+.bh-info h2 {
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bh-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.bh-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bh-seats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.bh-seats span {
+  padding: 2px 8px;
+  color: #ffb3b7;
+  background: var(--red-soft);
+  border: 1px solid var(--red-line);
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+.bh-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bh-amount {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+}
+
+.bh-amount strong {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.bh-amount span {
+  color: var(--faint);
+  font-size: 11.5px;
+}
+
+.bh-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.bh-actions :is(a, button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  color: var(--text);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.bh-actions :is(a, button):hover:not(:disabled) {
+  border-color: var(--red-line);
+}
+
+.bh-actions .is-primary {
+  color: #fff;
+  background: var(--red);
+  border-color: var(--red);
+}
+
+.bh-actions .is-primary:hover:not(:disabled) {
+  background: var(--red-hover);
+}
+
+.bh-actions button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.bh-skeleton {
+  height: 118px;
+  background: linear-gradient(90deg, var(--panel) 25%, var(--panel-2) 37%, var(--panel) 63%);
+  background-size: 400% 100%;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  animation: bh-shimmer 1.3s ease infinite;
+}
+
+@keyframes bh-shimmer {
+  from { background-position: 100% 50%; }
+  to { background-position: 0 50%; }
+}
+
+.bh-empty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 36px 16px;
+  color: var(--muted);
+  text-align: center;
+  background: var(--panel);
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+}
+
+.bh-empty > svg {
+  color: var(--faint);
+}
+
+.bh-empty strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.bh-empty a {
+  margin-top: 6px;
+  padding: 7px 14px;
+  color: #fff;
+  background: var(--red);
+  border-radius: 8px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.bh-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  color: var(--muted);
+}
+
+.bh-pagination button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 12px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bh-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* ---------- Cột phụ ---------- */
+
+.bh-aside {
+  position: sticky;
+  top: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.bh-card {
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.bh-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+  font-size: 13.5px;
+  font-weight: 800;
+}
+
+.bh-card h3 svg {
+  color: var(--red);
+}
+
+.bh-card ul {
+  display: grid;
+  gap: 6px;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.bh-member {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(212, 164, 76, 0.18), transparent 60%),
+    var(--panel);
+  border-color: rgba(212, 164, 76, 0.4);
+}
+
+.bh-member-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.bh-member strong {
+  display: block;
+  margin: 6px 0 4px;
+  color: var(--gold);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.bh-member p {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.bh-member p b {
+  color: var(--text);
+}
+
+.bh-member a {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--gold);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.bh-member a:hover {
+  text-decoration: underline;
+}
+
+.bh-qr-offscreen {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  pointer-events: none;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1100px) {
+  .bh-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .bh-aside {
+    position: static;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .bh-stats {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bh-toolbar {
+    align-items: stretch;
+  }
+
+  .bh-tabs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .bh-tabs button {
+    justify-content: center;
+    gap: 5px;
+    padding: 0 6px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .bh-dates {
+    width: 100%;
+  }
+
+  .bh-dates label {
+    flex: 1;
+  }
+
+  .bh-dates input {
+    width: 100%;
+  }
+
+  .bh-ticket {
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  .bh-poster {
+    width: 56px;
+    height: 80px;
+  }
+
+  .bh-side {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .bh-amount {
+    justify-items: start;
+  }
+}

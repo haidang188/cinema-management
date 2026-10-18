@@ -1,0 +1,938 @@
+/* =========================================================
+   ADMIN / STAFF UI — đồng bộ các trang quản trị theo thiết kế
+   "Quản lý đặt vé" (BookingManagement.css, lớp bm-*) và
+   "Bán vé tại quầy" (CounterSale*.css, lớp cs-* / sale-*).
+
+   Phạm vi: chỉ các lớp cũ của trang admin nằm trong
+   #pl-main .admin-content / .staff-content (AdminShell / StaffShell).
+   Tiền tố #pl-main (id của <main> trong common/layout/Layout.tsx) cho
+   độ ưu tiên cao hơn mọi quy tắc cũ dạng ".admin-content .x .y" nên
+   không cần !important. Không đụng tới lớp bm-*, cs-*, sale-*, tp-*.
+
+   Import sau styles/design-tokens.css trong App.tsx.
+   ========================================================= */
+
+/* ---------- Khung trang ---------- */
+
+#pl-main :is(.admin-content, .staff-content) :is(.app-shell, .promotion-page, .statistics-page, .showtime-page) {
+  width: min(1320px, calc(100% - 24px));
+  max-width: none;
+  min-height: 0;
+  margin: 12px auto;
+  padding: 0 0 28px;
+  color: var(--ui-text);
+  background: transparent;
+  font-family: var(--ui-font);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#pl-main :is(.admin-content, .staff-content) .room-designer-page {
+  width: calc(100% - 24px);
+}
+
+#pl-main :is(.admin-content, .staff-content) .ticket-price-page {
+  margin: 12px auto;
+  padding: 0 0 28px;
+  color: var(--ui-text);
+  font-family: var(--ui-font);
+  font-size: 13px;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.app-shell, .promotion-page, .statistics-page, .ticket-price-page, .showtime-page) :is(h1, h2, h3, h4, button, input, select, textarea, table) {
+  font-family: var(--ui-font);
+}
+
+/* ---------- Tiêu đề trang (giống .bm-header) ---------- */
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-page-header, .room-page-header, .employee-page-header, .member-page-header, .promotion-page-header, .statistics-heading, .page-header) {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-height: 0;
+  margin: 0 0 14px;
+  padding: 0 2px;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  text-align: left;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.ticket-price-header, .showtime-header) {
+  margin: 0 0 14px;
+  padding: 0 2px;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  text-align: left;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-page-header, .room-page-header, .employee-page-header, .member-page-header, .promotion-page-header, .statistics-heading, .page-header, .ticket-price-header, .showtime-header) h1 {
+  margin: 0;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-page-header, .room-page-header, .employee-page-header, .member-page-header, .promotion-page-header, .statistics-heading, .page-header, .ticket-price-header, .showtime-header) :is(p, .page-subtitle):not(.room-page-eyebrow):not(.employee-page-eyebrow):not(.eyebrow):not(.movie-page-eyebrow) {
+  max-width: none;
+  margin: 3px 0 0;
+  color: var(--ui-muted);
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+/* Dòng nhỏ phía trên tiêu đề (giống .counter-sale .page-eyebrow) */
+#pl-main :is(.admin-content, .staff-content) :is(.room-page-eyebrow, .employee-page-eyebrow, .movie-page-eyebrow, .promotion-eyebrow, .promotion-section-kicker, .eyebrow) {
+  display: block;
+  margin: 0 0 3px;
+  color: var(--ui-red);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+#pl-main :is(.admin-content, .staff-content) .promotion-back-link {
+  padding: 0;
+  color: var(--ui-muted);
+  background: none;
+  border: 0;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+#pl-main :is(.admin-content, .staff-content) .promotion-back-link:hover {
+  color: #fff;
+}
+
+/* Tiêu đề khu vực / panel */
+#pl-main :is(.admin-content, .staff-content) :is(.promotion-section-heading, .promotion-list-heading, .panel-heading, .employee-panel-heading, .compact-heading) :is(h2, h3) {
+  margin: 0;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.promotion-section-heading, .promotion-list-heading, .panel-heading, .employee-panel-heading, .compact-heading) p {
+  margin-top: 3px;
+  color: var(--ui-muted);
+  font-size: 12.5px;
+}
+
+#pl-main :is(.admin-content, .staff-content) .statistics-page :is(.statistics-panel, .ast-create) :is(h2, h3) {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* ---------- Thanh lọc / panel / thẻ (giống .bm-toolbar, .bm-table-card) ---------- */
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-toolbar, .room-toolbar, .employee-toolbar, .member-toolbar, .promotion-toolbar, .statistics-filters) {
+  padding: 14px;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-lg);
+  box-shadow: none;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(
+  .movie-table-card, .room-table-card, .employee-table-card, .member-table-card,
+  .promotion-table-panel, .statistics-panel, .form-panel, .room-form-card,
+  .room-designer-panel, .room-summary-card, .room-detail-info-panel, .seat-map-panel, .seat-editor-panel,
+  .movie-preview-panel, .member-detail-panel, .employee-profile-card,
+  .promotion-form-panel, .promotion-side-card, .promotion-preview-card, .promotion-image-panel,
+  .promotion-detail-simple-card, .member-stat-card, .employee-stat-card, .promotion-stat-card,
+  .ticket-price-card, .ticket-price-empty, .showtime-movie-card, .no-showtime
+) {
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-lg);
+  box-shadow: none;
+}
+
+#pl-main :is(.admin-content, .staff-content) .promotion-directory-panel {
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.member-stat-card, .employee-stat-card, .promotion-stat-card)::before,
+#pl-main :is(.admin-content, .staff-content) :is(.member-stat-card, .employee-stat-card, .promotion-stat-card)::after {
+  display: none;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.member-stat-card, .employee-stat-card, .promotion-stat-card) strong {
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Ô nhập / chọn (giống .bm-field) ---------- */
+
+#pl-main :is(.admin-content, .staff-content) :is(.app-shell, .promotion-page, .statistics-page, .ticket-price-page, .showtime-page) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="hidden"]), select, textarea):not(:is(.employee-search-control, .employee-password-field, .calendar-wrapper) *) {
+  color: #fff;
+  background-color: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+  border-radius: 9px;
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 600;
+  color-scheme: dark;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.employee-search-control, .employee-password-field) {
+  background: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+  border-radius: 9px;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.employee-search-control, .employee-password-field) input {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.app-shell, .promotion-page, .statistics-page, .ticket-price-page, .showtime-page) :is(input, textarea)::placeholder {
+  color: var(--ui-placeholder);
+  font-weight: 500;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.app-shell, .promotion-page, .statistics-page, .ticket-price-page, .showtime-page) :is(input, select, textarea):not(:is(.employee-search-control, .employee-password-field) *):focus,
+#pl-main :is(.admin-content, .staff-content) :is(.employee-search-control, .employee-password-field):focus-within {
+  border-color: var(--ui-red);
+  box-shadow: 0 0 0 3px var(--ui-red-soft);
+  outline: none;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.app-shell, .promotion-page, .statistics-page) :is(input, select, textarea):is(.is-invalid, [aria-invalid="true"]) {
+  border-color: var(--ui-red);
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.app-shell, .promotion-page, .statistics-page) :is(input, select, textarea):is(:disabled, [readonly]) {
+  color: var(--ui-muted);
+  background-color: var(--ui-surface-sunken);
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.app-shell, .promotion-page, .statistics-page) select option {
+  color: #fff;
+  background: var(--ui-surface-2);
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.app-shell, .promotion-page, .statistics-page) :is(input[type="checkbox"], input[type="radio"]) {
+  accent-color: var(--ui-red);
+}
+
+/* Nhãn ô nhập */
+#pl-main :is(.admin-content, .staff-content) :is(
+  .movie-field, .movie-filter-field, .room-form-field, .room-filter-field, .employee-field, .employee-filter-field,
+  .member-field, .member-filter-field, .member-date-field, .promotion-filter-field, .form-group
+) > :is(span, label):first-child,
+#pl-main :is(.admin-content, .staff-content) .statistics-page :is(.statistics-filter-fields, .statistics-pagination) > label,
+#pl-main :is(.admin-content, .staff-content) :is(.field-title, .ast-fieldset legend) {
+  color: var(--ui-faint);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.field-error, .employee-field-error, .member-field-error) {
+  color: var(--ui-red-text);
+  font-size: 11.5px;
+}
+
+/* ---------- Nút (giống .bm-reprint-all / .bm-chip / .cs-dialog-btn) ---------- */
+
+#pl-main :is(.admin-content, .staff-content) :is(.primary-button, .promotion-btn-primary, .statistics-primary) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 16px;
+  color: #fff;
+  background: var(--ui-red);
+  border: 0;
+  border-radius: 9px;
+  box-shadow: none;
+  font-family: var(--ui-font);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.primary-button, .promotion-btn-primary, .statistics-primary):hover:not(:disabled) {
+  color: #fff;
+  background: var(--ui-red-hover);
+  box-shadow: none;
+  transform: none;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.secondary-button, .promotion-btn-secondary, .statistics-secondary) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  color: var(--ui-text-soft);
+  background: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+  border-radius: 9px;
+  box-shadow: none;
+  font-family: var(--ui-font);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.secondary-button, .promotion-btn-secondary, .statistics-secondary):hover:not(:disabled) {
+  color: #fff;
+  background: var(--ui-surface-2);
+  border-color: var(--ui-red);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Nút xoá / nguy hiểm: viền đỏ nhạt như .bm-clear */
+#pl-main :is(.admin-content, .staff-content) :is(.danger-button, .movie-delete-button.secondary-button, .room-delete-button.secondary-button) {
+  color: var(--ui-red-text);
+  background: transparent;
+  border: 1px solid var(--ui-red-line);
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.danger-button, .movie-delete-button.secondary-button, .room-delete-button.secondary-button):hover:not(:disabled) {
+  color: #fff;
+  background: var(--ui-red-soft);
+  border-color: var(--ui-red);
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.primary-button, .secondary-button, .danger-button, .promotion-btn, .statistics-primary, .admin-action-button):disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Nút biểu tượng trong bảng */
+#pl-main :is(.admin-content, .staff-content) .admin-action-button {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  color: var(--ui-text-soft);
+  background: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+#pl-main :is(.admin-content, .staff-content) .admin-action-button:hover:not(:disabled) {
+  color: #fff;
+  background: var(--ui-surface-2);
+  border-color: var(--ui-red);
+  transform: none;
+}
+
+#pl-main :is(.admin-content, .staff-content) .admin-action-button.admin-action-danger {
+  color: var(--ui-red-text);
+}
+
+#pl-main :is(.admin-content, .staff-content) .admin-action-button.admin-action-danger:hover:not(:disabled) {
+  color: #fff;
+  background: var(--ui-red-soft);
+  border-color: var(--ui-red);
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.promotion-view-link, .movie-title-button) {
+  color: var(--ui-text);
+}
+
+#pl-main :is(.admin-content, .staff-content) .promotion-view-link:hover {
+  color: var(--ui-red-hover);
+}
+
+/* ---------- Bảng (giống .bm-table) ---------- */
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-admin-table, .room-table, .employee-table, .member-table, .promotion-table, .ast-table, .ticket-price-table),
+#pl-main :is(.admin-content, .staff-content) .statistics-table-scroll table {
+  border-collapse: collapse;
+  background: transparent;
+  font-size: 13px;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-admin-table, .room-table, .employee-table, .member-table, .promotion-table, .ast-table, .ticket-price-table) th,
+#pl-main :is(.admin-content, .staff-content) .statistics-table-scroll table th {
+  padding: 11px 14px;
+  color: var(--ui-faint);
+  background: var(--ui-table-head);
+  border-bottom: 1px solid var(--ui-border);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-admin-table, .room-table, .employee-table, .member-table, .promotion-table, .ast-table, .ticket-price-table) td,
+#pl-main :is(.admin-content, .staff-content) .statistics-table-scroll table td {
+  padding: 11px 14px;
+  color: var(--ui-text);
+  background: transparent;
+  border-bottom: 1px solid var(--ui-row-line);
+  font-size: 13px;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-admin-table, .room-table, .employee-table, .member-table, .promotion-table, .ast-table, .ticket-price-table) tbody tr,
+#pl-main :is(.admin-content, .staff-content) .statistics-table-scroll table tbody tr {
+  background: transparent;
+  transition: background-color 0.12s ease;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-admin-table, .room-table, .employee-table, .member-table, .promotion-table, .ast-table, .ticket-price-table) tbody tr:hover,
+#pl-main :is(.admin-content, .staff-content) .statistics-table-scroll table tbody tr:hover {
+  background: var(--ui-row-hover);
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-admin-table, .member-table, .employee-table) tbody tr.is-selected > td:first-child {
+  box-shadow: inset 3px 0 0 var(--ui-red);
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-admin-table, .room-table, .employee-table, .member-table, .promotion-table, .ast-table, .ticket-price-table) tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+#pl-main :is(.admin-content, .staff-content) .ticket-price-title {
+  padding: 11px 14px;
+  color: #fff;
+  background: var(--ui-table-head);
+  border-bottom: 1px solid var(--ui-border);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* ---------- Nhãn trạng thái (giống .bm-status) ---------- */
+
+#pl-main :is(.admin-content, .staff-content) :is(.status-badge, .promotion-status) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  min-height: 0;
+  padding: 3px 9px;
+  color: var(--ui-muted);
+  background: rgba(156, 165, 175, 0.12);
+  border: 0;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.4;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+#pl-main :is(.admin-content, .staff-content) .status-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+#pl-main :is(.admin-content, .staff-content) .promotion-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: none;
+}
+
+/* Đang hoạt động / đang chiếu */
+#pl-main :is(.admin-content, .staff-content) :is(.status-active, .status-showing, .status-now_showing, .room-status-active, .employee-status-active, .promotion-status.active) {
+  color: var(--ui-green);
+  background: var(--ui-green-soft);
+}
+
+/* Sắp tới / bảo trì / chờ */
+#pl-main :is(.admin-content, .staff-content) :is(.status-upcoming, .status-coming_soon, .status-pending, .status-pending_deletion, .room-status-maintenance, .promotion-status.upcoming) {
+  color: var(--ui-amber);
+  background: var(--ui-amber-soft);
+}
+
+/* Ngừng / khoá / hết hạn */
+#pl-main :is(.admin-content, .staff-content) :is(.status-inactive, .status-locked, .status-banned, .status-deleted, .room-status-inactive, .employee-status-inactive, .promotion-status.inactive, .promotion-status.expired) {
+  color: var(--ui-red-text);
+  background: rgba(229, 9, 20, 0.1);
+}
+
+/* Đã kết thúc / không rõ */
+#pl-main :is(.admin-content, .staff-content) :is(.status-ended, .status-unknown, .room-status-unknown, .employee-status-unknown) {
+  color: var(--ui-muted);
+  background: rgba(156, 165, 175, 0.12);
+}
+
+/* Chip thể loại / mã */
+#pl-main :is(.admin-content, .staff-content) .genre-list span,
+#pl-main :is(.admin-content, .staff-content) .promotion-code-tag {
+  padding: 2px 8px;
+  color: var(--ui-text-soft);
+  background: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+#pl-main :is(.admin-content, .staff-content) .promotion-code-tag {
+  font-family: var(--ui-font-mono);
+  letter-spacing: 0.3px;
+}
+
+/* ---------- Phân trang (giống .bm-pagination) ---------- */
+
+#pl-main :is(.admin-content, .staff-content) :is(.pagination, .promotion-pagination, .statistics-pagination) {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 0;
+  padding: 10px 14px;
+  color: var(--ui-muted);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  font-size: 12.5px;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.pagination, .promotion-pagination, .statistics-pagination) :is(b, strong) {
+  color: #fff;
+}
+
+#pl-main :is(.admin-content, .staff-content) .pagination-summary {
+  margin-right: auto;
+  color: var(--ui-muted);
+  font-size: 12.5px;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.pagination-button, .pagination-buttons button, .statistics-pagination button) {
+  width: auto;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0 12px;
+  color: #fff;
+  background: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  box-shadow: none;
+  font-family: var(--ui-font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.pagination-button, .pagination-buttons button, .statistics-pagination button):hover:not(:disabled) {
+  color: #fff;
+  background: var(--ui-surface-2);
+  border-color: var(--ui-red);
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.pagination-button.is-active, .pagination-buttons button.current, .pagination-buttons button.active) {
+  color: #fff;
+  background: var(--ui-red);
+  border-color: var(--ui-red);
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.pagination-button, .pagination-buttons button, .statistics-pagination button):disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+#pl-main :is(.admin-content, .staff-content) .pagination-ellipsis {
+  color: var(--ui-faint);
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.promotion-page-size, .statistics-pagination select) {
+  height: 32px;
+  min-height: 32px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+/* ---------- Thông báo lỗi / thành công (giống .cs-dialog-error) ---------- */
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-alert, .room-alert, .employee-alert, .member-alert, .error-alert, .promotion-form-error) {
+  padding: 9px 11px;
+  color: var(--ui-red-text);
+  background: rgba(229, 9, 20, 0.08);
+  border: 1px solid rgba(229, 9, 20, 0.3);
+  border-radius: var(--ui-radius-sm);
+  box-shadow: none;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.member-alert-success, .ast-success) {
+  color: var(--ui-green);
+  background: var(--ui-green-soft);
+  border: 1px solid rgba(34, 192, 122, 0.3);
+}
+
+/* ---------- Trạng thái trống / đang tải (giống .bm-state) ---------- */
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-empty-state, .room-empty-state, .member-empty-state, .employee-empty-state, .promotion-state, .statistics-state, .ticket-price-empty, .no-showtime, .seat-editor-empty) {
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-empty-state, .room-empty-state, .member-empty-state, .employee-empty-state, .promotion-state, .statistics-state) :is(h2, h3, strong) {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.promotion-state.error, .statistics-error) {
+  color: var(--ui-red-text);
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.movie-empty-icon, .member-empty-icon) {
+  color: var(--ui-muted);
+  background: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+}
+
+#pl-main :is(.admin-content, .staff-content) div:is(.movie-skeleton-row, .room-skeleton-row, .member-skeleton-row, .employee-skeleton-row) {
+  background: linear-gradient(100deg, #1b2025 30%, #262c33 50%, #1b2025 70%);
+  background-size: 300% 100%;
+  animation: ui-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes ui-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+/* ---------- Chọn ngày + suất chiếu (trang Lịch chiếu khi xem trong admin/staff) ---------- */
+
+#pl-main :is(.admin-content, .staff-content) .showtime-page :is(.date-item, .week-arrow, .calendar-button, .showtime-time) {
+  color: var(--ui-text-soft);
+  background: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+  border-radius: 9px;
+}
+
+#pl-main :is(.admin-content, .staff-content) .showtime-page :is(.date-item, .week-arrow:not(:disabled), .calendar-button, .showtime-time):hover {
+  color: #fff;
+  background: var(--ui-surface-2);
+  border-color: var(--ui-red);
+}
+
+#pl-main :is(.admin-content, .staff-content) .showtime-page .date-item.active {
+  color: #fff;
+  background: var(--ui-red);
+  border-color: var(--ui-red);
+}
+
+#pl-main :is(.admin-content, .staff-content) .showtime-page .showtime-header h1 {
+  text-transform: none;
+}
+
+/* ---------- Thông báo nổi ---------- */
+
+#pl-main :is(.admin-content, .staff-content) :is(.room-toast, .employee-toast, .promotion-toast) {
+  color: #fff;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-left: 3px solid var(--ui-green);
+  border-radius: var(--ui-radius-md);
+  box-shadow: var(--ui-shadow);
+  font-family: var(--ui-font);
+}
+
+/* ---------- Tab / phím chọn nhanh trong Thống kê (giống .bm-segment / .bm-chip) ---------- */
+
+#pl-main :is(.admin-content, .staff-content) .statistics-page :is(.statistics-tabs, .statistics-presets) button {
+  border-radius: 8px;
+  font-family: var(--ui-font);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+/* ---------- Focus bàn phím ---------- */
+
+#pl-main :is(.admin-content, .staff-content) :is(.app-shell, .promotion-page, .statistics-page, .ticket-price-page, .showtime-page) :is(button, a):focus-visible {
+  outline: 2px solid var(--ui-red-hover);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  #pl-main :is(.admin-content, .staff-content) :is(.movie-page-header, .room-page-header, .employee-page-header, .member-page-header, .promotion-page-header, .statistics-heading, .page-header) {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #pl-main :is(.admin-content, .staff-content) div:is(.movie-skeleton-row, .room-skeleton-row, .member-skeleton-row, .employee-skeleton-row) {
+    animation: none;
+  }
+}
+
+/* ---------- Tinh chỉnh sau khi soát bằng ảnh chụp ---------- */
+
+/* Nút "Trang chủ" trên header admin/staff: kiểu nút phụ như .bm-page. */
+.pl-header .shell-home-button {
+  height: 32px;
+  padding: 0 12px;
+  color: var(--ui-text);
+  background: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  font: 700 12.5px/1 var(--ui-font);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pl-header .shell-home-button:hover {
+  border-color: var(--ui-red-line);
+  background: var(--ui-red-soft);
+}
+
+/* MemberList tự vẽ "●" trong badge; ::before đã có chấm nên ẩn ký tự thừa. */
+#pl-main :is(.admin-content, .staff-content) .status-badge > span[aria-hidden="true"] {
+  display: none;
+}
+
+/* Avatar chữ tắt nhân viên bị rule cũ ép display:block nên chữ lệch/cắt. */
+#pl-main :is(.admin-content, .staff-content) .employee-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+#pl-main :is(.admin-content, .staff-content) .employee-avatar-fallback {
+  color: #ff8a90;
+  background: var(--ui-red-soft);
+  border-color: var(--ui-red-line);
+}
+
+/* Ô tìm kiếm nhân viên: viền nằm ở khung ngoài, input bên trong không viền. */
+#pl-main :is(.admin-content, .staff-content) .employee-search-control input {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+}
+
+/* Bảng phim: gộp còn 6 cột (poster + tên, thể loại, thông tin, trạng thái, thao tác)
+   để vừa khung khi panel chi tiết đang mở, không phải cuộn ngang. */
+#pl-main .admin-content .movie-admin-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+#pl-main .admin-content .movie-admin-table .movie-col-index { width: 44px; }
+#pl-main .admin-content .movie-admin-table .movie-col-genres { width: 22%; }
+#pl-main .admin-content .movie-admin-table .movie-col-info { width: 19%; }
+#pl-main .admin-content .movie-admin-table .movie-col-status { width: 150px; }
+#pl-main .admin-content .movie-admin-table .action-column { width: 160px; }
+
+#pl-main .admin-content .movie-admin-table .movie-title-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+#pl-main .admin-content .movie-admin-table .movie-title-cell .movie-poster-thumb {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 56px;
+}
+
+#pl-main .admin-content .movie-admin-table .movie-title-button {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+#pl-main .admin-content .movie-admin-table .movie-title-button :is(strong, span) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#pl-main .admin-content .movie-admin-table .movie-title-button strong {
+  color: var(--ui-text);
+  font-size: 13.5px;
+  font-weight: 800;
+}
+
+#pl-main .admin-content .movie-admin-table .movie-title-button span {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+#pl-main .admin-content .movie-admin-table .movie-genre-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+#pl-main .admin-content .movie-info-cell {
+  display: grid;
+  gap: 3px;
+}
+
+#pl-main .admin-content .movie-info-cell span {
+  color: var(--ui-text);
+  font-weight: 700;
+}
+
+#pl-main .admin-content .movie-info-cell small {
+  color: var(--ui-muted);
+  font-size: 11.5px;
+}
+
+#pl-main .admin-content .movie-admin-table .action-column.admin-row-actions {
+  white-space: nowrap;
+}
+
+/* Nút icon trong bảng: padding ngang 16px làm icon (svg) co về 0px trong nút 34px. */
+#pl-main :is(.admin-content, .staff-content) :is(.admin-action-button, .room-icon-action) {
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#pl-main :is(.admin-content, .staff-content) :is(.admin-action-button, .room-icon-action) svg {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+}
+
+/* Nút bị vô hiệu vẫn phải đọc được (vd. "Đặt lại" khi chưa lọc). */
+#pl-main :is(.admin-content, .staff-content) button:disabled {
+  color: var(--ui-faint);
+  opacity: 0.75;
+}
+
+/* Trang phim: chi tiết phim mở dạng ngăn kéo (giống .bm-drawer) thay vì panel cố định 360px,
+   để bảng dùng toàn bộ chiều ngang. */
+#pl-main .admin-content .movie-content-layout {
+  display: block;
+}
+
+#pl-main .admin-content .movie-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(3, 4, 6, 0.6);
+}
+
+#pl-main .admin-content .movie-preview-panel.movie-drawer {
+  position: static;
+  top: auto;
+  width: min(460px, 100%);
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  overflow-y: auto;
+  background: var(--ui-surface);
+  border: 0;
+  border-left: 1px solid var(--ui-border);
+  border-radius: 0;
+  box-shadow: -20px 0 50px rgba(0, 0, 0, 0.5);
+  animation: movie-drawer-in 0.18s ease-out;
+}
+
+@keyframes movie-drawer-in {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+#pl-main .admin-content .movie-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -4px 0 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+#pl-main .admin-content .movie-drawer-head span {
+  color: var(--ui-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#pl-main .admin-content .movie-drawer-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: var(--ui-muted);
+  background: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+#pl-main .admin-content .movie-drawer-close:hover {
+  color: #fff;
+  border-color: var(--ui-red);
+}
+
+#pl-main .admin-content .movie-admin-table tbody tr {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #pl-main .admin-content .movie-preview-panel.movie-drawer {
+    animation: none;
+  }
+}
+
+/* Form phòng chiếu: nút Hủy/Lưu từng bị ghim absolute ở góc trên, đè lên khung sơ đồ ghế.
+   Đưa về thanh hành động cuối form, căn phải. */
+#pl-main .admin-content .room-action-bar.designer-actions {
+  position: static;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 0;
+}

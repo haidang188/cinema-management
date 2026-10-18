@@ -15,7 +15,9 @@ import type {
   StatisticsReport,
 } from "../../../service/statistics/statisticsService"
 
+import { formatVnd } from "../../../utils/format"
 import "./statistics.css"
+import { clearStoredUser } from "../../../hooks/useAuth"
 
 const labels: Record<ReportType, string> = {
   movies: "Phim",
@@ -32,12 +34,7 @@ const channels = {
 const number = (value: number) =>
   new Intl.NumberFormat("vi-VN").format(value)
 
-const money = (value: number) =>
-  new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  }).format(value)
+const money = (value: number) => formatVnd(value)
 
 function todayInVietnam() {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -408,7 +405,7 @@ export default function StatisticsPage() {
             <button
               type="button"
               onClick={() => {
-                localStorage.removeItem("cinema.currentUser")
+                clearStoredUser()
                 window.location.assign("/login")
               }}
             >

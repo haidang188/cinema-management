@@ -116,7 +116,7 @@
 
 .admin-content .movie-admin-page .primary-button {
   align-items: center;
-  background: var(--accent, #f3123f);
+  background: var(--accent, #e50914);
   border: 0;
   border-radius: 10px;
   color: #ffffff;
@@ -130,7 +130,7 @@
 }
 
 .admin-content .movie-admin-page .primary-button:hover:not(:disabled) {
-  background: var(--accent-hover, #d90f37);
+  background: var(--accent-hover, #ff1f2b);
   transform: translateY(-1px);
 }
 
@@ -456,8 +456,8 @@
 }
 
 .admin-content .movie-pagination .pagination-button.is-active {
-  background: var(--accent, #f3123f);
-  border-color: var(--accent, #f3123f);
+  background: var(--accent, #e50914);
+  border-color: var(--accent, #e50914);
   color: #ffffff;
 }
 
@@ -549,8 +549,8 @@
 }
 
 .admin-content .movie-genre-options .checkbox-pill:has(input:checked) {
-  background: rgba(243, 18, 63, 0.14);
-  border-color: rgba(243, 18, 63, 0.55);
+  background: rgba(229, 9, 20, 0.14);
+  border-color: rgba(229, 9, 20, 0.55);
   color: #ff8ea2;
 }
 

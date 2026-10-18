@@ -67,12 +67,11 @@ public class AuthServiceImpl implements AuthService {
         validateRegisterRequest(request);
 
         String email = normalizeEmail(request.getEmail());
-        String accountType = normalizeRole(request.getAccountType());
+        // Web chỉ cho khách hàng tự đăng ký. Tài khoản nhân viên do quản trị tạo trong hệ thống/database,
+        // nên bỏ qua accountType client gửi lên để không ai tự cấp quyền nhân viên.
+        String accountType = ROLE_MEMBER;
         Role role = roleRepository.findByName(accountType)
-                .orElseThrow(() -> new AuthValidationException(
-                        "Thông tin đăng ký không hợp lệ",
-                        Map.of("accountType", "Loại tài khoản không tồn tại")
-                ));
+                .orElseThrow(() -> new IllegalStateException("Thiếu role " + ROLE_MEMBER + " trong database"));
 
         User user = new User();
         user.setUsername(email);
@@ -81,30 +80,17 @@ public class AuthServiceImpl implements AuthService {
         User savedUser = userRepository.save(user);
 
         LocalDateTime now = LocalDateTime.now();
-        if (ROLE_EMPLOYEE.equals(accountType)) {
-            Employee employee = new Employee();
-            employee.setUser(savedUser);
-            employee.setEmployeeCode(generateEmployeeCode());
-            employee.setFullName(request.getFullName().trim());
-            employee.setEmail(email);
-            employee.setPhone(request.getPhone().trim());
-            employee.setStatus("ACTIVE");
-            employee.setCreatedAt(now);
-            employee.setUpdatedAt(now);
-            employeeRepository.save(employee);
-        } else {
-            Member member = new Member();
-            member.setUser(savedUser);
-            member.setFullName(request.getFullName().trim());
-            member.setEmail(email);
-            member.setPhone(request.getPhone().trim());
-            member.setPointBalance(0);
-            member.setMembershipLevel("BASIC");
-            member.setStatus("ACTIVE");
-            member.setCreatedAt(now);
-            member.setUpdatedAt(now);
-            memberRepository.save(member);
-        }
+        Member member = new Member();
+        member.setUser(savedUser);
+        member.setFullName(request.getFullName().trim());
+        member.setEmail(email);
+        member.setPhone(request.getPhone().trim());
+        member.setPointBalance(0);
+        member.setMembershipLevel("BASIC");
+        member.setStatus("ACTIVE");
+        member.setCreatedAt(now);
+        member.setUpdatedAt(now);
+        memberRepository.save(member);
 
         return buildResponse(savedUser, accountType, "Đăng ký tài khoản thành công");
     }
@@ -192,13 +178,6 @@ public class AuthServiceImpl implements AuthService {
                 .orElse(new AuthResponse(user.getId(), null, null, user.getUsername(), null, role, message));
     }
 
-    private String normalizeRole(String accountType) {
-        if (ROLE_EMPLOYEE.equalsIgnoreCase(nullToEmpty(accountType))) {
-            return ROLE_EMPLOYEE;
-        }
-        return ROLE_MEMBER;
-    }
-
     private String normalizeEmail(String email) {
         return nullToEmpty(email).trim().toLowerCase(Locale.ROOT);
     }
@@ -211,7 +190,4 @@ public class AuthServiceImpl implements AuthService {
         return value == null || value.trim().isEmpty();
     }
 
-    private String generateEmployeeCode() {
-        return "EMP" + System.currentTimeMillis();
-    }
 }

@@ -24,7 +24,7 @@ function LoginForm({ message, fieldErrors, isLoading, onSubmit, onRegisterClick 
     <form className="auth-card auth-card--login" onSubmit={handleSubmit} noValidate>
       <div className="auth-card__brand">
         <strong>PREMIERE</strong>
-        <span>Cinemas Management</span>
+        <span>Premiere Cinemas</span>
       </div>
 
       <div className="auth-card__heading">

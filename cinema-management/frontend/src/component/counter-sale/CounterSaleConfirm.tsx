@@ -39,9 +39,6 @@ import "./CounterSaleConfirm.css";
  * để không đụng CSS của trang khác (CSS trong Vite là global).
  */
 
-// TODO: lấy từ thông tin đăng nhập của nhân viên (context / token).
-const EMPLOYEE_ID = 1;
-
 
 type PaymentMethod = "CASH" | "TRANSFER";
 
@@ -643,7 +640,7 @@ function CounterSaleConfirm() {
                     : {}),
             };
 
-            const response = await sellTickets(request, EMPLOYEE_ID);
+            const response = await sellTickets(request);
 
             soldRef.current = true;
             // Đơn đã bán xong: tab bắt đầu đơn mới cho khách tiếp theo.

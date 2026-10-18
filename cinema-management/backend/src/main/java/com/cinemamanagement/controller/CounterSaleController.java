@@ -5,6 +5,8 @@ import com.cinemamanagement.request.CounterSaleRequest;
 import com.cinemamanagement.response.CounterSalePreviewResponse;
 import com.cinemamanagement.response.CounterSaleResponse;
 import com.cinemamanagement.service.CounterSaleService;
+import com.cinemamanagement.util.SessionEmployeeResolver;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +16,14 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CounterSaleController {
     private final CounterSaleService counterSaleService;
+    private final SessionEmployeeResolver sessionEmployeeResolver;
 
     @PostMapping
     public ResponseEntity<CounterSaleResponse> sellTickets(
             @RequestBody CounterSaleRequest request,
-            @RequestParam Long employeeId
+            HttpServletRequest httpRequest
     ) {
-
+        Long employeeId = sessionEmployeeResolver.requireEmployeeId(httpRequest);
         CounterSaleResponse response = counterSaleService.sellTickets(request, employeeId);
 
         return ResponseEntity.ok(response);

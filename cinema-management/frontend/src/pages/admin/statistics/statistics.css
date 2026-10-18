@@ -8,12 +8,12 @@
     --stats-secondary: var(--ui-secondary, #c4c9d2);
     --stats-muted: var(--ui-muted, var(--theme-muted, #9ca4b2));
 
-    --stats-primary: var(--ui-primary, #e11d48);
-    --stats-primary-hover: var(--ui-primary-hover, #be123c);
+    --stats-primary: var(--ui-primary, #e50914);
+    --stats-primary-hover: var(--ui-primary-hover, #ff1f2b);
     --stats-primary-soft: var(--ui-primary-soft, #3b1c29);
-    --stats-primary-text: #fda4af;
-    --stats-chart: #fb7185;
-    --stats-control-line: #687386;
+    --stats-primary-text: var(--ui-red-text, #ff8a90);
+    --stats-chart: var(--ui-red, #e50914);
+    --stats-control-line: var(--ui-border, #2b3139);
     --stats-error: var(--ui-error, #fda4af);
 
     color-scheme: dark;
@@ -34,7 +34,7 @@ html[data-theme="light"] .statistics-page {
     --stats-secondary: var(--ui-secondary, #454e5c);
     --stats-primary-soft: var(--ui-primary-soft, #fce7ed);
     --stats-primary-text: #9f1239;
-    --stats-chart: #be123c;
+    --stats-chart: #ff1f2b;
     --stats-control-line: #8591a2;
     --stats-error: var(--ui-error, #9f1239);
 

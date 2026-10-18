@@ -14,7 +14,7 @@ import com.cinemamanagement.response.*;
 import com.cinemamanagement.service.OnlineBookingService;
 import com.cinemamanagement.service.TicketPricingService;
 import com.cinemamanagement.service.VnPayService;
-import com.cinemamanagement.websocket.SeatStatusPublisher;
+import com.cinemamanagement.service.SeatEventPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +27,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +47,7 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
     private final VnPayService vnPayService;
     private final VietQrProperties vietQrProperties;
     private final VnPayProperties vnPayProperties;
-    private final SeatStatusPublisher seatStatusPublisher;
+    private final SeatEventPublisher seatEventPublisher;
     private final com.cinemamanagement.service.LoyaltyPointService loyaltyPointService;
     private final com.cinemamanagement.service.PromotionApplyService promotionApplyService;
 
@@ -186,8 +188,17 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
                 boolean validAmount = isValidVnPayAmount(parameters.get("vnp_Amount"), payment.getAmount());
 
                 if (validSignature && accepted && validAmount) {
-                    confirmPayment(booking, payment, parameters.get("vnp_TransactionNo"));
-                    successful = BookingStatus.CONFIRMED.name().equals(booking.getStatus());
+                    try {
+                        confirmPayment(booking, payment, parameters.get("vnp_TransactionNo"));
+                        successful = BookingStatus.CONFIRMED.name().equals(booking.getStatus());
+                    } catch (ConflictException ex) {
+                        // VNPay đã trừ tiền nhưng đơn quá hạn/ghế không còn giữ: không phát vé,
+                        // lưu mã giao dịch để nhân viên đối soát hoàn tiền, và vẫn chuyển hướng về frontend
+                        // thay vì trả JSON 409 cho trình duyệt.
+                        expireBooking(booking);
+                        payment.setTransactionCode(parameters.get("vnp_TransactionNo"));
+                        paymentRepository.save(payment);
+                    }
                 } else if (PaymentStatus.PENDING.name().equals(payment.getStatus())) {
                     payment.setStatus(PaymentStatus.FAILED.name());
                     paymentRepository.save(payment);
@@ -320,15 +331,22 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
         List<ShowtimeSeat> seats = showtimeSeatRepository.findAllByIdsForUpdate(ids);
         validateLockedHoldSeats(holds, seats);
 
+        List<BookingSeat> bookingSeats = bookingSeatRepository.findByBookingId(booking.getId());
+        Set<Long> heldSeatIds = seats.stream().map(seat -> seat.getSeat().getId()).collect(Collectors.toSet());
+        Set<Long> bookedSeatIds = bookingSeats.stream().map(bs -> bs.getSeat().getId()).collect(Collectors.toSet());
+        if (!heldSeatIds.equals(bookedSeatIds)) {
+            throw new ConflictException("Ghế đang giữ không khớp với ghế của đơn đặt vé");
+        }
+
         for (ShowtimeSeat seat : seats) {
             seat.setStatus(ShowtimeSeatStatus.SOLD.name());
             seat.setHeldUntil(null);
+            seat.setHoldOwner(null);
         }
         for (SeatHold hold : holds) {
             hold.setStatus(SeatHoldStatus.CONVERTED.name());
         }
 
-        List<BookingSeat> bookingSeats = bookingSeatRepository.findByBookingId(booking.getId());
         for (BookingSeat bookingSeat : bookingSeats) {
             bookingSeat.setStatus("ACTIVE");
             if (ticketRepository.findByBookingSeatId(bookingSeat.getId()).isEmpty()) {
@@ -354,7 +372,7 @@ public class OnlineBookingServiceImpl implements OnlineBookingService {
         bookingRepository.save(booking);
         paymentRepository.save(payment);
         loyaltyPointService.awardForPaidBooking(booking);
-        seatStatusPublisher.publishSold(booking.getShowtime().getId(), ids);
+        seatEventPublisher.publishAfterCommit(booking.getShowtime().getId(), seats);
     }
 
     private void expireBooking(Booking booking) {

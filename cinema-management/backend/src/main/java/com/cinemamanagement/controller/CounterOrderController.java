@@ -4,6 +4,8 @@ import com.cinemamanagement.request.CreateCounterOrderRequest;
 import com.cinemamanagement.request.ParkCounterOrderRequest;
 import com.cinemamanagement.response.CounterOrderResponse;
 import com.cinemamanagement.service.CounterOrderService;
+import com.cinemamanagement.util.SessionEmployeeResolver;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,14 +27,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CounterOrderController {
 
-    // TODO: lấy từ thông tin đăng nhập của nhân viên, giống EMPLOYEE_ID ở frontend.
-    private static final Long EMPLOYEE_ID = 1L;
-
     private final CounterOrderService counterOrderService;
+    private final SessionEmployeeResolver sessionEmployeeResolver;
 
     @PostMapping
-    public ResponseEntity<CounterOrderResponse> create(@RequestBody CreateCounterOrderRequest request) {
-        return ResponseEntity.ok(counterOrderService.create(request.showtimeId(), EMPLOYEE_ID));
+    public ResponseEntity<CounterOrderResponse> create(
+            @RequestBody CreateCounterOrderRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        Long employeeId = sessionEmployeeResolver.requireEmployeeId(httpRequest);
+        return ResponseEntity.ok(counterOrderService.create(request.showtimeId(), employeeId));
     }
 
     @GetMapping("/parked")

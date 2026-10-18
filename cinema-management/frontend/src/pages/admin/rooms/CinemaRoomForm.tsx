@@ -1,5 +1,7 @@
-import { Fragment, useMemo, useState, type FormEvent, type PointerEvent } from "react"
+import { useMemo, useState, type FormEvent, type PointerEvent } from "react"
 import AppModal from "../../../component/common/AppModal"
+import "../../../component/counter-sale/CounterSaleSeats.css"
+import "../../../component/room/RoomSeatDesigner.css"
 import type { CinemaRoom, CinemaRoomPayload, CinemaRoomSeatPayload, Seat } from "../../../types/admin"
 
 type SeatTool = "NORMAL" | "VIP" | "INACTIVE" | "DELETE"
@@ -40,6 +42,18 @@ const TOOLS: Array<{ value: SeatTool; label: string }> = [
   { value: "INACTIVE", label: "Ghế ngừng hoạt động" },
   { value: "DELETE", label: "Khoảng trống" },
 ]
+const TOOL_LABELS: Record<SeatTool, string> = {
+  NORMAL: "Ghế thường",
+  VIP: "Ghế VIP",
+  INACTIVE: "Ghế ngừng hoạt động",
+  DELETE: "Khoảng trống",
+}
+const TOOL_ICON_CLASS: Record<SeatTool, string> = {
+  NORMAL: "is-available",
+  VIP: "is-vip",
+  INACTIVE: "rsd-legend-inactive",
+  DELETE: "rsd-legend-empty",
+}
 const MAX_ROWS = 20
 const MAX_COLUMNS = 30
 const DEFAULT_ROWS = 6
@@ -196,6 +210,12 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
     )
   }
 
+  function paintRow(rowIndex: number, tool: SeatTool) {
+    setGrid((current) =>
+      current.map((row, currentRowIndex) => (currentRowIndex === rowIndex ? row.map((cell) => applyTool(cell, tool)) : row)),
+    )
+  }
+
   function handlePointerDown(event: PointerEvent<HTMLButtonElement>, rowIndex: number, columnIndex: number) {
     event.preventDefault()
     event.currentTarget.setPointerCapture(event.pointerId)
@@ -333,22 +353,6 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
           </section>
 
           <section className="room-designer-panel">
-            <div className="seat-tool-bar designer-tools" role="toolbar" aria-label="Công cụ ghế">
-              {TOOLS.map((tool) => (
-                <button
-                  key={tool.value}
-                  type="button"
-                  className={`seat-tool-button${selectedTool === tool.value ? " is-active" : ""}`}
-                  aria-pressed={selectedTool === tool.value}
-                  onClick={() => setSelectedTool(tool.value)}
-                >
-                  {tool.label}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="room-designer-panel">
             <h2>Thao tác nhanh</h2>
             <div className="seat-quick-actions">
               <button type="button" className="secondary-button" onClick={fillAllSeats}>
@@ -369,97 +373,127 @@ function CinemaRoomForm({ mode, initialRoom, saving, onCancel, onSubmit }: Cinem
           </section>
         </aside>
 
-        <section className="seat-designer-stage">
-          <div className="seat-stage-header">
-            <div>
-              <p>Nhấn và kéo chuột để thêm hoặc xóa ghế.</p>
+        <section className="cs-seats-page room-seat-designer" aria-label="Thiết kế sơ đồ ghế">
+          <div className="cs-seatmap-card">
+            <div className="cs-seatmap-toolbar">
+              <div>
+                <h2>Sơ đồ ghế</h2>
+                <p>Chọn công cụ rồi bấm (hoặc kéo) lên ô để thêm, đổi loại hay xóa ghế. Bấm nhãn hàng để áp dụng cho cả hàng.</p>
+              </div>
+
+              <ul className="cs-legend" aria-label="Chú thích">
+                <li>
+                  <i className="cs-legend-seat is-available" />
+                  Ghế thường
+                </li>
+                <li>
+                  <i className="cs-legend-seat is-vip" />
+                  Ghế VIP
+                </li>
+                <li>
+                  <i className="cs-legend-seat rsd-legend-inactive" />
+                  Ngừng hoạt động
+                </li>
+                <li>
+                  <i className="cs-legend-seat rsd-legend-empty" />
+                  Ô trống
+                </li>
+              </ul>
             </div>
-            <strong>Tổng số ghế: {stats.total}</strong>
-          </div>
 
-          <div className="seat-grid-legend" aria-label="Chú thích">
-            <span>
-              <i className="legend-normal" aria-hidden="true" />
-              Ghế thường
-            </span>
-            <span>
-              <i className="legend-vip" aria-hidden="true" />
-              Ghế VIP
-            </span>
-            <span>
-              <i className="legend-inactive" aria-hidden="true" />
-              Ghế ngừng hoạt động
-            </span>
-            <span>
-              <i className="legend-empty" aria-hidden="true" />
-              Khoảng trống
-            </span>
-          </div>
+            <div className="rsd-tools" role="toolbar" aria-label="Công cụ ghế">
+              {TOOLS.map((tool) => (
+                <button
+                  key={tool.value}
+                  type="button"
+                  className={`rsd-tool${selectedTool === tool.value ? " is-active" : ""}`}
+                  aria-pressed={selectedTool === tool.value}
+                  onClick={() => setSelectedTool(tool.value)}
+                >
+                  <i className={`cs-legend-seat ${TOOL_ICON_CLASS[tool.value]}`} aria-hidden="true" />
+                  {tool.label}
+                </button>
+              ))}
+            </div>
 
-          <div className="seat-screen">
-            <span>MÀN HÌNH</span>
-          </div>
-
-          <div className="seat-grid-scroll">
-            <div
-              className="seat-grid-table designer-grid-table"
-              style={{ gridTemplateColumns: `40px repeat(${columnCount}, 54px)` }}
-              onPointerLeave={stopPainting}
-              onPointerUp={stopPainting}
-            >
-              <div className="seat-grid-corner" aria-hidden="true" />
-              {Array.from({ length: columnCount }, (_, columnIndex) => (
-                <div key={`column-${columnIndex}`} className="seat-grid-column-label">
-                  {columnIndex + 1}
+            <div className="cs-seatmap-scroll">
+              <div className="cs-seatmap">
+                <div className="cs-screen" aria-hidden="true">
+                  <span>Màn hình</span>
                 </div>
-              ))}
-              {grid.map((row, rowIndex) => (
-                <Fragment key={`row-${rowIndex}`}>
-                  <div className="seat-grid-row-label">{getRowLabel(rowIndex)}</div>
-                  {row.map((cell, columnIndex) => (
-                    <button
-                      key={`${rowIndex}-${columnIndex}`}
-                      type="button"
-                      className={[
-                        "seat-grid-cell",
-                        "designer-seat-cell",
-                        cell.active ? "is-seat" : "is-empty",
-                        cell.seatType === "VIP" ? "is-vip" : "",
-                        cell.status === "INACTIVE" ? "is-inactive" : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                      aria-label={`${getRowLabel(rowIndex)} cột ${columnIndex + 1}${cell.active ? ", có ghế" : ", khoảng trống"}`}
-                      onPointerDown={(event) => handlePointerDown(event, rowIndex, columnIndex)}
-                      onPointerEnter={() => handlePointerEnter(rowIndex, columnIndex)}
-                      onPointerUp={stopPainting}
-                    >
-                      {cell.active && <span className="seat-cell-icon" aria-hidden="true" />}
-                    </button>
-                  ))}
-                </Fragment>
-              ))}
+
+                <div className="cs-rows" onPointerLeave={stopPainting} onPointerUp={stopPainting}>
+                  {grid.map((row, rowIndex) => {
+                    const rowLabel = getRowLabel(rowIndex)
+                    let seatNumber = 0
+                    return (
+                      <div className="cs-row" key={`row-${rowIndex}`}>
+                        <button
+                          type="button"
+                          className="cs-row-label cs-row-toggle"
+                          onClick={() => paintRow(rowIndex, selectedTool)}
+                          title={`Áp dụng "${TOOL_LABELS[selectedTool]}" cho cả hàng ${rowLabel}`}
+                        >
+                          {rowLabel}
+                        </button>
+
+                        <div className="cs-row-seats">
+                          {row.map((cell, columnIndex) => {
+                            if (cell.active) seatNumber += 1
+                            return (
+                              <button
+                                key={`${rowIndex}-${columnIndex}`}
+                                type="button"
+                                className={[
+                                  "cs-seat",
+                                  cell.active ? "is-available" : "rsd-empty",
+                                  cell.active && cell.seatType === "VIP" ? "is-vip" : "",
+                                  cell.active && cell.status === "INACTIVE" ? "rsd-inactive" : "",
+                                ]
+                                  .filter(Boolean)
+                                  .join(" ")}
+                                title={
+                                  cell.active
+                                    ? `${rowLabel}${seatNumber} - ${cell.seatType === "VIP" ? "Ghế VIP" : "Ghế thường"}${cell.status === "INACTIVE" ? " - Ngừng hoạt động" : ""}`
+                                    : `${rowLabel} cột ${columnIndex + 1} - Ô trống`
+                                }
+                                aria-label={`${rowLabel} cột ${columnIndex + 1}${cell.active ? ", có ghế" : ", khoảng trống"}`}
+                                onPointerDown={(event) => handlePointerDown(event, rowIndex, columnIndex)}
+                                onPointerEnter={() => handlePointerEnter(rowIndex, columnIndex)}
+                                onPointerUp={stopPainting}
+                              >
+                                {cell.active ? seatNumber : ""}
+                              </button>
+                            )
+                          })}
+                        </div>
+
+                        <span className="cs-row-label">{rowLabel}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="rsd-stats" aria-label="Thống kê ghế">
+              <span className="rsd-stat is-strong">
+                Tổng số ghế <b>{stats.total}</b>
+              </span>
+              <span className="rsd-stat">
+                Thường <b>{stats.normal}</b>
+              </span>
+              <span className="rsd-stat is-vip">
+                VIP <b>{stats.vip}</b>
+              </span>
+              <span className="rsd-stat">
+                Ngừng hoạt động <b>{stats.inactive}</b>
+              </span>
+              <span className="rsd-stat">
+                Kích thước <b>{rowCount} × {columnCount}</b>
+              </span>
             </div>
           </div>
-
-          <section className="seat-stat-grid" aria-label="Thống kê ghế">
-            <div>
-              <strong>{stats.total}</strong>
-              <span>Tổng số ghế</span>
-            </div>
-            <div>
-              <strong>{stats.normal}</strong>
-              <span>Ghế thường</span>
-            </div>
-            <div>
-              <strong>{stats.vip}</strong>
-              <span>Ghế VIP</span>
-            </div>
-            <div>
-              <strong>{stats.inactive}</strong>
-              <span>Ghế ngừng hoạt động</span>
-            </div>
-          </section>
         </section>
       </section>
 

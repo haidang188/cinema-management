@@ -1,6 +1,8 @@
 import type { ShowtimeSeat } from "../../types/showtimeSeat/showtimeSeat";
 
-const URL = import.meta.env.VITE_API_URL;
+import { API_BASE_URL } from "../apiBase";
+
+const URL = API_BASE_URL;
 
 export async function getShowtimeSeats(
     showtimeId: number

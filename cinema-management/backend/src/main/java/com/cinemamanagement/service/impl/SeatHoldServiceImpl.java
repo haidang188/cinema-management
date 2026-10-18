@@ -11,6 +11,7 @@ import com.cinemamanagement.exception.BadRequestException;
 import com.cinemamanagement.exception.ConflictException;
 import com.cinemamanagement.exception.ResourceNotFoundException;
 import com.cinemamanagement.exception.SeatConflictException;
+import com.cinemamanagement.repository.BookingRepository;
 import com.cinemamanagement.repository.CounterOrderRepository;
 import com.cinemamanagement.repository.SeatHoldRepository;
 import com.cinemamanagement.repository.ShowtimeRepository;
@@ -26,7 +27,6 @@ import com.cinemamanagement.service.HoldPolicyService;
 import com.cinemamanagement.service.SeatEventPublisher;
 import com.cinemamanagement.service.SeatHoldService;
 import com.cinemamanagement.util.HoldTokens;
-import com.cinemamanagement.websocket.SeatStatusPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -65,9 +65,9 @@ public class SeatHoldServiceImpl implements SeatHoldService {
     private final UserRepository userRepository;
     private final MemberRepository memberRepository;
     private final CounterOrderRepository counterOrderRepository;
+    private final BookingRepository bookingRepository;
     private final BookingProperties bookingProperties;
     private final HoldPolicyService holdPolicyService;
-    private final SeatStatusPublisher seatStatusPublisher;
     private final SeatEventPublisher seatEventPublisher;
 
     /* API giữ ghế của luồng đặt vé online hiện có. */
@@ -79,8 +79,11 @@ public class SeatHoldServiceImpl implements SeatHoldService {
         User user = getMemberUser(request.getUserId());
         Showtime showtime = getOpenShowtime(request.getShowtimeId(), now);
         List<Long> requestedIds = normalizeRequiredIds(request.getShowtimeSeatIds());
+        ensureWithinOnlineSeatLimit(requestedIds.size());
+        ensureNotBlockedForAbuse(user.getId(), now);
 
         releaseExpiredHoldOfUser(user.getId(), showtime.getId(), now);
+        releaseHoldsOnOtherShowtimes(user.getId(), showtime.getId());
         List<SeatHold> existing = seatHoldRepository
                 .findAllByUserIdAndShowtimeSeatShowtimeIdAndStatus(
                         user.getId(), showtime.getId(), SeatHoldStatus.ACTIVE.name());
@@ -128,6 +131,7 @@ public class SeatHoldServiceImpl implements SeatHoldService {
     @Override
     @Transactional
     public SeatHoldResponse updateHold(String token, UpdateSeatHoldRequest request) {
+        ensureHoldNotBooked(token);
         List<SeatHold> activeHolds = ownedActiveHolds(token, request.getUserId());
         SeatHold first = activeHolds.getFirst();
         LocalDateTime now = LocalDateTime.now();
@@ -141,6 +145,7 @@ public class SeatHoldServiceImpl implements SeatHoldService {
 
         String owner = HoldTokens.owner(token);
         List<Long> desiredIds = normalizeIds(request.getShowtimeSeatIds(), false);
+        ensureWithinOnlineSeatLimit(desiredIds.size());
         validateNoSingleGap(showtimeId, desiredIds, owner, now);
         Map<Long, SeatHold> currentById = activeHolds.stream().collect(
                 Collectors.toMap(h -> h.getShowtimeSeat().getId(), Function.identity()));
@@ -228,8 +233,72 @@ public class SeatHoldServiceImpl implements SeatHoldService {
     @Override
     @Transactional
     public void releaseHold(String token, Long userId) {
+        ensureHoldNotBooked(token);
         releaseHoldRows(ownedActiveHolds(token, userId),
                 SeatHoldStatus.RELEASED);
+    }
+
+    private void ensureWithinOnlineSeatLimit(int seatCount) {
+        int max = bookingProperties.getOnlineMaxSeats();
+        if (seatCount > max) {
+            throw new BadRequestException("Mỗi lượt đặt vé online được chọn tối đa " + max
+                    + " ghế. Đặt nhóm đông hơn vui lòng liên hệ quầy vé.");
+        }
+    }
+
+    /*
+     * Chống chiếm ghế: thành viên liên tục giữ ghế (hoặc tạo đơn) rồi để hết hạn
+     * sẽ bị tạm chặn giữ ghế online. Lượt tự huỷ (RELEASED) và lượt đã thanh toán không bị tính.
+     */
+    private void ensureNotBlockedForAbuse(Long userId, LocalDateTime now) {
+        LocalDateTime since = now.minusMinutes(bookingProperties.getAbuseWindowMinutes());
+        List<SeatHold> expired = seatHoldRepository.findAllByUserIdAndStatusAndExpiresAtAfter(
+                userId, SeatHoldStatus.EXPIRED.name(), since);
+        long expiredLots = expired.stream().map(SeatHold::getHoldToken).distinct().count();
+        if (expiredLots < bookingProperties.getAbuseMaxExpiredHolds()) {
+            return;
+        }
+
+        LocalDateTime lastExpiry = expired.stream()
+                .map(SeatHold::getExpiresAt)
+                .max(Comparator.naturalOrder())
+                .orElse(now);
+        LocalDateTime blockedUntil = lastExpiry.plusMinutes(bookingProperties.getAbuseBlockMinutes());
+        if (now.isBefore(blockedUntil)) {
+            long minutesLeft = Math.max(1, Duration.between(now, blockedUntil).toMinutes() + 1);
+            throw new ConflictException("Bạn đã giữ ghế mà không thanh toán " + expiredLots
+                    + " lần gần đây. Vui lòng thử lại sau khoảng " + minutesLeft + " phút.");
+        }
+    }
+
+    /*
+     * Mỗi thành viên chỉ giữ ghế ở một suất tại một thời điểm. Lượt giữ ở suất khác chưa tạo đơn
+     * được tự nhả (người dùng đã rời trang); nếu đã tạo đơn chờ thanh toán thì yêu cầu xử lý đơn đó trước.
+     */
+    private void releaseHoldsOnOtherShowtimes(Long userId, Long showtimeId) {
+        Map<String, List<SeatHold>> byToken = seatHoldRepository
+                .findAllByUserIdAndStatus(userId, SeatHoldStatus.ACTIVE.name()).stream()
+                .filter(hold -> !hold.getShowtimeSeat().getShowtime().getId().equals(showtimeId))
+                .collect(Collectors.groupingBy(SeatHold::getHoldToken));
+
+        for (Map.Entry<String, List<SeatHold>> entry : byToken.entrySet()) {
+            if (bookingRepository.existsByHoldToken(entry.getKey())) {
+                throw new ConflictException("Bạn đang có một đơn chờ thanh toán. "
+                        + "Vui lòng thanh toán hoặc chờ đơn hết hạn trước khi đặt suất khác.");
+            }
+            releaseHoldRows(entry.getValue(), SeatHoldStatus.RELEASED);
+        }
+    }
+
+    /*
+     * Khi hold đã gắn với một đơn online, ghế của đơn (booking_seats) được chốt theo hold lúc tạo đơn.
+     * Đổi/huỷ hold sau thời điểm đó làm ghế SOLD lệch với ghế in trên vé, nên phải chặn lại;
+     * đơn chưa thanh toán sẽ tự huỷ và trả ghế qua BookingExpirationScheduler.
+     */
+    private void ensureHoldNotBooked(String token) {
+        if (bookingRepository.existsByHoldToken(token)) {
+            throw new ConflictException("Lượt giữ ghế đã được dùng để tạo đơn, không thể thay đổi");
+        }
     }
 
     /* API thời gian thực dùng cho màn bán vé tại quầy. */
@@ -627,8 +696,6 @@ public class SeatHoldServiceImpl implements SeatHoldService {
         List<Long> releasedIds = released.stream()
                 .map(ShowtimeSeat::getId).toList();
         if (!releasedIds.isEmpty()) {
-            seatStatusPublisher.publishReleased(
-                    showtimeId, releasedIds);
             seatEventPublisher.publishAfterCommit(
                     showtimeId, released);
         }
@@ -665,7 +732,6 @@ public class SeatHoldServiceImpl implements SeatHoldService {
             List<Long> ids,
             LocalDateTime expiresAt
     ) {
-        seatStatusPublisher.publishHeld(showtimeId, ids, expiresAt);
         seatEventPublisher.publishAfterCommit(showtimeId, seats);
     }
 
@@ -676,13 +742,6 @@ public class SeatHoldServiceImpl implements SeatHoldService {
             List<Long> added,
             LocalDateTime expiresAt
     ) {
-        if (!released.isEmpty()) {
-            seatStatusPublisher.publishReleased(showtimeId, released);
-        }
-        if (!added.isEmpty()) {
-            seatStatusPublisher.publishHeld(
-                    showtimeId, added, expiresAt);
-        }
         List<ShowtimeSeat> changed = new ArrayList<>();
         released.stream().map(byId::get).filter(Objects::nonNull)
                 .forEach(changed::add);

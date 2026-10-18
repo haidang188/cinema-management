@@ -9,8 +9,9 @@ import java.time.LocalDateTime;
  * CHÍNH SÁCH GIỮ GHẾ THEO KÊNH BÁN
  * ---------------------------------------------------------------
  *                    tối đa ghế      hạn giữ   gia hạn
- *   Online           10              10 phút   -
- *   Quầy - thường    20               5 phút   +2 phút x 2 lần
+ *   Online            8              10 phút   -   (cấu hình booking.* trong SeatHoldServiceImpl,
+ *                                                   kèm chặn giữ ghế khi để hết hạn nhiều lần)
+ *   Quầy - thường   20               5 phút   +2 phút x 2 lần
  *   Quầy - đơn đoàn  không giới hạn  15 phút   +2 phút x 2 lần
  *   Tạm gác đơn      -               15 phút   -
  *
@@ -19,10 +20,8 @@ import java.time.LocalDateTime;
  */
 public interface HoldPolicyService {
 
-    int ONLINE_MAX_SEATS = 10;
     int COUNTER_MAX_SEATS = 20;
 
-    Duration ONLINE_DURATION = Duration.ofMinutes(10);
     Duration COUNTER_DURATION = Duration.ofMinutes(5);
     Duration GROUP_DURATION = Duration.ofMinutes(15);
     Duration PARK_DURATION = Duration.ofMinutes(15);

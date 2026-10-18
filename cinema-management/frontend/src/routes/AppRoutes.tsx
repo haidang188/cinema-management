@@ -11,7 +11,7 @@ import BookingResultPage from "../pages/booking/BookingResultPage"
 import type { AuthMode } from "../types/auth"
 import { adminRoutes } from "./adminRoutes"
 import { promotionRoutes } from "./PromotionRoutes"
-import { AdminShell, CustomerShell } from "./RouteShells"
+import { AdminShell, CustomerShell, RoleShell, StaffShell, WorkspaceShell } from "./RouteShells"
 import { showtimeRoutes } from "./showtimeRoutes"
 import { ticketPriceRoutes } from "./ticketPriceRoutes"
 import { counterSaleRoutes } from "./counterSaleRoutes"
@@ -89,7 +89,7 @@ function AppRouteContent() {
 
       <Route
         path="/movies/:movieId"
-        element={<MovieDetailPage currentUser={currentUser} onLoginClick={goToLogin} />}
+        element={<MovieDetailPage currentUser={currentUser} onLoginClick={goToLogin} onLogout={logout} />}
       />
 
       <Route path="/login" element={renderAuthPage("login")} />
@@ -104,21 +104,17 @@ function AppRouteContent() {
       <Route path="/booking-history" element={renderMemberPage(currentUser && <BookingHistoryPage currentUser={currentUser} />)} />
       <Route path="/promotions" element={<CustomerShell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}><PromotionsPage /></CustomerShell>} />
 
-      {[...showtimeRoutes, ...ticketPriceRoutes].map((route) => {
-        const Shell = currentUser?.role === "ADMIN" ? AdminShell : CustomerShell
-
-        return (
-          <Route
-            key={route.path}
-            path={route.path}
-            element={
-              <Shell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
-                {route.element}
-              </Shell>
-            }
-          />
-        )
-      })}
+      {[...showtimeRoutes, ...ticketPriceRoutes].map((route) => (
+        <Route
+          key={route.path}
+          path={route.path}
+          element={
+            <RoleShell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
+              {route.element}
+            </RoleShell>
+          }
+        />
+      ))}
 
       {[...adminRoutes, ...promotionRoutes].map((route) => (
         <Route
@@ -132,11 +128,27 @@ function AppRouteContent() {
         />
       ))}
 
-      {[...counterSaleRoutes, ...bookingManagementRoutes, ...ticketPickupRoutes].map((route) => (
+      {[...counterSaleRoutes, ...ticketPickupRoutes].map((route) => (
         <Route
           key={route.path}
           path={route.path}
-          element={route.element}
+          element={
+            <StaffShell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
+              {route.element}
+            </StaffShell>
+          }
+        />
+      ))}
+
+      {bookingManagementRoutes.map((route) => (
+        <Route
+          key={route.path}
+          path={route.path}
+          element={
+            <WorkspaceShell currentUser={currentUser} onLogout={logout} onLoginClick={goToLogin}>
+              {route.element}
+            </WorkspaceShell>
+          }
         />
       ))}
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { Eye, Pencil, Trash2 } from "lucide-react"
+import { Eye, Pencil, Trash2, X } from "lucide-react"
 import AppModal from "../../../component/common/AppModal"
 import { deleteMovie, getMovies } from "../../../service/movie/movieService"
 import type { AdminMovie, Genre, NavigateHandler } from "../../../types/admin"
@@ -57,8 +57,8 @@ function formatReleaseDate(value?: string) {
 
 function getVisibleGenres(genres: Genre[] = []) {
   return {
-    shown: genres.slice(0, 3),
-    hiddenCount: Math.max(genres.length - 3, 0),
+    shown: genres.slice(0, 2),
+    hiddenCount: Math.max(genres.length - 2, 0),
   }
 }
 
@@ -82,9 +82,21 @@ function MovieList({ onNavigate }: MovieListProps) {
   const firstItemIndex = totalElements === 0 ? 0 : page * pageSize + 1
   const lastItemIndex = Math.min(page * pageSize + movies.length, totalElements)
   const selectedMovie = useMemo(
-    () => movies.find((movie) => movie.id === selectedMovieId) || movies[0] || null,
+    () => movies.find((movie) => movie.id === selectedMovieId) || null,
     [movies, selectedMovieId],
   )
+
+  // Drawer chi tiết: đóng bằng phím Esc, giống ngăn kéo ở trang Quản lý đặt vé.
+  useEffect(() => {
+    if (!selectedMovieId) return
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setSelectedMovieId(null)
+    }
+
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [selectedMovieId])
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -106,7 +118,7 @@ function MovieList({ onNavigate }: MovieListProps) {
           const nextMovies = data.content || []
           setMovies(nextMovies)
           setSelectedMovieId((current) =>
-            current && nextMovies.some((movie) => movie.id === current) ? current : nextMovies[0]?.id || null,
+            current && nextMovies.some((movie) => movie.id === current) ? current : null,
           )
           setTotalPages(data.totalPages || 0)
           setTotalElements(data.totalElements || 0)
@@ -138,7 +150,7 @@ function MovieList({ onNavigate }: MovieListProps) {
     const nextMovies = data.content || []
     setMovies(nextMovies)
     setSelectedMovieId((current) =>
-      current && nextMovies.some((movie) => movie.id === current) ? current : nextMovies[0]?.id || null,
+      current && nextMovies.some((movie) => movie.id === current) ? current : null,
     )
     setTotalPages(data.totalPages || 0)
     setTotalElements(data.totalElements || 0)
@@ -260,14 +272,11 @@ function MovieList({ onNavigate }: MovieListProps) {
               <table className="movie-table movie-admin-table">
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Poster</th>
-                    <th>Tên phim</th>
-                    <th>Thể loại</th>
-                    <th>Ngôn ngữ</th>
-                    <th>Thời lượng</th>
-                    <th>Ngày khởi chiếu</th>
-                    <th>Trạng thái</th>
+                    <th className="movie-col-index">#</th>
+                    <th className="movie-col-title">Phim</th>
+                    <th className="movie-col-genres">Thể loại</th>
+                    <th className="movie-col-info">Thông tin</th>
+                    <th className="movie-col-status">Trạng thái</th>
                     <th className="action-column">Thao tác</th>
                   </tr>
                 </thead>
@@ -281,13 +290,12 @@ function MovieList({ onNavigate }: MovieListProps) {
                         className={selectedMovie?.id === movie.id ? "is-selected" : undefined}
                         onClick={() => setSelectedMovieId(movie.id)}
                       >
-                        <td>{page * pageSize + index + 1}</td>
-                        <td>
+                        <td className="movie-col-index">{page * pageSize + index + 1}</td>
+                        <td className="movie-col-title">
+                          <div className="movie-title-cell">
                           <div className="poster-cell movie-poster-thumb">
                             {movie.posterUrl ? <img src={movie.posterUrl} alt={`Poster ${movie.title}`} /> : <span>Không có ảnh</span>}
                           </div>
-                        </td>
-                        <td>
                           <button
                             type="button"
                             className="movie-title-button"
@@ -298,10 +306,11 @@ function MovieList({ onNavigate }: MovieListProps) {
                             }}
                           >
                             <strong className="movie-title-text">{movie.title}</strong>
-                            <span>{movie.description || movie.director || "-"}</span>
+                            <span>{movie.director || "Chưa có đạo diễn"}</span>
                           </button>
+                          </div>
                         </td>
-                        <td>
+                        <td className="movie-col-genres">
                           <div className="genre-list movie-genre-list">
                             {shown.length > 0 ? (
                               <>
@@ -315,10 +324,13 @@ function MovieList({ onNavigate }: MovieListProps) {
                             )}
                           </div>
                         </td>
-                        <td>{movie.language || "-"}</td>
-                        <td>{movie.durationMinutes} phút</td>
-                        <td>{formatReleaseDate(movie.releaseDate)}</td>
-                        <td>
+                        <td className="movie-col-info">
+                          <div className="movie-info-cell">
+                            <span>{movie.language || "-"} · {movie.durationMinutes} phút</span>
+                            <small>Khởi chiếu {formatReleaseDate(movie.releaseDate)}</small>
+                          </div>
+                        </td>
+                        <td className="movie-col-status">
                           <span className={`status-badge status-${movie.status?.toLowerCase() || "unknown"}`}>
                             {STATUS_LABELS[movie.status || ""] || movie.status || "-"}
                           </span>
@@ -402,7 +414,19 @@ function MovieList({ onNavigate }: MovieListProps) {
           </div>
 
           {selectedMovie && (
-            <aside className="movie-preview-panel">
+            <div
+              className="movie-drawer-backdrop"
+              onMouseDown={(event) => {
+                if (event.target === event.currentTarget) setSelectedMovieId(null)
+              }}
+            >
+            <aside className="movie-preview-panel movie-drawer" role="dialog" aria-modal="true" aria-label="Chi tiết phim">
+              <header className="movie-drawer-head">
+                <span>Chi tiết phim</span>
+                <button type="button" className="movie-drawer-close" onClick={() => setSelectedMovieId(null)} aria-label="Đóng">
+                  <X size={18} aria-hidden="true" />
+                </button>
+              </header>
               <div className="movie-preview-header">
                 <div className="movie-preview-poster">
                   {selectedMovie.posterUrl ? (
@@ -473,6 +497,7 @@ function MovieList({ onNavigate }: MovieListProps) {
                 </button>
               </div>
             </aside>
+            </div>
           )}
         </section>
       )}

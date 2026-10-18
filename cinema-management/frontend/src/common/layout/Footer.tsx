@@ -21,7 +21,7 @@ function Footer({ links = DEFAULT_LINKS, version }: FooterProps) {
                 <b>
                     PREMIERE <em>CINEMAS</em>
                 </b>
-                <span>© {new Date().getFullYear()} Premiere Cinemas. All rights reserved.</span>
+                <span>© {new Date().getFullYear()} Premiere Cinemas. Bảo lưu mọi quyền.</span>
             </div>
 
             <nav className="pl-footer-nav" aria-label="Liên kết cuối trang">

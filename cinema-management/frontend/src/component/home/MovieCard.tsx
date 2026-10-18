@@ -35,7 +35,9 @@ function MovieCard({ movie }: MovieCardProps) {
           <a href={movie.trailerUrl} target="_blank" rel="noreferrer">
             Xem trailer
           </a>
-          <button type="button">Đặt vé ngay</button>
+          <button type="button" onClick={() => navigate(`/movies/${movie.id}#movie-showtimes`)}>
+            Đặt vé ngay
+          </button>
         </div>
       </div>
     </article>

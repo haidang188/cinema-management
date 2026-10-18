@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import type { AccountType, AuthFieldErrors, RegisterPayload } from '../../types/auth'
+import type { AuthFieldErrors, RegisterPayload } from '../../types/auth'
 import FormInput from './FormInput'
 
 interface RegisterFormProps {
@@ -12,7 +12,6 @@ interface RegisterFormProps {
 }
 
 function RegisterForm({ message, fieldErrors, isLoading, onSubmit, onLoginClick }: RegisterFormProps) {
-  const [accountType, setAccountType] = useState<AccountType>('MEMBER')
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -21,7 +20,8 @@ function RegisterForm({ message, fieldErrors, isLoading, onSubmit, onLoginClick 
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    void onSubmit({ fullName, email, phone, password, confirmPassword, accountType })
+    // Web chỉ đăng ký tài khoản khách hàng; tài khoản nhân viên do quản trị tạo.
+    void onSubmit({ fullName, email, phone, password, confirmPassword, accountType: 'MEMBER' })
   }
 
   return (
@@ -30,28 +30,6 @@ function RegisterForm({ message, fieldErrors, isLoading, onSubmit, onLoginClick 
         <h2>Đăng ký tài khoản</h2>
         <p>Vui lòng điền thông tin để tham gia hệ thống.</p>
       </div>
-
-      <div className="account-tabs" role="tablist" aria-label="Loại tài khoản">
-        <button
-          type="button"
-          className={accountType === 'MEMBER' ? 'is-active' : ''}
-          onClick={() => setAccountType('MEMBER')}
-        >
-          Khách hàng
-        </button>
-        <button
-          type="button"
-          className={accountType === 'EMPLOYEE' ? 'is-active' : ''}
-          onClick={() => setAccountType('EMPLOYEE')}
-        >
-          Nhân viên
-        </button>
-      </div>
-      {fieldErrors.accountType && (
-        <small className="auth-field-error" id="register-account-type-error">
-          {fieldErrors.accountType}
-        </small>
-      )}
 
       <FormInput
         id="register-name"

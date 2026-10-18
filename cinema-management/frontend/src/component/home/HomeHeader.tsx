@@ -45,6 +45,7 @@ function HomeHeader({ currentUser, onLoginClick, onLogout, searchValue = '', onS
             <div className="user-menu__dropdown" role="menu">
               {currentUser.role === 'MEMBER' && <Link role="menuitem" to="/account">Quản lý tài khoản</Link>}
               {currentUser.role === 'ADMIN' && <Link role="menuitem" to="/admin/movies">Quản lý phim</Link>}
+              {currentUser.role === 'EMPLOYEE' && <Link role="menuitem" to="/counter-sale">Quầy bán vé</Link>}
               {currentUser.role === 'MEMBER' && <Link role="menuitem" to="/booking-history">Lịch sử đặt vé</Link>}
               <button type="button" role="menuitem" onClick={onLogout}><LogOut size={16} /> Đăng xuất</button>
             </div>
