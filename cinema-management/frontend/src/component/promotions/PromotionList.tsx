@@ -165,6 +165,14 @@ export function PromotionList() {
       null
     )
 
+  // Ảnh khuyến mãi tải lỗi (file đã xoá / sai đường dẫn): hiện ô "Chưa có ảnh" thay vì ảnh vỡ.
+  const [
+    brokenImages,
+    setBrokenImages
+  ] = useState<Set<number>>(
+    () => new Set()
+  )
+
   const [
     keyword,
     setKeyword
@@ -400,6 +408,10 @@ export function PromotionList() {
           <h1>
             Quản lý khuyến mãi
           </h1>
+
+          <p>
+            Chương trình ưu đãi, mã giảm giá và thời gian áp dụng
+          </p>
         </div>
 
         <button
@@ -774,13 +786,26 @@ export function PromotionList() {
                               <td>
                                 <div className="promotion-main-cell">
                                   <div className="promotion-image-box promotion-image-box-wide">
-                                    {item.imageUrl ? (
+                                    {item.imageUrl &&
+                                    !brokenImages.has(
+                                      item.id
+                                    ) ? (
                                       <img
                                         src={toAssetUrl(
                                           item.imageUrl
                                         )}
                                         alt={
                                           item.title
+                                        }
+                                        onError={() =>
+                                          setBrokenImages(
+                                            prev =>
+                                              new Set(
+                                                prev
+                                              ).add(
+                                                item.id
+                                              )
+                                          )
                                         }
                                       />
                                     ) : (

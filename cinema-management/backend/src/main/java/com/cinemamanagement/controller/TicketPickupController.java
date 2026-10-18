@@ -3,6 +3,8 @@ package com.cinemamanagement.controller;
 import com.cinemamanagement.response.PickupBookingItemResponse;
 import com.cinemamanagement.response.PickupInfoResponse;
 import com.cinemamanagement.service.TicketPickupService;
+import com.cinemamanagement.util.SessionEmployeeResolver;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +16,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TicketPickupController {
 
-    private static final Long EMPLOYEE_ID = 1L;
-
     private final TicketPickupService ticketPickupService;
+    private final SessionEmployeeResolver sessionEmployeeResolver;
 
     @GetMapping("/search")
     public ResponseEntity<List<PickupBookingItemResponse>> search(@RequestParam String keyword) {
@@ -29,7 +30,8 @@ public class TicketPickupController {
     }
 
     @PostMapping("/{bookingId}/confirm")
-    public ResponseEntity<PickupInfoResponse> confirm(@PathVariable Long bookingId) {
-        return ResponseEntity.ok(ticketPickupService.confirm(bookingId, EMPLOYEE_ID));
+    public ResponseEntity<PickupInfoResponse> confirm(@PathVariable Long bookingId, HttpServletRequest request) {
+        Long employeeId = sessionEmployeeResolver.requireEmployeeId(request);
+        return ResponseEntity.ok(ticketPickupService.confirm(bookingId, employeeId));
     }
 }

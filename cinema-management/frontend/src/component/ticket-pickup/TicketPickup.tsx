@@ -11,6 +11,7 @@ import type { PickupBookingItem, PickupInfo } from "../../service/ticket-pickup/
 import { reprintTickets } from "../../service/bookingManagement/bookingManagementService";
 import { TicketPrintArea, seatKindLabel } from "../ticket-print/TicketPrint";
 import type { PrintableTicket } from "../ticket-print/TicketPrint";
+import QrCameraScanner from "./QrCameraScanner";
 
 import "./TicketPickup.css";
 
@@ -64,6 +65,7 @@ export default function TicketPickup() {
     const [notice, setNotice] = useState("");
     // Vé đang in (sau khi xác nhận hoặc in lại).
     const [printing, setPrinting] = useState<{ tickets: PrintableTicket[]; note: string } | null>(null);
+    const [cameraOpen, setCameraOpen] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -77,10 +79,19 @@ export default function TicketPickup() {
     }, [notice]);
 
 
-    async function handleSearch(event?: FormEvent) {
+    function handleSearch(event?: FormEvent) {
         event?.preventDefault();
+        runSearch(keyword.trim());
+    }
 
-        const value = keyword.trim();
+    // Camera đọc được mã: điền vào ô tìm (để nhân viên thấy mã đã quét) rồi tìm luôn.
+    function handleScanned(text: string) {
+        setCameraOpen(false);
+        setKeyword(text);
+        runSearch(text);
+    }
+
+    async function runSearch(value: string) {
         if (!value) return;
 
         setError("");
@@ -193,10 +204,27 @@ export default function TicketPickup() {
                     aria-label="Tìm đơn để nhận vé"
                     autoComplete="off"
                 />
+                <button
+                    type="button"
+                    className={`tp-cam-btn${cameraOpen ? " is-active" : ""}`}
+                    onClick={() => setCameraOpen((open) => !open)}
+                    aria-pressed={cameraOpen}
+                    title="Dùng camera của máy để quét mã QR trên điện thoại / vé của khách"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 8a2 2 0 0 1 2-2h1.5l1.5-2h6l1.5 2H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
+                        <circle cx="12" cy="12.5" r="3.5" />
+                    </svg>
+                    {cameraOpen ? "Đang quét" : "Quét bằng camera"}
+                </button>
                 <button type="submit" disabled={!keyword.trim() || view.kind === "searching"}>
                     {view.kind === "searching" ? "Đang tìm…" : "Tìm"}
                 </button>
             </form>
+
+            {cameraOpen && (
+                <QrCameraScanner onDetected={handleScanned} onClose={() => setCameraOpen(false)} />
+            )}
 
             {error && (
                 <div className="tp-alert is-error" role="alert">
@@ -210,7 +238,7 @@ export default function TicketPickup() {
                 </div>
             )}
 
-            {view.kind === "idle" && (
+            {view.kind === "idle" && !cameraOpen && (
                 <div className="tp-empty">
                     <strong>Sẵn sàng nhận vé</strong>
                     <span>Quét mã QR trong email / ứng dụng của khách, hoặc hỏi mã đặt vé, số điện thoại.</span>

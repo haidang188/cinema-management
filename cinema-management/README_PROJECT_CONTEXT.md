@@ -390,7 +390,7 @@ Module quầy và online cùng tác động trạng thái ghế, vì vậy mọi
 
 ## 9. Auth và giới hạn bảo mật hiện tại
 
-Frontend dùng `useAuth` và lưu `cinema.currentUser` trong `localStorage`. Route booking online yêu cầu `MEMBER`; shell admin dùng role để điều hướng.
+Frontend dùng `useAuth` và lưu `cinema.currentUser` (kèm `token`) trong `sessionStorage`, nên mỗi tab có thể đăng nhập một tài khoản khác nhau. Các API cần biết người dùng (thống kê, lịch chiếu admin, bán vé tại quầy) đọc token qua header `Authorization: Bearer` bằng `AuthTokenStore`; token lưu trong bộ nhớ backend, hết hạn sau 30 phút không hoạt động và mất khi khởi động lại backend. Route booking online yêu cầu `MEMBER`; shell admin dùng role để điều hướng.
 
 Hệ thống hiện chưa có cơ chế Spring Security + JWT/session hoàn chỉnh. Một số API vẫn nhận `userId` từ client. Đây không an toàn nếu triển khai công khai vì client có thể sửa ID. Trước production cần:
 
@@ -473,7 +473,7 @@ Frontend dùng biến:
 VITE_API_URL=http://localhost:8080/api
 ```
 
-Lưu ý `localhost` và `127.0.0.1` có localStorage khác nhau. Nên dùng thống nhất `http://localhost:5173` trong toàn bộ luồng.
+Lưu ý `localhost` và `127.0.0.1` có sessionStorage khác nhau. Nên dùng thống nhất `http://localhost:5173` trong toàn bộ luồng.
 
 ## 14. Cách chạy
 

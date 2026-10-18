@@ -7,6 +7,10 @@ import {
   register,
   logoutSession,
 } from "../service/auth/authService"
+import {
+  AUTH_STORAGE_KEY,
+  readStoredAuthRaw,
+} from "../service/auth/authStorage"
 
 import type {
   AuthFieldErrors,
@@ -15,8 +19,6 @@ import type {
   RegisterPayload,
 } from "../types/auth"
 
-const STORAGE_KEY = "cinema.currentUser"
-
 // Dùng chung một nguồn state cho mọi nơi gọi useAuth(), tránh mỗi trang giữ một bản
 // riêng (đăng xuất ở trang bán vé nhưng router gốc vẫn tưởng còn đăng nhập).
 const listeners = new Set<() => void>()
@@ -24,13 +26,7 @@ let cachedRaw: string | null | undefined
 let cachedUser: AuthResponse | null = null
 
 function readStoredUser(): AuthResponse | null {
-  let rawUser: string | null = null
-
-  try {
-    rawUser = window.localStorage.getItem(STORAGE_KEY)
-  } catch {
-    rawUser = null
-  }
+  const rawUser = readStoredAuthRaw()
 
   if (rawUser === cachedRaw) {
     return cachedUser
@@ -46,7 +42,7 @@ function readStoredUser(): AuthResponse | null {
   try {
     cachedUser = JSON.parse(rawUser) as AuthResponse
   } catch {
-    window.localStorage.removeItem(STORAGE_KEY)
+    window.sessionStorage.removeItem(AUTH_STORAGE_KEY)
     cachedRaw = null
     cachedUser = null
   }
@@ -61,26 +57,19 @@ function notifyAuthChanged() {
 function subscribe(listener: () => void) {
   listeners.add(listener)
 
-  function onStorage(event: StorageEvent) {
-    if (event.key === STORAGE_KEY) listener()
-  }
-
-  window.addEventListener("storage", onStorage)
-
   return () => {
     listeners.delete(listener)
-    window.removeEventListener("storage", onStorage)
   }
 }
 
 function storeUser(user: AuthResponse | null) {
   if (user) {
-    window.localStorage.setItem(
-      STORAGE_KEY,
+    window.sessionStorage.setItem(
+      AUTH_STORAGE_KEY,
       JSON.stringify(user),
     )
   } else {
-    window.localStorage.removeItem(STORAGE_KEY)
+    window.sessionStorage.removeItem(AUTH_STORAGE_KEY)
   }
 
   notifyAuthChanged()

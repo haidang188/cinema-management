@@ -1,5 +1,6 @@
 import axios from "axios";
 import { API_BASE_URL } from "../apiBase";
+import { authHeaders } from "../auth/authStorage";
 
 const URL = API_BASE_URL;
 
@@ -50,7 +51,8 @@ export async function previewSale(
             {
                 showtimeId,
                 showtimeSeatIds,
-            }
+            },
+            { headers: authHeaders() }
         );
 
     return response.data;
@@ -59,11 +61,11 @@ export async function previewSale(
 export async function sellTickets(
     request: CounterSaleRequest
 ): Promise<CounterSaleResponse> {
-    // Backend xác định nhân viên bán từ session đăng nhập, nên phải gửi kèm cookie.
+    // Backend xác định nhân viên bán từ token đăng nhập, nên phải gửi kèm header Authorization.
     const response = await axios.post<CounterSaleResponse>(
         `${URL}/counter-sales`,
         request,
-        { withCredentials: true }
+        { withCredentials: true, headers: authHeaders() }
     );
 
     return response.data;

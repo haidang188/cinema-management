@@ -1,5 +1,6 @@
 import axios from "axios";
 import { API_ORIGIN, WS_URL } from "../apiBase";
+import { authHeaders } from "../auth/authStorage";
 
 /*
  * GIỮ GHẾ (frontend)
@@ -7,7 +8,7 @@ import { API_ORIGIN, WS_URL } from "../apiBase";
  *   để giữ / nhả / bán ghế. Không gửi token lên WebSocket.
  * - Server chỉ công khai SHA-256 của token (holdOwner); tab tự băm token của mình
  *   để nhận ra ghế nào đang do mình giữ.
- * Nếu dự án có axios instance dùng chung (kèm token đăng nhập), thay `client` bằng instance đó.
+ * Token đăng nhập (sessionStorage, riêng từng tab) được gắn vào header Authorization.
  */
 
 export const API_BASE_URL = API_ORIGIN;
@@ -16,8 +17,7 @@ export { WS_URL };
 export const client = axios.create({ baseURL: API_BASE_URL, withCredentials: true, });
 
 client.interceptors.request.use((config) => {
-    const token = localStorage.getItem("token") ?? localStorage.getItem("accessToken");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    config.headers.set(authHeaders());
     return config;
 });
 

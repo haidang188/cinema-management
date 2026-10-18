@@ -2,10 +2,16 @@ import axios from "axios";
 
 import type { ShowtimeData } from "../../types/showtime/showtime";
 import { API_ORIGIN } from "../apiBase";
+import { authHeaders } from "../auth/authStorage";
 
 const client = axios.create({
     baseURL: API_ORIGIN,
     withCredentials: true,
+});
+
+client.interceptors.request.use((config) => {
+    config.headers.set(authHeaders());
+    return config;
 });
 
 export type SeatSummaryDto = {

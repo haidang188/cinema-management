@@ -13,6 +13,7 @@ import "./theme/theme.css";
 // Phải import SAU CÙNG: token thiết kế chung + lớp giao diện admin/staff theo trang "Quản lý đặt vé".
 import "./styles/design-tokens.css";
 import "./styles/admin-ui.css";
+import "./styles/admin-pages.css";
 
 function App() {
     return (

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Client } from "@stomp/stompjs";
 
+import { authHeaders } from "../auth/authStorage";
 import { WS_URL } from "./seatHoldService";
 import type { SeatStateDto } from "./seatHoldService";
 
@@ -28,11 +29,9 @@ export function useSeatSocket(
     useEffect(() => {
         if (!showtimeId) return;
 
-        const token = localStorage.getItem("token") ?? localStorage.getItem("accessToken");
-
         const client = new Client({
             brokerURL: WS_URL,
-            connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
+            connectHeaders: authHeaders(),
             reconnectDelay: 3_000,
             heartbeatIncoming: 10_000,
             heartbeatOutgoing: 10_000,

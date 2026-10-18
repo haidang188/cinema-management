@@ -1,11 +1,16 @@
 import type { ApiRequestError } from "../types/admin"
 import { API_ORIGIN } from "./apiBase"
+import { authHeaders } from "./auth/authStorage"
 
 // Các service dùng request() truyền path dạng "/api/...", nên ghép với origin của backend.
 const API_BASE_URL = API_ORIGIN
 
 export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers)
+
+  for (const [name, value] of Object.entries(authHeaders())) {
+    headers.set(name, value)
+  }
 
   if (options.body && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json")

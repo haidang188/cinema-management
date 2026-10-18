@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../apiBase"
+import { authHeaders } from "../auth/authStorage"
 
 export type ReportType = "movies" | "members" | "genres"
 export type Channel = "ALL" | "ONLINE" | "COUNTER"
@@ -67,6 +68,7 @@ export async function getStatistics(
         {
             credentials: "include",
             cache: "no-store",
+            headers: authHeaders(),
             signal,
         },
     )

@@ -3,6 +3,7 @@ package com.cinemamanagement.controller;
 import com.cinemamanagement.request.AdminShowtimeBatchRequest;
 import com.cinemamanagement.request.AdminShowtimeRequest;
 import com.cinemamanagement.service.AdminShowtimeService;
+import com.cinemamanagement.util.AuthTokenStore;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,9 +18,11 @@ import java.util.Map;
 @RequestMapping("/api/admin/showtimes")
 public class AdminShowtimeController {
     private final AdminShowtimeService service;
+    private final AuthTokenStore authTokenStore;
 
-    public AdminShowtimeController(AdminShowtimeService service) {
+    public AdminShowtimeController(AdminShowtimeService service, AuthTokenStore authTokenStore) {
         this.service = service;
+        this.authTokenStore = authTokenStore;
     }
 
     @GetMapping("/options")
@@ -154,15 +157,9 @@ public class AdminShowtimeController {
     private ResponseEntity<?> denied(
             HttpServletRequest request
     ) {
-        var session = request.getSession(false);
+        Long id = authTokenStore.resolveUserId(request);
 
-        Object userId = session == null
-                ? null
-                : session.getAttribute(
-                AuthController.SESSION_USER_ID
-        );
-
-        if (!(userId instanceof Long id)) {
+        if (id == null) {
             return ResponseEntity.status(401).body(Map.of(
                     "message",
                     "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại."

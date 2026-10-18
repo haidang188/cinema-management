@@ -110,7 +110,7 @@ sequenceDiagram
     DB-->>BE: User + role
     BE-->>API: AuthResponse
     API-->>Hook: currentUser
-    Hook->>Hook: Luu cinema.currentUser vao localStorage
+    Hook->>Hook: Luu cinema.currentUser (kem token) vao sessionStorage
     alt ADMIN
         Hook-->>User: /admin/movies
     else EMPLOYEE
@@ -126,7 +126,7 @@ Trang admin duoc boc trong `AdminShell`. Shell chuyen nguoi chua dang nhap ve `/
 
 ### Gioi han bao mat hien tai
 
-Du an chua dung Spring Security/JWT/session authentication. `currentUser` duoc luu trong `localStorage`, va viec chan route admin chu yeu dien ra o frontend. Cac endpoint `/api/admin/**` chua duoc backend xac thuc role mot cach tap trung. `userId` trong API danh gia cung dang duoc gui tu frontend. Day la phan can nang cap neu muon phan quyen an toan that su.
+Du an chua dung Spring Security/JWT. Backend cap token dang nhap (luu trong bo nho, `AuthTokenStore`), frontend luu `currentUser` kem token trong `sessionStorage` (moi tab mot phien rieng) va gui header `Authorization: Bearer`, va viec chan route admin chu yeu dien ra o frontend. Cac endpoint `/api/admin/**` chua duoc backend xac thuc role mot cach tap trung. `userId` trong API danh gia cung dang duoc gui tu frontend. Day la phan can nang cap neu muon phan quyen an toan that su.
 
 ## 5. Cac chuc nang da co trong code
 

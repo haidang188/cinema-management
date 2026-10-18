@@ -41,6 +41,21 @@ const statusLabels: Record<string, string> = {
 const statusLabel = (value: string | null) =>
   value ? statusLabels[value] || value : "Chưa xác định"
 
+// Màu nhãn trạng thái theo các lớp status-* dùng chung trong styles/admin-ui.css.
+const statusTone = (value: string | null) => {
+  switch (value) {
+    case "OPEN":
+      return "status-active"
+    case "DRAFT":
+    case "PAUSED":
+      return "status-pending"
+    case "CANCELLED":
+      return "status-inactive"
+    default:
+      return "status-ended"
+  }
+}
+
 const message = (error: unknown) =>
   error instanceof Error ? error.message : "Không thể xử lý lịch chiếu"
 
@@ -454,7 +469,11 @@ function ShowtimeList({ options }: { options: ShowtimeOptions }) {
                         {displayTime(show.endTime)}
                       </td>
 
-                      <td>{statusLabel(show.status)}</td>
+                      <td>
+                        <span className={`status-badge ${statusTone(show.status)}`}>
+                          {statusLabel(show.status)}
+                        </span>
+                      </td>
 
                       <td className="statistics-numeric">
                         {show.totalSeats}

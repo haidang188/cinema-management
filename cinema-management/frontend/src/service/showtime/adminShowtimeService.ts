@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../apiBase"
+import { authHeaders } from "../auth/authStorage"
 
 export interface ShowtimeFilters {
   from: string
@@ -133,6 +134,7 @@ async function request<T>(
       cache: "no-store",
       headers: {
         "Content-Type": "application/json",
+        ...authHeaders(),
       },
     },
   )

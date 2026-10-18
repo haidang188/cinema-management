@@ -1,0 +1,747 @@
+/* =========================================================
+   ADMIN PAGES — lớp hoàn thiện thứ hai sau styles/admin-ui.css.
+   admin-ui.css đã đưa màu, ô nhập, nút, bảng về chuẩn "Quản lý đặt vé" (bm-*).
+   File này gom các khối còn lệch giữa các trang admin:
+     - thẻ số liệu (mỗi trang một kiểu) → một kiểu chung
+     - tab / phím chọn nhanh → .bm-segment / .bm-chip
+     - khoảng cách, tiêu đề panel, mật độ dòng bảng
+     - phần riêng của từng trang ở cuối file
+   Cùng tiền tố #pl-main .admin-content như admin-ui.css; import sau nó trong App.tsx.
+   ========================================================= */
+
+/* ---------- Khung trang: nhịp dọc 14px giống .bm-page ---------- */
+
+#pl-main .admin-content :is(.app-shell, .promotion-page, .statistics-page) > * + * {
+  margin-top: 14px;
+}
+
+#pl-main .admin-content :is(.app-shell, .promotion-page, .statistics-page) > :is(header, .page-header, .promotion-page-header, .statistics-heading) {
+  margin-bottom: 0;
+}
+
+/* Dòng chữ đỏ nhỏ phía trên tiêu đề: trang mẫu không có, bỏ cho đồng bộ. */
+#pl-main .admin-content :is(.room-page-eyebrow, .employee-page-eyebrow, .movie-page-eyebrow, .promotion-eyebrow) {
+  display: none;
+}
+
+/* ---------- Thẻ số liệu (Thành viên, Nhân viên, Khuyến mãi, Thống kê) ---------- */
+
+#pl-main .admin-content :is(.member-stats, .employee-stat-grid, .promotion-stat-grid, .statistics-summary) {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+#pl-main .admin-content :is(.member-stat-card, .employee-stat-card, .promotion-stat-card, .statistics-metric) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  min-height: 0;
+  padding: 14px 16px;
+  color: var(--ui-text);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-lg);
+  box-shadow: none;
+  transform: none;
+}
+
+#pl-main .admin-content :is(.promotion-stat-card, .statistics-metric) {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+}
+
+#pl-main .admin-content :is(.member-stat-card, .employee-stat-card) > div {
+  min-width: 0;
+}
+
+#pl-main .admin-content :is(.member-stat-icon, .employee-stat-icon) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  color: var(--ui-muted);
+  background: var(--ui-surface-2);
+  border: 0;
+  border-radius: var(--ui-radius-md);
+}
+
+#pl-main .admin-content :is(.member-stat-icon, .employee-stat-icon) svg {
+  width: 18px;
+  height: 18px;
+}
+
+#pl-main .admin-content :is(.member-stat-card-blue, .employee-stat-blue) :is(.member-stat-icon, .employee-stat-icon) {
+  color: var(--ui-blue);
+  background: var(--ui-blue-soft);
+}
+
+#pl-main .admin-content :is(.member-stat-card-green, .employee-stat-green) :is(.member-stat-icon, .employee-stat-icon) {
+  color: var(--ui-green);
+  background: var(--ui-green-soft);
+}
+
+#pl-main .admin-content :is(.member-stat-card-red, .employee-stat-red) :is(.member-stat-icon, .employee-stat-icon) {
+  color: var(--ui-red-text);
+  background: var(--ui-red-soft);
+}
+
+#pl-main .admin-content :is(.member-stat-card-gold, .employee-stat-gold, .employee-stat-amber) :is(.member-stat-icon, .employee-stat-icon) {
+  color: var(--ui-amber);
+  background: var(--ui-amber-soft);
+}
+
+/* Nhãn */
+#pl-main .admin-content :is(.member-stat-card, .employee-stat-card) > div > :is(span, p):first-child,
+#pl-main .admin-content .promotion-stat-topline span,
+#pl-main .admin-content .statistics-metric > span {
+  display: block;
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Số */
+#pl-main .admin-content :is(.member-stat-card, .employee-stat-card, .promotion-stat-card, .statistics-metric) strong {
+  display: block;
+  margin: 4px 0 0;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* Chú thích */
+#pl-main .admin-content :is(.member-stat-card, .employee-stat-card, .promotion-stat-card) small {
+  display: block;
+  margin-top: 2px;
+  color: var(--ui-faint);
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+#pl-main .admin-content .promotion-stat-topline {
+  display: block;
+  margin: 0;
+}
+
+/* Số thứ tự 01..04 trên thẻ khuyến mãi */
+#pl-main .admin-content .promotion-stat-topline i {
+  display: none;
+}
+
+/* Thẻ "Đang áp dụng" nổi bật như số tổng của trang mẫu */
+#pl-main .admin-content .promotion-stat-card.accent strong {
+  color: var(--ui-green);
+}
+
+/* ---------- Tab báo cáo (giống .bm-segment) ---------- */
+
+#pl-main .admin-content .statistics-page .statistics-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0;
+  width: fit-content;
+  height: auto;
+  margin-bottom: 0;
+  padding: 3px;
+  background: var(--ui-surface-sunken);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+}
+
+#pl-main .admin-content .statistics-page .statistics-tabs button {
+  min-width: 0;
+  height: 30px;
+  min-height: 0;
+  padding: 0 16px;
+  color: var(--ui-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  box-shadow: none;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+#pl-main .admin-content .statistics-page .statistics-tabs button:hover {
+  color: #fff;
+  background: transparent;
+}
+
+#pl-main .admin-content .statistics-page .statistics-tabs button[aria-current="page"],
+#pl-main .admin-content .statistics-page .statistics-tabs button[aria-current="page"]:hover {
+  color: #fff;
+  background: var(--ui-red);
+  border: 0;
+}
+
+/* ---------- Phím chọn nhanh (giống .bm-chip) ---------- */
+
+#pl-main .admin-content .statistics-page .statistics-presets {
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+#pl-main .admin-content .statistics-page .statistics-presets > span {
+  margin-right: 2px;
+  color: var(--ui-faint);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+#pl-main .admin-content .statistics-page .statistics-presets button {
+  height: 32px;
+  min-height: 0;
+  padding: 0 12px;
+  color: var(--ui-text-soft);
+  background: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+#pl-main .admin-content .statistics-page .statistics-presets button:hover {
+  color: #fff;
+  border-color: var(--ui-red);
+}
+
+#pl-main .admin-content .statistics-page .statistics-presets button[aria-pressed="true"] {
+  color: #fff;
+  background: var(--ui-red-soft);
+  border-color: var(--ui-red);
+}
+
+/* ---------- Thanh lọc Thống kê / Lịch chiếu ---------- */
+
+#pl-main .admin-content .statistics-page .statistics-filters {
+  padding: 14px;
+}
+
+#pl-main .admin-content .statistics-page .statistics-filter-fields {
+  gap: 10px;
+}
+
+#pl-main .admin-content .statistics-page .statistics-filter-fields label {
+  gap: 4px;
+}
+
+#pl-main .admin-content .statistics-page .statistics-filter-fields :is(input, select) {
+  height: 36px;
+  min-height: 0;
+  padding: 0 10px;
+  font-size: 12.5px;
+}
+
+#pl-main .admin-content .statistics-page .statistics-primary {
+  height: 36px;
+  min-height: 0;
+}
+
+#pl-main .admin-content .statistics-page :is(.statistics-period, .statistics-note) {
+  margin-bottom: 0;
+  padding: 0 2px;
+  color: var(--ui-muted);
+  font-size: 12.5px;
+}
+
+#pl-main .admin-content .statistics-page .statistics-period strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ---------- Panel có tiêu đề (Thống kê, Lịch chiếu) ---------- */
+
+#pl-main .admin-content .statistics-page .statistics-panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+#pl-main .admin-content .statistics-page .statistics-panel > h2 {
+  margin: 0;
+  padding: 13px 16px;
+  color: #fff;
+  border-bottom: 1px solid var(--ui-border);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+#pl-main .admin-content .statistics-page .statistics-panel > :not(h2) {
+  margin-left: 16px;
+  margin-right: 16px;
+}
+
+#pl-main .admin-content .statistics-page .statistics-panel > :last-child {
+  margin-bottom: 16px;
+}
+
+#pl-main .admin-content .statistics-page .statistics-panel > h2 + * {
+  margin-top: 16px;
+}
+
+/* Bảng nằm sát mép panel, không lồng thêm khung */
+#pl-main .admin-content .statistics-page .statistics-panel > .statistics-table-scroll {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+#pl-main .admin-content .statistics-page .statistics-panel > h2 + .statistics-table-scroll {
+  margin-top: 0;
+}
+
+#pl-main .admin-content .statistics-page .statistics-panel > .statistics-table-scroll:last-child {
+  margin-bottom: 0;
+}
+
+#pl-main .admin-content .statistics-page .statistics-panel > .statistics-pagination {
+  margin: 0;
+  border-top: 1px solid var(--ui-row-line);
+}
+
+/* ---------- Biểu đồ TOP (Thống kê) ---------- */
+
+#pl-main .admin-content .statistics-page .statistics-chart {
+  gap: 14px;
+  counter-reset: stats-rank;
+}
+
+#pl-main .admin-content .statistics-page .statistics-chart li {
+  counter-increment: stats-rank;
+}
+
+#pl-main .admin-content .statistics-page .statistics-bar-label {
+  margin-bottom: 6px;
+  color: var(--ui-text-soft);
+  font-size: 13px;
+}
+
+#pl-main .admin-content .statistics-page .statistics-bar-label span::before {
+  content: counter(stats-rank);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  margin-right: 10px;
+  padding: 0 5px;
+  color: var(--ui-muted);
+  background: var(--ui-surface-2);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+#pl-main .admin-content .statistics-page .statistics-chart li:first-child .statistics-bar-label span::before {
+  color: #fff;
+  background: var(--ui-red);
+}
+
+#pl-main .admin-content .statistics-page .statistics-bar-label strong {
+  color: #fff;
+  font-weight: 800;
+}
+
+#pl-main .admin-content .statistics-page .statistics-bar-track {
+  height: 6px;
+  margin-left: 32px;
+  background: var(--ui-surface-2);
+  border-radius: 999px;
+}
+
+#pl-main .admin-content .statistics-page .statistics-bar-track > div {
+  background: linear-gradient(90deg, #b8070f, var(--ui-red));
+}
+
+/* ---------- Bảng: mật độ dòng như .bm-table ---------- */
+
+#pl-main .admin-content :is(.member-table, .employee-table, .room-table) td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  vertical-align: middle;
+}
+
+/* Ô "tên + dòng phụ" */
+#pl-main .admin-content :is(.member-table, .employee-table) :is(strong, b) {
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+#pl-main .admin-content :is(.member-contact, .employee-contact) {
+  display: grid;
+  gap: 2px;
+}
+
+#pl-main .admin-content :is(.member-contact, .employee-contact) > * {
+  margin: 0;
+  line-height: 1.35;
+}
+
+#pl-main .admin-content :is(.member-contact, .employee-contact) > :first-child {
+  color: var(--ui-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+#pl-main .admin-content :is(.member-contact, .employee-contact) > :not(:first-child) {
+  color: var(--ui-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Cột thao tác: nút icon xếp sát nhau, căn phải.
+   CSS cũ đặt display:flex thẳng lên <td> làm ô rời khỏi lưới bảng (đường kẻ dòng bị lệch). */
+#pl-main .admin-content :is(.member-table, .employee-table, .room-table, .movie-admin-table) td.admin-row-actions {
+  display: table-cell;
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+#pl-main .admin-content :is(.member-table, .employee-table, .room-table) td.admin-row-actions .admin-action-button {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  vertical-align: middle;
+}
+
+#pl-main .admin-content :is(.member-table, .employee-table, .room-table, .movie-admin-table) th.action-column {
+  text-align: right;
+}
+
+#pl-main .admin-content .admin-row-actions > * + * {
+  margin-left: 6px;
+}
+
+/* Hàng nhãn nút thao tác bên trong ô (một số trang bọc thêm div) */
+#pl-main .admin-content .admin-row-actions > :is(div, span):only-child {
+  display: inline-flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* Nút "Đặt lại / Làm mới" cuối thanh lọc: vừa chữ, không kéo giãn thành khối rỗng */
+#pl-main .admin-content :is(.room-toolbar, .employee-toolbar, .member-toolbar, .movie-toolbar) :is(.room-reset-button, .secondary-button) {
+  width: auto;
+  min-width: 0;
+  flex: 0 0 auto;
+  align-self: stretch;
+  height: auto;
+  min-height: 36px;
+  padding: 0 14px;
+  justify-self: start;
+}
+
+/* ---------- Phòng chiếu ---------- */
+
+#pl-main .admin-content .room-table .room-title-text {
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+#pl-main .admin-content .room-table td:first-child {
+  color: var(--ui-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Trang tạo / sửa phòng rộng như các trang khác để tiêu đề thẳng hàng */
+#pl-main .admin-content .room-designer-page {
+  width: min(1320px, calc(100% - 24px));
+}
+
+/* ---------- Form phim ---------- */
+
+/* Thanh "Quay lại / Thêm phim" đầu form: thanh mảnh, dính trên cùng khi cuộn */
+#pl-main .admin-content .movie-action-bar.movie-action-bar-top {
+  position: sticky;
+  top: 8px;
+  z-index: 5;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  min-height: 0;
+  background: rgba(20, 24, 29, 0.92);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-lg);
+  backdrop-filter: blur(6px);
+}
+
+#pl-main .admin-content .movie-action-bar.movie-action-bar-top :is(button, a) {
+  min-height: 36px;
+  height: 36px;
+}
+
+/* Nhãn ô nhập form phim viết HOA, các form khác viết thường: thống nhất viết thường */
+#pl-main .admin-content .movie-form :is(.movie-field > span:first-child, .movie-field > label:first-child, .field-title) {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+#pl-main .admin-content .movie-form-section {
+  padding: 16px 18px 18px;
+}
+
+#pl-main .admin-content .movie-form-section + .movie-form-section {
+  margin-top: 14px;
+}
+
+#pl-main .admin-content .movie-form-section > .panel-heading {
+  margin: 0 0 14px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--ui-row-line);
+}
+
+#pl-main .admin-content .movie-form-section > .panel-heading::after {
+  display: none;
+}
+
+/* Chọn thể loại: chip đọc rõ, chọn = đỏ nhạt như .bm-chip.is-active */
+#pl-main .admin-content .movie-genre-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#pl-main .admin-content .movie-genre-options .checkbox-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  margin: 0;
+  padding: 0 12px;
+  color: var(--ui-text-soft);
+  background: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 1;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+#pl-main .admin-content .movie-genre-options .checkbox-pill input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#pl-main .admin-content .movie-genre-options .checkbox-pill span {
+  color: inherit;
+  font: inherit;
+}
+
+#pl-main .admin-content .movie-genre-options .checkbox-pill:hover {
+  color: #fff;
+  border-color: #4a525b;
+}
+
+#pl-main .admin-content .movie-genre-options .checkbox-pill:has(input:checked) {
+  color: #fff;
+  background: var(--ui-red-soft);
+  border-color: var(--ui-red);
+}
+
+#pl-main .admin-content .movie-genre-options .checkbox-pill:has(input:focus-visible) {
+  outline: 2px solid var(--ui-red-hover);
+  outline-offset: 2px;
+}
+
+/* ---------- Khuyến mãi ---------- */
+
+/* Tiêu đề phụ "Tổng quan chương trình" / "Danh sách khuyến mãi" lặp lại ý của tiêu đề trang */
+#pl-main .admin-content .promotion-page > .promotion-section-heading,
+#pl-main .admin-content .promotion-directory-panel > .promotion-section-heading {
+  display: none;
+}
+
+#pl-main .admin-content .promotion-directory-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0;
+}
+
+#pl-main .admin-content .promotion-image-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--ui-faint);
+  background: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-align: center;
+}
+
+#pl-main .admin-content .promotion-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#pl-main .admin-content .promotion-view-link {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  color: var(--ui-text-soft);
+  background: var(--ui-surface-2);
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+#pl-main .admin-content .promotion-view-link:hover {
+  color: #fff;
+  border-color: var(--ui-red);
+}
+
+#pl-main .admin-content .promotion-table td {
+  vertical-align: middle;
+}
+
+/* ---------- Form khuyến mãi / chi tiết khuyến mãi ---------- */
+
+/* Dòng "01 / Thông tin chương trình", "Hình ảnh", "Xem trước" màu đỏ phía trên tiêu đề panel:
+   chuyển sang nhãn xám nhỏ như .bm-field span, đỏ chỉ dành cho hành động chính. */
+#pl-main .admin-content .promotion-page :is(.panel-heading-premium, .compact-heading) > div > span:first-child,
+#pl-main .admin-content .promotion-page .promotion-preview-heading > span {
+  display: block;
+  margin: 0 0 3px;
+  color: var(--ui-faint);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+#pl-main .admin-content .promotion-detail-simple-card {
+  max-width: none;
+  padding: 16px 18px 20px;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-lg);
+  box-shadow: none;
+}
+
+/* ---------- Form phòng chiếu: tiêu đề panel 15px như mọi panel khác ---------- */
+
+#pl-main .admin-content .room-designer-panel > :is(h2, h3),
+#pl-main .admin-content .room-designer-panel > .panel-heading :is(h2, h3) {
+  margin-bottom: 12px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* ---------- Thanh nút form phim: bên trái ghi chú bắt buộc ---------- */
+
+#pl-main .admin-content .movie-action-bar.movie-action-bar-top {
+  align-items: center;
+}
+
+#pl-main .admin-content .movie-action-bar.movie-action-bar-top::before {
+  content: "Các mục có dấu * là bắt buộc";
+  margin-right: auto;
+  color: var(--ui-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* ---------- Lịch chiếu (admin) ---------- */
+
+/* Form thêm suất: rộng hết khung như các panel khác */
+#pl-main .admin-content .ast-page .ast-create {
+  max-width: none;
+}
+
+#pl-main .admin-content .ast-page .ast-movie-title {
+  color: #fff;
+  font-weight: 700;
+}
+
+#pl-main .admin-content .ast-page .ast-table td:first-child {
+  color: var(--ui-muted);
+  font-family: var(--ui-font-mono);
+  font-size: 12.5px;
+}
+
+/* ---------- Giá vé ---------- */
+
+/* Trước là một cột hẹp 820px giữa trang: rộng như các trang khác, bảng giá chia 2 cột */
+#pl-main :is(.admin-content, .staff-content) .ticket-price-page {
+  width: min(1320px, calc(100% - 24px));
+  max-width: none;
+}
+
+#pl-main :is(.admin-content, .staff-content) .ticket-price-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
+  gap: 12px;
+}
+
+#pl-main :is(.admin-content, .staff-content) .ticket-price-card {
+  margin: 0;
+  overflow: hidden;
+}
+
+#pl-main :is(.admin-content, .staff-content) .ticket-price-table :is(th, td):not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#pl-main :is(.admin-content, .staff-content) .ticket-price-table td:first-child {
+  color: var(--ui-text-soft);
+  font-weight: 600;
+}
+
+#pl-main :is(.admin-content, .staff-content) .ticket-price-table td:not(:first-child) {
+  color: #fff;
+  font-weight: 800;
+}
+
+/* ---------- Màn hình hẹp ---------- */
+
+@media (max-width: 1100px) {
+  #pl-main .admin-content :is(.member-stats, .employee-stat-grid, .promotion-stat-grid, .statistics-summary) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1180px) {
+  #pl-main :is(.admin-content, .staff-content) .ticket-price-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  #pl-main .admin-content :is(.member-stats, .employee-stat-grid, .promotion-stat-grid, .statistics-summary) {
+    grid-template-columns: 1fr;
+  }
+}

@@ -27,4 +27,5 @@ export interface AuthResponse {
   accountStatus: 'ACTIVE' | 'INACTIVE' | 'PENDING_DELETION' | 'DELETED'
   scheduledDeletionAt: string | null
   message: string
+  token?: string
 }

@@ -1,6 +1,7 @@
 package com.cinemamanagement.controller;
 
 import com.cinemamanagement.service.StatisticsService;
+import com.cinemamanagement.util.AuthTokenStore;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.CacheControl;
@@ -14,9 +15,11 @@ import java.util.Map;
 @RequestMapping("/api/admin/statistics")
 public class StatisticsController {
     private final StatisticsService service;
+    private final AuthTokenStore authTokenStore;
 
-    public StatisticsController(StatisticsService service) {
+    public StatisticsController(StatisticsService service, AuthTokenStore authTokenStore) {
         this.service = service;
+        this.authTokenStore = authTokenStore;
     }
 
     @GetMapping("/{type}")
@@ -39,13 +42,9 @@ public class StatisticsController {
 
             HttpServletRequest request
     ) {
-        var session = request.getSession(false);
+        Long id = authTokenStore.resolveUserId(request);
 
-        Object userId = session == null
-                ? null
-                : session.getAttribute(AuthController.SESSION_USER_ID);
-
-        if (!(userId instanceof Long id)) {
+        if (id == null) {
             return ResponseEntity.status(401).body(Map.of(
                     "message",
                     "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại."

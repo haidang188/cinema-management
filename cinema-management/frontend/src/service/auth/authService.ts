@@ -5,6 +5,7 @@ import type {
   LoginPayload,
   RegisterPayload,
 } from "../../types/auth"
+import { authHeaders } from "./authStorage"
 
 const API_BASE_URL = `${API_ROOT}/auth`
 
@@ -80,6 +81,7 @@ export async function logoutSession(): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/logout`, {
     method: "POST",
     credentials: "include",
+    headers: authHeaders(),
   })
 
   if (!response.ok) {

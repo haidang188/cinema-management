@@ -50,7 +50,7 @@ $env:VNPAY_FRONTEND_RESULT_URL='http://localhost:5173/payment/vnpay-return'
 .\gradlew.bat bootRun
 ```
 
-4. Chạy frontend bằng `npm run dev`, truy cập **http://localhost:5173**. Dùng cùng hostname khi đăng nhập và khi quay về. `localhost` và `127.0.0.1` có localStorage riêng nên đổi hostname có thể khiến trang yêu cầu đăng nhập lại.
+4. Chạy frontend bằng `npm run dev`, truy cập **http://localhost:5173**. Dùng cùng hostname khi đăng nhập và khi quay về. `localhost` và `127.0.0.1` có sessionStorage riêng nên đổi hostname có thể khiến trang yêu cầu đăng nhập lại.
 5. Chọn VNPay rồi xác nhận. Trình duyệt sẽ sang `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html`.
 6. Dùng thông tin thẻ thử nghiệm tại https://sandbox.vnpayment.vn/apis/vnpay-demo/. Lấy số thẻ, tên, ngày và OTP đúng theo trang hiện tại, không dùng thẻ ngân hàng thật.
 7. Sau khi thao tác thành công, VNPay đưa trình duyệt về backend qua Return URL. Backend kiểm tra chữ ký/số tiền, sau đó chuyển tới frontend để xem kết quả.
