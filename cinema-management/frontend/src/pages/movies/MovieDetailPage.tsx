@@ -1,3 +1,4 @@
+import PosterImage from "../../component/common/PosterImage"
 import { useEffect, useState, type FormEvent } from "react"
 import { CalendarX2, Star } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
@@ -182,7 +183,7 @@ function MovieDetailPage({ currentUser, onLoginClick }: MovieDetailPageProps) {
           <div className="movie-detail-poster-frame">
             <span className="movie-age-badge">{movie.ageRating}</span>
             <div className="movie-detail-poster">
-              <img src={movie.posterUrl} alt={movie.title} />
+              <PosterImage src={movie.posterUrl} alt={movie.title} />
             </div>
           </div>
         </div>

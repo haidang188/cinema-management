@@ -8,6 +8,7 @@ import com.cinemamanagement.exception.ResourceNotFoundException;
 import com.cinemamanagement.repository.BookingSeatRepository;
 import com.cinemamanagement.repository.CinemaRoomRepository;
 import com.cinemamanagement.repository.SeatRepository;
+import com.cinemamanagement.repository.ShowtimeSeatRepository;
 import com.cinemamanagement.request.CreateCinemaRoomRequest;
 import com.cinemamanagement.request.SeatTypeUpdateRequest;
 import com.cinemamanagement.request.UpdateCinemaRoomRequest;
@@ -36,15 +37,18 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
     private final CinemaRoomRepository cinemaRoomRepository;
     private final SeatRepository seatRepository;
     private final BookingSeatRepository bookingSeatRepository;
+    private final ShowtimeSeatRepository showtimeSeatRepository;
 
     public CinemaRoomServiceImpl(
             CinemaRoomRepository cinemaRoomRepository,
             SeatRepository seatRepository,
-            BookingSeatRepository bookingSeatRepository
+            BookingSeatRepository bookingSeatRepository,
+            ShowtimeSeatRepository showtimeSeatRepository
     ) {
         this.cinemaRoomRepository = cinemaRoomRepository;
         this.seatRepository = seatRepository;
         this.bookingSeatRepository = bookingSeatRepository;
+        this.showtimeSeatRepository = showtimeSeatRepository;
     }
 
     @Override
@@ -295,10 +299,23 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
     ) {
         List<Seat> existingSeats = seatRepository.findByRoomIdOrderByRowLabelAscSeatNumberAsc(room.getId());
         Map<String, Seat> existingByGridPosition = new HashMap<>();
+        Map<Long, String> gridPositionBySeatId = new HashMap<>();
+        Map<String, Integer> fallbackColumnByRow = new HashMap<>();
         for (Seat seat : existingSeats) {
+            String position;
             if (seat.getGridRow() != null && seat.getGridColumn() != null) {
-                existingByGridPosition.put(gridKey(seat.getGridRow(), seat.getGridColumn()), seat);
+                position = gridKey(seat.getGridRow(), seat.getGridColumn());
+            } else {
+                // Match the editor's placement for seats created before grid coordinates existed.
+                String rowLabel = seat.getRowLabel();
+                int column = fallbackColumnByRow.getOrDefault(rowLabel, 0);
+                fallbackColumnByRow.put(rowLabel, column + 1);
+                position = gridKey(Math.max(0, rowLabel.charAt(0) - 'A'), column);
             }
+            if (existingByGridPosition.putIfAbsent(position, seat) != null) {
+                throw new BadRequestException("Existing seats have overlapping grid positions");
+            }
+            gridPositionBySeatId.put(seat.getId(), position);
         }
 
         Set<String> requestedGridPositions = new HashSet<>();
@@ -308,12 +325,15 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
 
         List<Seat> seatsToDelete = new java.util.ArrayList<>();
         for (Seat existingSeat : existingSeats) {
-            String existingGridKey = existingSeat.getGridRow() == null || existingSeat.getGridColumn() == null
-                    ? null
-                    : gridKey(existingSeat.getGridRow(), existingSeat.getGridColumn());
-            if (existingGridKey == null || !requestedGridPositions.contains(existingGridKey)) {
+            String existingGridKey = gridPositionBySeatId.get(existingSeat.getId());
+            if (!requestedGridPositions.contains(existingGridKey)) {
                 if (bookingSeatRepository.existsBySeatId(existingSeat.getId())) {
-                    throw new BadRequestException("Cannot remove booked seat " + existingSeat.getRowLabel() + existingSeat.getSeatNumber());
+                    throw new BadRequestException("Không thể xóa ghế " + existingSeat.getRowLabel() + existingSeat.getSeatNumber()
+                            + " vì đã có đặt vé. Bạn có thể chuyển ghế sang trạng thái ngừng hoạt động.");
+                }
+                if (showtimeSeatRepository.existsBySeatId(existingSeat.getId())) {
+                    throw new BadRequestException("Không thể xóa ghế " + existingSeat.getRowLabel() + existingSeat.getSeatNumber()
+                            + " vì đang được sử dụng trong suất chiếu. Bạn có thể chuyển ghế sang trạng thái ngừng hoạt động.");
                 }
                 seatsToDelete.add(existingSeat);
             }
@@ -321,6 +341,31 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
 
         if (!seatsToDelete.isEmpty()) {
             seatRepository.deleteAll(seatsToDelete);
+            seatRepository.flush();
+        }
+
+        // Hibernate can insert new seats before updating existing ones. Release old
+        // (room, row, number) keys first so renumbering cannot collide mid-flush.
+        // Temporary numbers stay inside this transaction and retain seat IDs/references.
+        Set<Integer> occupiedNumbers = new HashSet<>();
+        for (Seat seat : existingSeats) {
+            occupiedNumbers.add(seat.getSeatNumber());
+        }
+        int temporaryNumber = -1;
+        boolean renumbered = false;
+        for (CreateCinemaRoomRequest.SeatLayoutRequest requestedSeat : requestedSeats) {
+            Seat existingSeat = existingByGridPosition.get(gridKey(requestedSeat.getGridRow(), requestedSeat.getGridColumn()));
+            if (existingSeat != null && (!existingSeat.getRowLabel().equals(requestedSeat.getRowLabel())
+                    || !existingSeat.getSeatNumber().equals(requestedSeat.getSeatNumber()))) {
+                while (occupiedNumbers.contains(temporaryNumber)) {
+                    temporaryNumber--;
+                }
+                existingSeat.setSeatNumber(temporaryNumber);
+                occupiedNumbers.add(temporaryNumber--);
+                renumbered = true;
+            }
+        }
+        if (renumbered) {
             seatRepository.flush();
         }
 

@@ -1,3 +1,4 @@
+import PosterImage from "../../component/common/PosterImage"
 import { ArrowLeft, BadgePercent, Building2, Clock3, QrCode, ShieldCheck, WalletCards } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -127,7 +128,7 @@ function BookingConfirmPage({ currentUser }: BookingConfirmPageProps) {
           <article className="confirm-card">
             <h2>Thông Tin Phim</h2>
             <div className="confirm-movie">
-              <img src={preview.posterUrl} alt={preview.movieTitle} />
+              <PosterImage src={preview.posterUrl} alt={preview.movieTitle} />
               <div><h3>{preview.movieTitle}</h3><span>{preview.roomName}</span><span>{preview.format || "2D"}</span><strong>{formatDateTime(preview.startTime)}</strong></div>
             </div>
           </article>

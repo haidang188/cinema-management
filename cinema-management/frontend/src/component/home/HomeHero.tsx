@@ -1,3 +1,4 @@
+import { posterBackground } from "../common/PosterImage"
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Movie } from '../../types/movie'
@@ -39,7 +40,7 @@ function HomeHero({ movies, isLoading, onBookingClick }: HomeHeroProps) {
           <article
             key={movie.id}
             className="featured-card"
-            style={{ backgroundImage: `url(${movie.posterUrl})` }}
+            style={{ backgroundImage: posterBackground(movie.posterUrl) }}
           >
             <div className="featured-card__content">
               <span className="hero-date">Khởi chiếu: {formatDate(movie.releaseDate)}</span>
@@ -73,7 +74,7 @@ function HomeHero({ movies, isLoading, onBookingClick }: HomeHeroProps) {
           <div
             key={movie.id}
             className={movie.id === activeMovie.id ? 'is-active' : ''}
-            style={{ backgroundImage: `url(${movie.posterUrl})` }}
+            style={{ backgroundImage: posterBackground(movie.posterUrl) }}
           >
             <span>{movie.title}</span>
           </div>

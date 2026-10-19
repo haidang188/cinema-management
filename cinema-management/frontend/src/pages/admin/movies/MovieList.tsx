@@ -1,3 +1,4 @@
+import PosterImage from "../../../component/common/PosterImage"
 import { useEffect, useMemo, useState } from "react"
 import { Eye, Pencil, Trash2 } from "lucide-react"
 import AppModal from "../../../component/common/AppModal"
@@ -284,7 +285,7 @@ function MovieList({ onNavigate }: MovieListProps) {
                         <td>{page * pageSize + index + 1}</td>
                         <td>
                           <div className="poster-cell movie-poster-thumb">
-                            {movie.posterUrl ? <img src={movie.posterUrl} alt={`Poster ${movie.title}`} /> : <span>Không có ảnh</span>}
+                            {movie.posterUrl ? <PosterImage src={movie.posterUrl} alt={`Poster ${movie.title}`} /> : <span>Không có ảnh</span>}
                           </div>
                         </td>
                         <td>
@@ -406,7 +407,7 @@ function MovieList({ onNavigate }: MovieListProps) {
               <div className="movie-preview-header">
                 <div className="movie-preview-poster">
                   {selectedMovie.posterUrl ? (
-                    <img src={selectedMovie.posterUrl} alt={`Poster ${selectedMovie.title}`} />
+                    <PosterImage src={selectedMovie.posterUrl} alt={`Poster ${selectedMovie.title}`} />
                   ) : (
                     <span>Không có ảnh</span>
                   )}

@@ -1,3 +1,4 @@
+import PosterImage from "../../component/common/PosterImage"
 import { Check, Download, Printer, TicketCheck, X } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
 import { useEffect, useState } from "react"
@@ -66,7 +67,7 @@ function BookingResultPage({ currentUser }: BookingResultPageProps) {
         <div className="result-column">
           <article className="result-card order-reference"><small>Mã đặt vé</small><strong>{booking.bookingCode}</strong><span className={paid ? 'payment-paid' : ''}>{paid ? 'Đã thanh toán' : booking.paymentStatus}</span><dl><div><dt>Phương thức thanh toán</dt><dd>{booking.paymentMethod}</dd></div><div><dt>Thời gian giao dịch</dt><dd>{booking.paidAt ? dateTime(booking.paidAt) : 'Chưa thanh toán'}</dd></div></dl></article>
           <article className="result-card result-movie-card">
-            <img src={booking.posterUrl} alt={booking.movieTitle} />
+            <PosterImage src={booking.posterUrl} alt={booking.movieTitle} />
             <div><span>{booking.ageRating} · {booking.format}</span><h1>{booking.movieTitle}</h1><p>{dateTime(booking.startTime)}</p><p>{booking.roomName} · {booking.roomType}</p></div>
           </article>
           <article className="result-card"><h2>Ghế đã đặt ({booking.tickets.length})</h2><div className="ticket-chip-list">{booking.tickets.map((ticket) => <span key={ticket.seatName}>{ticket.seatName} <small>{ticket.seatType}</small></span>)}</div></article>
@@ -108,7 +109,7 @@ function BookingResultPage({ currentUser }: BookingResultPageProps) {
               {booking.tickets.map((ticket, index) => (
                 <article className="electronic-ticket" key={ticket.ticketCode || ticket.seatName}>
                   <div className="electronic-ticket-head"><span>PREMIERE CINEMAS</span><small>E-TICKET · {index + 1}/{booking.tickets.length}</small></div>
-                  <div className="electronic-ticket-movie"><img src={booking.posterUrl} alt="" /><div><span>{booking.ageRating} · {booking.format}</span><h3>{booking.movieTitle}</h3></div></div>
+                  <div className="electronic-ticket-movie"><PosterImage src={booking.posterUrl} alt="" /><div><span>{booking.ageRating} · {booking.format}</span><h3>{booking.movieTitle}</h3></div></div>
                   <dl className="electronic-ticket-details">
                     <div><dt>Ngày</dt><dd>{dateOnly(booking.startTime)}</dd></div>
                     <div><dt>Giờ chiếu</dt><dd>{timeOnly(booking.startTime)}</dd></div>

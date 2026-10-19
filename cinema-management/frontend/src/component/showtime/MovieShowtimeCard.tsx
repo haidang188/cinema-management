@@ -1,3 +1,4 @@
+import PosterImage from "../common/PosterImage"
 import type {ShowtimeData} from "../../types/showtime/showtime";
 import { useNavigate } from "react-router-dom";
 
@@ -84,7 +85,7 @@ function MovieShowtimeCard({
 
             <div className="movie-poster-wrapper">
 
-                <img
+                <PosterImage
                     src={movie.posterUrl}
                     alt={movie.movieTitle}
                     className="showtime-movie-poster"

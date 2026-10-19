@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600" viewBox="0 0 400 600">
+  <rect width="400" height="600" fill="#172129"/>
+  <g fill="none" stroke="#8ea5b3" stroke-width="8">
+    <rect x="140" y="225" width="120" height="110" rx="12"/>
+    <path d="M140 250h120M140 310h120M165 225v25m35-25v25m35-25v25m-70 60v25m35-25v25m35-25v25"/>
+  </g>
+  <text x="200" y="390" fill="#c9d6de" text-anchor="middle" font-family="sans-serif" font-size="22">Chưa có poster</text>
+</svg>

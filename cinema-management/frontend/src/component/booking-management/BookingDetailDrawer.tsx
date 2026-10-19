@@ -1,3 +1,4 @@
+import PosterImage from "../common/PosterImage"
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -167,7 +168,7 @@ export default function BookingDetailDrawer({ bookingId, onClose }: Props) {
                         {/* ---------- Suất chiếu ---------- */}
                         <section className="bm-drawer-movie">
                             <div className="bm-drawer-poster">
-                                {detail.showtime.posterUrl && <img src={detail.showtime.posterUrl} alt="" />}
+                                {detail.showtime.posterUrl && <PosterImage src={detail.showtime.posterUrl} alt="" />}
                             </div>
                             <div>
                                 <h3>{detail.showtime.movieTitle}</h3>

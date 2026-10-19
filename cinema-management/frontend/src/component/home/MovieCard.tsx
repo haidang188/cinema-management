@@ -1,3 +1,4 @@
+import { posterBackground } from "../common/PosterImage"
 import { useNavigate } from 'react-router-dom'
 import type { Movie } from '../../types/movie'
 
@@ -16,7 +17,7 @@ function MovieCard({ movie }: MovieCardProps) {
     <article className="movie-card">
       <button
         className="movie-poster movie-poster--button"
-        style={{ backgroundImage: `url(${movie.posterUrl})` }}
+        style={{ backgroundImage: posterBackground(movie.posterUrl) }}
         type="button"
         onClick={openMovieDetail}
         aria-label={`Xem chi tiết phim ${movie.title}`}

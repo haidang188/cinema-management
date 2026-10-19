@@ -1,3 +1,4 @@
+import PosterImage from "../../component/common/PosterImage"
 import { Armchair, CalendarDays, Clock3, MapPin, Monitor, Ticket } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
@@ -267,7 +268,7 @@ function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
         <aside className="booking-summary-panel">
           <h2>Tóm Tắt Đơn Hàng</h2>
           <div className="booking-movie-mini">
-            <img src={showtime.posterUrl} alt={showtime.movieTitle} />
+            <PosterImage src={showtime.posterUrl} alt={showtime.movieTitle} />
             <div><strong>{showtime.movieTitle}</strong><span>{showtime.format || "2D"}</span><span>{showtime.roomName}</span></div>
           </div>
           <dl>
