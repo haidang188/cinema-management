@@ -21,6 +21,7 @@
   margin: 0 auto;
   padding: 38px 0 64px;
   color: #f7f5f2;
+  overflow-anchor: none;
 }
 
 .booking-page h1,
@@ -89,6 +90,9 @@
 .booking-showtime-strip .booking-showtime-movie { color: #f5f2ed; font-family: "Times New Roman", Times, serif; font-size: 14px; font-weight: 700; }
 .booking-showtime-strip .booking-showtime-timer { margin-left: auto; }
 .booking-showtime-strip .booking-showtime-timer strong { color: #ff5d70; font-variant-numeric: tabular-nums; }
+.booking-showtime-strip .booking-showtime-timer.is-placeholder {
+  visibility: hidden;
+}
 
 .booking-layout {
   display: grid;

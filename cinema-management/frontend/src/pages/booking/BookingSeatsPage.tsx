@@ -52,6 +52,12 @@ function formatTime(value: string) {
   })
 }
 
+function haveSameSeatIds(left: number[], right: number[]) {
+  if (left.length !== right.length) return false
+  const rightIds = new Set(right)
+  return left.every((id) => rightIds.has(id))
+}
+
 function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
   const { showtimeId: rawShowtimeId } = useParams()
   const showtimeId = Number(rawShowtimeId)
@@ -63,7 +69,6 @@ function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
   const [expiresAt, setExpiresAt] = useState<string | null>(null)
   const [secondsLeft, setSecondsLeft] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const [isUpdating, setIsUpdating] = useState(false)
   const [error, setError] = useState("")
   const selectedIdsRef = useRef<number[]>([])
   const updatingRef = useRef(false)
@@ -103,6 +108,7 @@ function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
   useEffect(() => {
     if (!Number.isFinite(showtimeId)) return
     return subscribeToSeatStatus(showtimeId, (event) => {
+      if (!Array.isArray(event.showtimeSeatIds)) return
       setSeats((currentSeats) =>
         currentSeats.map((seat) => {
           if (!event.showtimeSeatIds.includes(seat.id)) return seat
@@ -158,16 +164,18 @@ function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
     const previousIds = selectedIds
     selectedIdsRef.current = nextIds
     setSelectedIds(nextIds)
-    setIsUpdating(true)
     setError("")
     try {
       const hold = holdToken
         ? await updateSeatHold(holdToken, currentUser.userId, nextIds)
         : await createSeatHold(currentUser.userId, showtimeId, nextIds)
 
-      setSelectedIds(hold.showtimeSeatIds)
-      setSeats(current => current.map(item => previousIds.includes(item.id) || nextIds.includes(item.id)
-        ? { ...item, status: nextIds.includes(item.id) ? "HELD" : "AVAILABLE" } : item))
+      // Đã cập nhật lạc quan ở trên. Chỉ sửa lại khi server thực sự
+      // trả về một tập ghế khác để tránh render/chớp sơ đồ lần thứ hai.
+      if (!haveSameSeatIds(nextIds, hold.showtimeSeatIds)) {
+        selectedIdsRef.current = hold.showtimeSeatIds
+        setSelectedIds(hold.showtimeSeatIds)
+      }
       if (hold.status === "ACTIVE") {
         setHoldToken(hold.holdToken)
         setExpiresAt(hold.expiresAt)
@@ -187,12 +195,11 @@ function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
       getShowtimeSeats(showtimeId).then(setSeats).catch(() => undefined)
     } finally {
       updatingRef.current = false
-      setIsUpdating(false)
     }
   }
 
   function continueBooking() {
-    if (!holdToken || selectedIds.length === 0) return
+    if (updatingRef.current || !holdToken || selectedIds.length === 0) return
     navigate("/booking/confirm")
   }
 
@@ -210,7 +217,12 @@ function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
         <span><CalendarDays size={15} />{formatDate(showtime.startTime)}</span>
         <span><Clock3 size={15} />{formatTime(showtime.startTime)}</span>
         <span><MapPin size={15} />{showtime.roomName} · {showtime.format || "2D"}</span>
-        {expiresAt && <span className="booking-showtime-timer">Giữ ghế <strong>{Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, "0")}</strong></span>}
+        <span
+          className={`booking-showtime-timer ${expiresAt ? "" : "is-placeholder"}`}
+          aria-hidden={!expiresAt}
+        >
+          Giữ ghế <strong>{Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, "0")}</strong>
+        </span>
       </div>
 
       <div className="booking-layout">
@@ -265,7 +277,7 @@ function BookingSeatsPage({ currentUser }: BookingSeatsPageProps) {
           </dl>
           <div className="selected-seat-prices">{selectedSeats.map(seat => <div key={seat.id}><span><Ticket size={14} /> {seat.rowLabel}{seat.seatNumber} · {seat.seatType}</span><strong>{seat.price?.toLocaleString("vi-VN")} đ</strong></div>)}</div>
           <div className="booking-grand-total"><span>Tổng cộng</span><strong>{selectedSeats.reduce((sum, seat) => sum + (seat.price || 0), 0).toLocaleString("vi-VN")} đ</strong></div>
-          <button className="booking-primary" type="button" disabled={isUpdating || !holdToken || selectedIds.length === 0 || secondsLeft === 0} onClick={continueBooking}>
+          <button className="booking-primary" type="button" disabled={!holdToken || selectedIds.length === 0 || secondsLeft === 0} onClick={continueBooking}>
             Tiếp tục <Armchair size={18} />
           </button>
           <small className="booking-note">Không giới hạn số ghế trong một lần đặt</small>
