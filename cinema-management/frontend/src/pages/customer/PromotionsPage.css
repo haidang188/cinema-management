@@ -1,0 +1,642 @@
+/*
+ * Trang Khuyến mãi phía khách — cùng ngôn ngữ thiết kế với Trang chủ (HomePage.css),
+ * Lịch chiếu (Showtime.css) và màn bán vé tại quầy (CounterSale.css).
+ */
+.pm {
+    --pm-red: #e50914;
+    --pm-red-hover: #ff1f2b;
+    --pm-red-soft: rgba(229, 9, 20, 0.12);
+    --pm-amber: #f5a524;
+    --pm-green: #8fd19e;
+    --pm-panel: #15191e;
+    --pm-card: #1b2025;
+    --pm-control: #20252b;
+    --pm-border: #30363e;
+    --pm-border-soft: #272d34;
+    --pm-text: #f5f7f8;
+    --pm-muted: #9ca5af;
+
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 18px 0 40px;
+    color: var(--pm-text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+/* Chặn CSS global rò vào */
+.pm *,
+.pm *::before,
+.pm *::after {
+    box-sizing: border-box;
+}
+
+.pm h1,
+.pm h2,
+.pm h3,
+.pm p,
+.pm ol {
+    margin: 0;
+    font-family: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.pm a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.pm button,
+.pm input {
+    font-family: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.pm button:focus-visible,
+.pm a:focus-visible,
+.pm input:focus-visible {
+    outline: 2px solid var(--pm-red-hover);
+    outline-offset: 2px;
+}
+
+/* ---------- Header ---------- */
+
+.pm .pm-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 2px;
+}
+
+.pm .pm-crumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    color: var(--pm-muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.pm .pm-crumb a:hover {
+    color: #fff;
+}
+
+.pm .pm-crumb strong {
+    color: var(--pm-red);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.pm .pm-header h1 {
+    color: #fff;
+    font-size: 24px;
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.pm .pm-status {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    color: #e8ebed;
+    background: #171b20;
+    border: 1px solid var(--pm-border);
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.pm .pm-status i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #1fa85a;
+}
+
+/* ---------- Panel ---------- */
+
+.pm .pm-panel {
+    min-width: 0;
+    padding: 12px 14px 14px;
+    background: var(--pm-panel);
+    border: 1px solid var(--pm-border);
+    border-radius: 13px;
+}
+
+.pm .pm-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 32px;
+}
+
+.pm .pm-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.pm .pm-step {
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: var(--pm-red);
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.pm .pm-title h2 {
+    color: #f7f8f9;
+    font-size: 15px;
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.pm .pm-title p {
+    margin-top: 3px;
+    color: var(--pm-muted);
+    font-size: 11.5px;
+}
+
+.pm .pm-search {
+    flex: 0 1 260px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 9px;
+    color: #8f98a1;
+    background: var(--pm-control);
+    border: 1px solid var(--pm-border);
+    border-radius: 7px;
+}
+
+.pm .pm-search:focus-within {
+    border-color: var(--pm-red);
+}
+
+.pm .pm-search svg {
+    flex: 0 0 14px;
+}
+
+.pm .pm-search input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    color: #fff;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    font-size: 12px;
+}
+
+.pm .pm-search input::placeholder {
+    color: #7f8892;
+}
+
+.pm .pm-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.pm .pm-segment {
+    display: inline-flex;
+    padding: 2px;
+    background: var(--pm-control);
+    border: 1px solid var(--pm-border);
+    border-radius: 8px;
+}
+
+.pm .pm-segment button {
+    height: 26px;
+    padding: 0 12px;
+    color: var(--pm-muted);
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pm .pm-segment button:hover {
+    color: #fff;
+}
+
+.pm .pm-segment button.active {
+    color: #fff;
+    background: var(--pm-red);
+}
+
+.pm .pm-count {
+    color: var(--pm-muted);
+    font-size: 11.5px;
+}
+
+.pm .pm-reset {
+    margin-left: auto;
+    padding: 0;
+    color: #ff8a90;
+    background: none;
+    border: 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pm .pm-reset:hover {
+    text-decoration: underline;
+}
+
+/* ---------- Nút ---------- */
+
+.pm .pm-btn {
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 14px;
+    color: #fff;
+    background: var(--pm-control);
+    border: 1px solid #3b424a;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.pm .pm-btn:hover {
+    background: #282e35;
+    border-color: #5a636d;
+}
+
+.pm .pm-btn--primary {
+    background: var(--pm-red);
+    border-color: var(--pm-red);
+}
+
+.pm .pm-btn--primary:hover {
+    background: var(--pm-red-hover);
+    border-color: var(--pm-red-hover);
+}
+
+.pm .pm-more {
+    display: flex;
+    margin: 12px auto 0;
+}
+
+/* ---------- Thẻ voucher ---------- */
+
+.pm .pm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.pm .pm-card {
+    position: relative;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    background: var(--pm-card);
+    border: 1px solid var(--pm-border-soft);
+    border-radius: 10px;
+    transition: border-color 0.15s ease;
+}
+
+.pm .pm-card:hover {
+    border-color: #4a525b;
+}
+
+/* Răng cưa vé: 2 nửa hình tròn khoét ở mép đường cắt */
+.pm .pm-card::before,
+.pm .pm-card::after {
+    content: "";
+    position: absolute;
+    left: 96px;
+    width: 16px;
+    height: 16px;
+    background: var(--pm-panel);
+    border: 1px solid var(--pm-border-soft);
+    border-radius: 50%;
+}
+
+.pm .pm-card::before {
+    top: -9px;
+    clip-path: inset(50% 0 0 0);
+}
+
+.pm .pm-card::after {
+    bottom: -9px;
+    clip-path: inset(0 0 50% 0);
+}
+
+.pm .pm-card-stub {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 14px 8px;
+    background: var(--pm-red-soft);
+    border-right: 1px dashed #4a3236;
+    border-radius: 10px 0 0 10px;
+    text-align: center;
+}
+
+.pm .pm-card-stub span {
+    color: #ffb4b8;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.pm .pm-card-stub strong {
+    color: #fff;
+    font-size: 24px;
+    line-height: 1;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+.pm .pm-card-stub em {
+    margin-top: 4px;
+    padding: 3px 6px;
+    color: #111;
+    background: var(--pm-amber);
+    border-radius: 5px;
+    font-size: 9.5px;
+    font-style: normal;
+    line-height: 1;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.pm .pm-card-body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 12px 14px 12px 16px;
+}
+
+.pm .pm-card-body h3 {
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.25;
+    font-weight: 800;
+}
+
+.pm .pm-card-body p {
+    overflow: hidden;
+    color: var(--pm-muted);
+    font-size: 12px;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+}
+
+.pm .pm-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.pm .pm-pills span {
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 8px;
+    color: #d8dde2;
+    background: #2a3037;
+    border: 1px solid #3b424a;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.pm .pm-card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 4px;
+}
+
+.pm .pm-code {
+    min-width: 0;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    color: #c9d0d6;
+    background: #14181d;
+    border: 1px dashed #4a525b;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.pm .pm-code code {
+    overflow: hidden;
+    color: #fff;
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pm .pm-code:hover {
+    color: #fff;
+    border-color: var(--pm-red);
+}
+
+.pm .pm-code.copied {
+    color: var(--pm-green);
+    border-color: var(--pm-green);
+    border-style: solid;
+}
+
+/* ---------- Hướng dẫn ---------- */
+
+.pm .pm-guide h2 {
+    color: #f7f8f9;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.pm .pm-guide ol {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+    padding: 0;
+    list-style: none;
+}
+
+.pm .pm-guide li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--pm-card);
+    border: 1px solid var(--pm-border-soft);
+    border-radius: 10px;
+}
+
+.pm .pm-guide strong {
+    display: block;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.pm .pm-guide p {
+    margin-top: 3px;
+    color: var(--pm-muted);
+    font-size: 11.5px;
+}
+
+/* ---------- Rỗng / đang tải ---------- */
+
+.pm .pm-empty {
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 12px;
+    color: var(--pm-muted);
+    background: var(--pm-card);
+    border: 1px dashed var(--pm-border);
+    border-radius: 10px;
+    text-align: center;
+}
+
+.pm .pm-empty strong {
+    color: #e9ecef;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.pm .pm-empty--error strong {
+    color: #ff6a72;
+}
+
+.pm .pm-empty span {
+    font-size: 11.5px;
+}
+
+.pm .pm-skeleton {
+    height: 146px;
+    border-radius: 10px;
+    background: linear-gradient(100deg, #1b2025 30%, #232a31 50%, #1b2025 70%);
+    background-size: 300% 100%;
+    animation: pm-skeleton 1.4s ease-in-out infinite;
+}
+
+@keyframes pm-skeleton {
+    from { background-position: 100% 0; }
+    to { background-position: 0 0; }
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 760px) {
+    .pm {
+        padding-top: 12px;
+    }
+
+    .pm .pm-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .pm .pm-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .pm .pm-search {
+        flex-basis: auto;
+    }
+
+    .pm .pm-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pm .pm-guide ol {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .pm .pm-card {
+        grid-template-columns: 1fr;
+    }
+
+    .pm .pm-card::before,
+    .pm .pm-card::after {
+        display: none;
+    }
+
+    .pm .pm-card-stub {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 8px;
+        padding: 9px 14px;
+        border-right: 0;
+        border-bottom: 1px dashed #4a3236;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .pm .pm-card-stub strong {
+        font-size: 20px;
+    }
+
+    .pm .pm-card-stub em {
+        margin: 0 0 0 auto;
+    }
+
+    .pm .pm-card-body {
+        padding: 12px 14px;
+    }
+}

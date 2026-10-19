@@ -1,197 +1,117 @@
 import type {ShowtimeData} from "../../types/showtime/showtime";
 import { useNavigate } from "react-router-dom";
-
-interface MovieGroup {
-    movieId: number;
-    movieTitle: string;
-    posterUrl: string;
-    durationMinutes: number;
-    ageRating?: string | null;
-    showtimes: ShowtimeData[];
-}
+import type { MovieGroup } from "./showtimeTypes";
 
 interface FormatGroup {
-    format: string;
-    date: string;
+    label: string;
     showtimes: ShowtimeData[];
 }
 
 interface MovieShowtimeCardProps {
     movie: MovieGroup;
-    showDates?: boolean;
 }
 
-function MovieShowtimeCard({
-                               movie, showDates = false
-                           }: MovieShowtimeCardProps) {
+const CLOSED_STATUSES = ["CANCELLED", "CLOSED", "INACTIVE"];
+
+const formatTime = (dateTime: string): string =>
+    new Date(dateTime).toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+
+const getEndTime = (showtime: ShowtimeData, durationMinutes: number): string =>
+    showtime.endTime
+    || new Date(new Date(showtime.startTime).getTime() + durationMinutes * 60000).toISOString();
+
+function MovieShowtimeCard({ movie }: MovieShowtimeCardProps) {
     const navigate = useNavigate();
+    const now = Date.now();
 
-    const groupByFormat = (
-        movieShowtimes: ShowtimeData[]
-    ): FormatGroup[] => {
+    const formatGroups: FormatGroup[] = Object.values(
+        movie.showtimes.reduce<Record<string, FormatGroup>>((groups, showtime) => {
+            const label = showtime.format || showtime.roomType || "Tiêu chuẩn";
 
-        const grouped = movieShowtimes.reduce<
-            Record<string, FormatGroup>
-        >(
-            (formats, showtime) => {
-
-                const format = showtime.format || "Khác";
-                const date = showtime.startTime.slice(0, 10);
-                const key = showDates ? `${date}-${format}` : format;
-
-                if (!formats[key]) {
-
-                    formats[key] = {
-                        format,
-                        date,
-                        showtimes: []
-                    };
-                }
-
-                formats[key].showtimes.push(showtime);
-
-                return formats;
-
-            },
-            {}
-        );
-
-        return Object.values(grouped);
-    };
-
-    const formatTime = (dateTime: string): string => {
-
-        return new Date(dateTime).toLocaleTimeString(
-            "vi-VN",
-            {
-                hour: "2-digit",
-                minute: "2-digit"
+            if (!groups[label]) {
+                groups[label] = { label, showtimes: [] };
             }
-        );
-    };
 
-    const firstShowtime =
-        movie.showtimes[0];
+            groups[label].showtimes.push(showtime);
 
-    const roomNames = Array.from(
-        new Set(
-            movie.showtimes
-                .map((showtime) => showtime.roomName)
-                .filter(Boolean)
+            return groups;
+        }, {})
+    ).map((group) => ({
+        ...group,
+        showtimes: [...group.showtimes].sort(
+            (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
         )
-    );
+    }));
 
     return (
-        <div
-            className="showtime-movie-card"
-            key={movie.movieId}
-        >
+        <article className="st-movie">
 
-            <div className="movie-poster-wrapper">
-
-                <img
-                    src={movie.posterUrl}
-                    alt={movie.movieTitle}
-                    className="showtime-movie-poster"
-                />
-
+            <div className="st-movie-poster">
+                <img src={movie.posterUrl} alt={movie.movieTitle} loading="lazy" />
+                {movie.ageRating && <span className="st-movie-age">{movie.ageRating}</span>}
             </div>
 
-            <div className="showtime-movie-content">
+            <div className="st-movie-body">
 
-                <div className="showtime-movie-info">
-                    <div>
-                        <h2>
-                            {movie.movieTitle}
-                        </h2>
+                <div className="st-movie-head">
+                    <h3>{movie.movieTitle}</h3>
+                    <div className="st-movie-meta">
+                        <span>{movie.durationMinutes} phút</span>
+                        {movie.language && <span>{movie.language}</span>}
+                        <span>{movie.showtimes.length} suất</span>
+                    </div>
+                </div>
 
-                        <div className="showtime-movie-meta">
+                {formatGroups.map((group) => (
+                    <div className="st-group" key={group.label}>
+                        <strong className="st-group-label">{group.label}</strong>
 
-                            {firstShowtime?.format && (
-                                <span>
-                                    {firstShowtime.format}
-                                </span>
-                            )}
+                        <div className="st-slots">
+                            {group.showtimes.map((showtime) => {
+                                const started = new Date(showtime.startTime).getTime() <= now;
+                                const closed = CLOSED_STATUSES.includes((showtime.status || "").toUpperCase());
+                                const soldOut = showtime.totalSeats > 0 && showtime.availableSeats <= 0;
+                                const disabled = started || closed || soldOut;
+                                const isLow = !disabled && showtime.totalSeats > 0
+                                    && showtime.availableSeats / showtime.totalSeats <= 0.2;
 
-                            {movie.ageRating && (
-                                <span>
-                                    {movie.ageRating}
-                                </span>
-                            )}
+                                const seatText = closed
+                                    ? "Đã hủy"
+                                    : started
+                                        ? "Đã chiếu"
+                                        : soldOut
+                                            ? "Hết vé"
+                                            : `${showtime.availableSeats}/${showtime.totalSeats}`;
 
-                            <span>
-                                {movie.durationMinutes} phút
-                            </span>
-
-                            {firstShowtime?.roomType && (
-                                <span>
-                                    {firstShowtime.roomType}
-                                </span>
-                            )}
-
+                                return (
+                                    <button
+                                        type="button"
+                                        key={showtime.id}
+                                        className={`st-slot${isLow ? " is-low" : ""}`}
+                                        disabled={disabled}
+                                        onClick={() => navigate(`/booking/showtimes/${showtime.id}/seats`)}
+                                    >
+                                        <span className="st-slot-time">
+                                            <b>{formatTime(showtime.startTime)}</b>
+                                            <span className="st-slot-sep">~</span>
+                                            <span className="st-slot-end">
+                                                {formatTime(getEndTime(showtime, movie.durationMinutes))}
+                                            </span>
+                                        </span>
+                                        <span className="st-slot-seats">{seatText}</span>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
-
-                    {roomNames.length > 0 && (
-                        <div className="showtime-room-summary">
-                            {roomNames.join(" · ")}
-                        </div>
-                    )}
-                </div>
-
-                <div className="showtime-schedule">
-
-                    {groupByFormat(movie.showtimes).map(
-                        (formatGroup) => (
-
-                            <div
-                                className="showtime-room"
-                                key={formatGroup.format}
-                            >
-
-                                <div className="format-info">
-                                    <span />
-                                    {showDates && <b>{new Date(formatGroup.date + "T00:00:00").toLocaleDateString("vi-VN", { weekday: "short", day: "2-digit", month: "2-digit" })}</b>}
-                                    {formatGroup.format}
-                                </div>
-
-                                <div className="showtime-times">
-
-                                    {[...formatGroup.showtimes]
-                                        .sort(
-                                            (a, b) =>
-                                                new Date(
-                                                    a.startTime
-                                                ).getTime() -
-                                                new Date(
-                                                    b.startTime
-                                                ).getTime()
-                                        )
-                                        .map((showtime) => (
-
-                                            <button
-                                                key={showtime.id}
-                                                className="showtime-time"
-                                                onClick={() => navigate(`/booking/showtimes/${showtime.id}/seats`)}
-                                            >
-                                                {formatTime(
-                                                    showtime.startTime
-                                                )}
-                                            </button>
-
-                                        ))}
-
-                                </div>
-
-                            </div>
-                        )
-                    )}
-
-                </div>
+                ))}
 
             </div>
 
-        </div>
+        </article>
     );
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { getGenres, getHomeMovies } from '../../service/movie/movieService'
 import type { AuthResponse } from '../../types/auth'
 import type { MovieGenre, Movie } from '../../types/movie'
@@ -6,8 +6,10 @@ import HomeFooter from './HomeFooter'
 import HomeHeader from './HomeHeader'
 import HomeHero from './HomeHero'
 import MovieSection from './MovieSection'
+import type { MovieFilters } from './MovieSection'
+import './HomePage.css'
 
-const DEFAULT_FILTERS = {
+const DEFAULT_FILTERS: MovieFilters = {
   status: 'SHOWING',
   genreId: '',
   date: '',
@@ -31,11 +33,13 @@ function getNextSevenDays() {
       label:
         index === 0
           ? 'Hôm nay'
-          : date.toLocaleDateString('vi-VN', {
-              weekday: 'short',
-              day: '2-digit',
-              month: '2-digit',
-            }),
+          : index === 1
+            ? 'Ngày mai'
+            : date.toLocaleDateString('vi-VN', {
+                weekday: 'short',
+                day: '2-digit',
+                month: '2-digit',
+              }),
     }
   })
 }
@@ -48,83 +52,93 @@ interface HomePageProps {
 }
 
 function HomePage({ currentUser, onLogout, onLoginClick }: HomePageProps) {
+  const [featuredMovies, setFeaturedMovies] = useState<Movie[]>([])
+  const [isFeaturedLoading, setIsFeaturedLoading] = useState(true)
   const [movies, setMovies] = useState<Movie[]>([])
   const [searchKeyword, setSearchKeyword] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [genres, setGenres] = useState<MovieGenre[]>([])
-  const [draftFilters, setDraftFilters] = useState(DEFAULT_FILTERS)
-  const [appliedFilters, setAppliedFilters] = useState(DEFAULT_FILTERS)
-  const dateOptions = getNextSevenDays()
+  const [filters, setFilters] = useState<MovieFilters>(DEFAULT_FILTERS)
+  const dateOptions = useMemo(getNextSevenDays, [])
 
-  const normalizedKeyword = searchKeyword.trim().toLowerCase()
+  const normalizedKeyword = searchKeyword.trim().toLocaleLowerCase('vi-VN')
   const filteredMovies = normalizedKeyword
     ? movies.filter((movie) =>
-        [
-          movie.title,
-          movie.description,
-          movie.director,
-          movie.cast,
-          movie.language,
-          movie.ageRating,
-          movie.status,
-        ]
+        [movie.title, movie.director, movie.cast]
           .filter(Boolean)
-          .some((value) => String(value).toLowerCase().includes(normalizedKeyword)),
+          .some((value) => String(value).toLocaleLowerCase('vi-VN').includes(normalizedKeyword)),
       )
     : movies
 
   useEffect(() => {
-    setIsLoading(true)
-    getHomeMovies(appliedFilters)
-      .then((data) => {
-        setMovies(data)
-        setErrorMessage('')
-      })
-      .catch((error) => {
-        setErrorMessage(error instanceof Error ? error.message : 'Không thể tải danh sách phim')
-      })
-      .finally(() => setIsLoading(false))
-  }, [appliedFilters])
+    getHomeMovies(DEFAULT_FILTERS)
+      .then((data) => setFeaturedMovies(data.slice(0, 6)))
+      .catch(() => setFeaturedMovies([]))
+      .finally(() => setIsFeaturedLoading(false))
 
-  useEffect(() => {
     getGenres().then(setGenres).catch(() => setGenres([]))
   }, [])
 
-  function updateDraftFilter(name: keyof typeof DEFAULT_FILTERS, value: string) {
-    setDraftFilters((currentFilters) => ({
+  useEffect(() => {
+    let cancelled = false
+
+    setIsLoading(true)
+    getHomeMovies(filters)
+      .then((data) => {
+        if (!cancelled) {
+          setMovies(data)
+          setErrorMessage('')
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setErrorMessage(error instanceof Error ? error.message : 'Không thể tải danh sách phim')
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoading(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [filters])
+
+  function updateFilter(name: keyof MovieFilters, value: string) {
+    setFilters((currentFilters) => ({
       ...currentFilters,
       [name]: value,
     }))
   }
 
-  function applyMovieFilters() {
-    setAppliedFilters(draftFilters)
+  function resetFilters() {
+    setFilters(DEFAULT_FILTERS)
+    setSearchKeyword('')
   }
 
   return (
-    <main className="home-page">
-      <HomeHeader
-        currentUser={currentUser}
-        onLoginClick={onLoginClick}
-        onLogout={onLogout}
-        searchValue={searchKeyword}
-        onSearchChange={setSearchKeyword}
-      />
+    <main className="home-page customer-shell">
+      <HomeHeader currentUser={currentUser} onLoginClick={onLoginClick} onLogout={onLogout} />
       <div className="home-content">
-        <p className="breadcrumb">Trang chủ - Premiere Cinemas</p>
-        <HomeHero movies={movies} isLoading={isLoading} />
-        <MovieSection
-          movies={filteredMovies}
-          isLoading={isLoading}
-          errorMessage={errorMessage}
-          searchKeyword={searchKeyword}
-          genres={genres}
-          filters={draftFilters}
-          dateOptions={dateOptions}
-          onFilterChange={updateDraftFilter}
-          onApplyFilters={applyMovieFilters}
-        />
+        <div className="hp">
+          <HomeHero movies={featuredMovies} isLoading={isFeaturedLoading} />
+          <MovieSection
+            movies={filteredMovies}
+            isLoading={isLoading}
+            errorMessage={errorMessage}
+            searchKeyword={searchKeyword}
+            onSearchChange={setSearchKeyword}
+            genres={genres}
+            filters={filters}
+            isFiltered={filters.genreId !== '' || filters.date !== '' || filters.status !== DEFAULT_FILTERS.status || normalizedKeyword !== ''}
+            dateOptions={dateOptions}
+            onFilterChange={updateFilter}
+            onResetFilters={resetFilters}
+          />
+        </div>
       </div>
       <HomeFooter />
     </main>

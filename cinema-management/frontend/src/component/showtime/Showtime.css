@@ -1,395 +1,724 @@
+/*
+ * Lịch chiếu phía khách — dùng chung ngôn ngữ thiết kế với màn bán vé tại quầy
+ * (CounterSale.css): Inter, tiêu đề 800, panel bo 13px, ô suất chiếu dạng cs-slot.
+ */
 .showtime-page {
-    color: var(--ui-text);
-    margin: 0 auto;
-    max-width: 1480px;
-    padding: 16px 0 42px;
+    --st-red: #e50914;
+    --st-red-hover: #ff1f2b;
+    --st-red-soft: rgba(229, 9, 20, 0.12);
+    --st-amber: #f5a524;
+    --st-green: #8fd19e;
+    --st-panel: #15191e;
+    --st-card: #1b2025;
+    --st-control: #20252b;
+    --st-border: #30363e;
+    --st-border-soft: #272d34;
+    --st-text: #f5f7f8;
+    --st-muted: #9ca5af;
+
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
     width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 18px 0 40px;
+    color: var(--st-text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.35;
 }
 
-.showtime-page .showtime-header {
-    border-bottom: 1px solid var(--ui-border);
-    display: grid;
-    gap: 10px;
-    grid-template-columns: minmax(0, 1fr) minmax(300px, 390px);
-    margin-bottom: 18px;
-    padding-bottom: 18px;
+/* Chặn CSS global (theme/layout) rò vào */
+.showtime-page *,
+.showtime-page *::before,
+.showtime-page *::after {
+    box-sizing: border-box;
 }
 
-.showtime-page .showtime-header .page-breadcrumb,
-.showtime-page .showtime-header h1,
-.showtime-page .showtime-header > p {
-    grid-column: 1;
-}
-
-.showtime-page .showtime-header h1 {
-    color: #ffffff;
-    font-size: clamp(29px, 3.5vw, 43px);
-    font-weight: 950;
-    letter-spacing: 0.02em;
-    line-height: 0.95;
+.showtime-page h1,
+.showtime-page h2,
+.showtime-page h3,
+.showtime-page p {
     margin: 0;
-    text-transform: uppercase;
+    font-family: inherit;
+    letter-spacing: normal;
+    text-transform: none;
 }
 
-.showtime-page .showtime-header p {
-    color: var(--ui-muted);
-    font-size: 14px;
-    max-width: 620px;
+.showtime-page button,
+.showtime-page input {
+    font-family: inherit;
+    letter-spacing: normal;
+    text-transform: none;
 }
 
-.showtime-page .date-selector {
-    align-items: stretch;
-    display: grid;
-    gap: 8px;
-    grid-template-columns: 34px minmax(0, 1fr) 34px 42px;
-    margin-bottom: 14px;
+.showtime-page button:focus-visible,
+.showtime-page input:focus-visible {
+    outline: 2px solid var(--st-red-hover);
+    outline-offset: 2px;
 }
 
-.showtime-page .week-arrow,
-.showtime-page .calendar-button,
-.showtime-page .date-item {
-    background: var(--ui-surface);
-    border: 1px solid var(--ui-border);
-    color: var(--ui-text-soft);
+.showtime-page svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
 }
 
-.showtime-page .week-arrow {
-    border-radius: 8px;
-    font-size: 24px;
+/* ---------- Header ---------- */
+
+.showtime-page .st-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 2px;
+}
+
+.showtime-page .st-crumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    color: var(--st-muted);
+    font-size: 11px;
     font-weight: 700;
 }
 
-.showtime-page .week-arrow:not(:disabled):hover,
-.showtime-page .calendar-button:hover,
-.showtime-page .date-item:hover {
-    background: var(--ui-surface-2);
-    border-color: var(--ui-red-line);
+.showtime-page .st-crumb a {
+    color: var(--st-muted);
+    text-decoration: none;
 }
 
-.showtime-page .week-arrow:disabled {
-    cursor: not-allowed;
-    opacity: 0.35;
+.showtime-page .st-crumb a:hover {
+    color: #fff;
 }
 
-.showtime-page .date-list {
-    display: grid;
+.showtime-page .st-crumb strong {
+    color: var(--st-red);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.showtime-page .st-header h1 {
+    color: #fff;
+    font-size: 24px;
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.showtime-page .st-status {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
     gap: 7px;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    padding: 6px 12px;
+    color: #e8ebed;
+    background: #171b20;
+    border: 1px solid var(--st-border);
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
 }
 
-.showtime-page .date-item {
-    border-radius: 8px;
-    display: grid;
-    gap: 3px;
-    min-height: 68px;
-    padding: 9px 8px;
-    text-align: center;
+.showtime-page .st-status i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #1fa85a;
 }
 
-.showtime-page .date-item.active {
-    background: var(--ui-red);
-    border-color: var(--ui-red);
-    color: #ffffff;
+/* ---------- Panel ---------- */
+
+.showtime-page .st-panel {
+    min-width: 0;
+    padding: 12px 14px 14px;
+    background: var(--st-panel);
+    border: 1px solid var(--st-border);
+    border-radius: 13px;
 }
 
-.showtime-page .date-number {
-    font-size: 20px;
-    font-weight: 950;
-    line-height: 1;
-}
-
-.showtime-page .date-weekday {
-    color: currentColor;
-    font-size: 11px;
-    opacity: 0.78;
-    text-transform: capitalize;
-}
-
-.showtime-page .calendar-wrapper {
-    position: relative;
-}
-
-.showtime-page .calendar-button {
-    align-items: center;
-    border-radius: 8px;
+.showtime-page .st-heading {
     display: flex;
-    height: 100%;
-    justify-content: center;
-    min-height: 68px;
-}
-
-.showtime-page .calendar-wrapper input {
-    height: 1px;
-    opacity: 0;
-    position: absolute;
-    width: 1px;
-}
-
-.showtime-page .selected-date {
     align-items: center;
-    background: var(--ui-surface);
-    border: 1px solid var(--ui-border);
-    color: var(--ui-muted);
-    display: flex;
-    font-size: 13px;
-    gap: 6px;
     justify-content: space-between;
-    margin-bottom: 18px;
-    padding: 11px 13px;
+    gap: 12px;
+    min-height: 32px;
 }
 
-.showtime-page .selected-date::after {
-    color: var(--ui-red);
-    content: "Cập nhật suất chiếu trực tiếp";
-    font-size: 11px;
-    font-weight: 850;
-    text-transform: uppercase;
-}
-
-.showtime-page .selected-date strong {
-    color: #ffffff;
-}
-
-.showtime-page .showtime-search-panel {
-    background: var(--ui-surface);
-    border: 1px solid var(--ui-border);
-    grid-column: 2;
-    grid-row: 1 / 4;
-    margin: 0;
-    padding: 12px;
-    align-self: center;
-}
-
-.showtime-page .showtime-search-panel label {
-    display: grid;
-    gap: 8px;
-}
-
-.showtime-page .showtime-search-panel span {
-    color: var(--ui-red);
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.showtime-page .showtime-search-panel input {
-    background: var(--ui-surface-sunken);
-    border: 1px solid var(--ui-border-strong);
-    color: var(--ui-text);
-    min-height: 42px;
-    outline: none;
-    padding: 10px 12px;
-}
-
-.showtime-page .showtime-search-panel input:focus {
-    border-color: var(--ui-red);
-    box-shadow: 0 0 0 3px var(--ui-red-soft);
-}
-
-.showtime-page .showtime-list {
-    display: grid;
-    gap: 18px;
-}
-
-.showtime-page .showtime-movie-card {
-    background: var(--ui-surface);
-    border: 1px solid var(--ui-border);
-    display: grid;
-    gap: 18px;
-    grid-template-columns: 145px minmax(0, 1fr);
-    min-height: 230px;
-    padding: 18px;
-}
-
-.showtime-page .movie-poster-wrapper {
-    align-self: start;
-    background: var(--ui-surface-sunken);
-    border: 1px solid var(--ui-border);
-    min-height: 204px;
-    overflow: hidden;
-    position: relative;
-}
-
-.showtime-page .showtime-movie-poster {
-    display: block;
-    height: 204px;
-    object-fit: cover;
-    width: 100%;
-}
-
-.showtime-page .movie-poster-wrapper::before {
-    background: var(--ui-red);
-    color: #ffffff;
-    content: "T" attr(data-age);
-    display: none;
-}
-
-.showtime-page .showtime-movie-content {
-    display: grid;
-    gap: 18px;
+.showtime-page .st-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     min-width: 0;
 }
 
-.showtime-page .showtime-movie-info {
-    align-items: start;
-    border-bottom: 1px solid var(--ui-border);
-    display: flex;
-    gap: 18px;
-    justify-content: space-between;
-    padding-bottom: 14px;
+.showtime-page .st-step {
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: var(--st-red);
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
 }
 
-.showtime-page .showtime-movie-info h2 {
-    color: #ffffff;
-    font-size: 24px;
-    font-weight: 900;
-    line-height: 1.08;
-    margin: 0 0 8px;
+.showtime-page .st-title h2 {
+    color: #f7f8f9;
+    font-size: 15px;
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.showtime-page .st-title p {
+    margin-top: 3px;
+    color: var(--st-muted);
+    font-size: 11.5px;
+    text-transform: none;
+}
+
+.showtime-page .st-title p::first-letter {
     text-transform: uppercase;
 }
 
-.showtime-page .showtime-movie-meta {
+/* ---------- Dải ngày ---------- */
+
+.showtime-page .st-date-row {
+    display: flex;
+    align-items: stretch;
+    gap: 7px;
+    height: 50px;
+    margin-top: 10px;
+}
+
+.showtime-page .st-dates {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.showtime-page .st-nav {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #eef0f2;
+    background: var(--st-control);
+    border: 1px solid var(--st-border);
+    border-radius: 8px;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.showtime-page .st-nav svg {
+    width: 16px;
+    height: 16px;
+}
+
+.showtime-page .st-nav:hover:not(:disabled) {
+    background: #282e35;
+    border-color: var(--st-red);
+}
+
+.showtime-page .st-nav:disabled {
+    color: #555c64;
+    background: #191d22;
+    cursor: not-allowed;
+}
+
+.showtime-page .st-calendar {
+    position: relative;
+    display: flex;
+}
+
+.showtime-page .st-calendar input {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.showtime-page .st-date {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 4px;
+    color: #d9dde1;
+    background: #1d2228;
+    border: 1px solid var(--st-border);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.showtime-page .st-date:hover:not(.selected) {
+    background: #262c32;
+    border-color: #555d66;
+}
+
+.showtime-page .st-date.selected {
+    color: #fff;
+    background: var(--st-red-soft);
+    border-color: var(--st-red);
+    box-shadow: inset 0 -2px 0 var(--st-red);
+}
+
+.showtime-page .st-date-value {
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.showtime-page .st-date-day {
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--st-muted);
+    font-size: 10.5px;
+    line-height: 1;
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.showtime-page .st-date-day::first-letter {
+    text-transform: uppercase;
+}
+
+.showtime-page .st-date.selected .st-date-day {
+    color: #ffb4b8;
+}
+
+/* ---------- Tìm kiếm + bộ lọc ---------- */
+
+.showtime-page .st-search {
+    flex: 0 1 240px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 9px;
+    background: var(--st-control);
+    border: 1px solid var(--st-border);
+    border-radius: 7px;
+}
+
+.showtime-page .st-search:focus-within {
+    border-color: var(--st-red);
+}
+
+.showtime-page .st-search svg {
+    flex: 0 0 14px;
+    width: 14px;
+    height: 14px;
+    color: #8f98a1;
+}
+
+.showtime-page .st-search input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    color: #fff;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    font-size: 12px;
+}
+
+.showtime-page .st-search input::placeholder {
+    color: #7f8892;
+}
+
+.showtime-page .st-filters {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-}
-
-.showtime-page .showtime-movie-meta span {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--ui-border);
-    color: var(--ui-muted);
-    font-size: 12px;
-    font-weight: 800;
-    padding: 5px 8px;
-}
-
-.showtime-page .showtime-room-summary {
-    color: var(--ui-faint);
-    font-size: 12px;
-    max-width: 240px;
-    text-align: right;
-}
-
-.showtime-page .showtime-schedule {
-    display: grid;
-    gap: 14px;
-}
-
-.showtime-page .showtime-room {
-    display: grid;
-    gap: 10px;
-}
-
-.showtime-page .format-info {
     align-items: center;
-    color: #ffffff;
-    display: flex;
-    font-size: 13px;
-    font-weight: 900;
     gap: 8px;
+    margin-top: 10px;
+}
+
+.showtime-page .st-segment {
+    display: inline-flex;
+    padding: 2px;
+    background: var(--st-control);
+    border: 1px solid var(--st-border);
+    border-radius: 8px;
+}
+
+.showtime-page .st-segment button {
+    height: 26px;
+    padding: 0 12px;
+    color: var(--st-muted);
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.showtime-page .st-segment button:hover {
+    color: #fff;
+}
+
+.showtime-page .st-segment button.active {
+    color: #fff;
+    background: var(--st-red);
+}
+
+.showtime-page .st-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.showtime-page .st-chips button {
+    height: 28px;
+    padding: 0 11px;
+    color: #c9d0d6;
+    background: transparent;
+    border: 1px solid var(--st-border);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.showtime-page .st-chips button:hover {
+    color: #fff;
+    border-color: #555d66;
+}
+
+.showtime-page .st-chips button.active {
+    color: #fff;
+    background: var(--st-red-soft);
+    border-color: rgba(229, 9, 20, 0.45);
+}
+
+.showtime-page .st-reset {
+    margin-left: auto;
+    padding: 0;
+    color: #ff8a90;
+    background: none;
+    border: 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.showtime-page .st-reset:hover {
+    text-decoration: underline;
+}
+
+/* ---------- Danh sách phim ---------- */
+
+.showtime-page .st-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.showtime-page .st-movie {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 14px;
+    padding: 10px;
+    background: var(--st-card);
+    border: 1px solid var(--st-border-soft);
+    border-radius: 10px;
+}
+
+.showtime-page .st-movie-poster {
+    position: relative;
+    align-self: start;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    background: #090b0e;
+    border-radius: 7px;
+}
+
+.showtime-page .st-movie-poster img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.showtime-page .st-movie-age {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    min-width: 26px;
+    padding: 3px 5px;
+    color: #fff;
+    background: var(--st-red);
+    border-radius: 5px;
+    font-size: 9.5px;
+    line-height: 1;
+    font-weight: 800;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+}
+
+.showtime-page .st-movie-body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 2px;
+}
+
+.showtime-page .st-movie-head h3 {
+    color: #fff;
+    font-size: 16px;
+    line-height: 1.2;
+    font-weight: 800;
+}
+
+.showtime-page .st-movie-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 6px;
+}
+
+.showtime-page .st-movie-meta span {
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 8px;
+    color: #d8dde2;
+    background: #2a3037;
+    border: 1px solid #3b424a;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.showtime-page .st-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.showtime-page .st-group-label {
+    align-self: flex-start;
+    padding: 4px 7px;
+    color: #fff;
+    background: #2b3138;
+    border-radius: 5px;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 800;
     text-transform: uppercase;
 }
 
-.showtime-page .format-info span {
-    background: var(--ui-red);
-    display: inline-block;
-    height: 8px;
-    width: 8px;
-}
-
-.showtime-page .showtime-times {
+/* Ô suất chiếu — cùng kiểu .cs-slot của màn bán vé */
+.showtime-page .st-slots {
     display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
     gap: 8px;
-    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
 }
 
-.showtime-page .showtime-time {
-    background: var(--ui-surface);
-    border: 1px solid var(--ui-border);
-    color: #ffffff;
-    font-size: 17px;
-    font-weight: 850;
+.showtime-page .st-slot {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     min-height: 54px;
-    padding: 9px 10px;
-    transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+    padding: 8px 10px;
+    color: #f2f4f6;
+    background: #1f252b;
+    border: 1px solid #353d45;
+    border-radius: 12px;
+    font-family: inherit;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
 }
 
-.showtime-page .showtime-time:hover {
-    background: var(--ui-red);
-    border-color: var(--ui-red);
-    transform: translateY(-1px);
+.showtime-page .st-slot :where(span, b) {
+    all: unset;
+    display: inline;
+    font-family: inherit;
 }
 
-.showtime-page .showtime-time::after {
-    color: var(--ui-faint);
-    content: "Chọn suất";
+.showtime-page .st-slot::before,
+.showtime-page .st-slot::after {
+    content: none !important;
+    display: none !important;
+}
+
+.showtime-page .st-slot:hover:not(:disabled) {
+    background: rgba(229, 9, 20, 0.16);
+    border-color: var(--st-red);
+}
+
+.showtime-page .st-slot:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.showtime-page .st-slot:focus-visible {
+    outline: 2px solid var(--st-red-hover);
+    outline-offset: 2px;
+}
+
+.showtime-page .st-slot:disabled {
+    background: #181c21;
+    border-style: dashed;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.showtime-page .st-slot-time,
+.showtime-page .st-slot-seats {
     display: block;
-    font-size: 10px;
-    font-weight: 650;
-    line-height: 1.2;
-    margin-top: 2px;
+    line-height: 1;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
-.showtime-page .showtime-time:hover::after {
-    color: #ffe4e8;
+.showtime-page .st-slot-time {
+    color: #fff;
+    font-size: 14px;
 }
 
-.showtime-page .no-showtime {
-    background: var(--ui-surface);
-    border: 1px solid var(--ui-border);
-    color: var(--ui-muted);
-    padding: 32px;
+.showtime-page .st-slot-time b {
+    font-weight: 800;
+}
+
+.showtime-page .st-slot-sep {
+    margin: 0 5px;
+    color: #6f7881;
+    font-weight: 500;
+}
+
+.showtime-page .st-slot-end {
+    color: #a3acb5;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.showtime-page .st-slot-seats {
+    color: var(--st-green);
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.showtime-page .st-slot.is-low .st-slot-seats {
+    color: var(--st-amber);
+}
+
+.showtime-page .st-slot:disabled .st-slot-seats {
+    color: var(--st-muted);
+}
+
+/* ---------- Rỗng / đang tải ---------- */
+
+.showtime-page .st-empty {
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: var(--st-muted);
+    background: var(--st-card);
+    border: 1px dashed var(--st-border);
+    border-radius: 10px;
     text-align: center;
 }
 
-@media (max-width: 860px) {
-    .showtime-page .showtime-header { grid-template-columns: 1fr; }
-    .showtime-page .showtime-search-panel { grid-column: 1; grid-row: auto; }
-    .showtime-page .date-selector {
-        grid-template-columns: 32px minmax(0, 1fr) 32px;
+.showtime-page .st-empty strong {
+    color: #e9ecef;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.showtime-page .st-empty span {
+    font-size: 11.5px;
+}
+
+.showtime-page .st-skeleton {
+    height: 164px;
+    border-radius: 10px;
+    background: linear-gradient(100deg, #1b2025 30%, #232a31 50%, #1b2025 70%);
+    background-size: 300% 100%;
+    animation: st-skeleton 1.4s ease-in-out infinite;
+}
+
+@keyframes st-skeleton {
+    from { background-position: 100% 0; }
+    to { background-position: 0 0; }
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 760px) {
+    .showtime-page {
+        padding-top: 12px;
     }
 
-    .showtime-page .calendar-wrapper {
+    .showtime-page .st-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .showtime-page .st-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .showtime-page .st-search {
+        flex-basis: auto;
+    }
+
+    .showtime-page .st-dates {
+        display: flex;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .showtime-page .st-dates::-webkit-scrollbar {
         display: none;
     }
 
-    .showtime-page .date-list {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+    .showtime-page .st-date {
+        flex: 0 0 72px;
     }
 
-    .showtime-page .showtime-movie-card {
-        grid-template-columns: 110px minmax(0, 1fr);
-        padding: 12px;
+    .showtime-page .st-movie {
+        grid-template-columns: 68px minmax(0, 1fr);
+        gap: 10px;
     }
 
-    .showtime-page .movie-poster-wrapper,
-    .showtime-page .showtime-movie-poster {
-        min-height: 164px;
-        height: 164px;
-    }
-
-    .showtime-page .showtime-movie-info {
-        display: grid;
-    }
-
-    .showtime-page .showtime-room-summary {
-        max-width: none;
-        text-align: left;
-    }
-}
-
-@media (max-width: 560px) {
-    .showtime-page .date-list {
+    .showtime-page .st-slots {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .showtime-page .showtime-movie-card {
-        grid-template-columns: 1fr;
-    }
-
-    .showtime-page .movie-poster-wrapper,
-    .showtime-page .showtime-movie-poster {
-        height: 320px;
     }
 }

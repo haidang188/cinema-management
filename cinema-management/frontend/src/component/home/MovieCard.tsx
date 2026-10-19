@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import type { Movie } from '../../types/movie'
 
 interface MovieCardProps {
@@ -7,37 +7,38 @@ interface MovieCardProps {
 
 function MovieCard({ movie }: MovieCardProps) {
   const navigate = useNavigate()
-
-  function openMovieDetail() {
-    navigate(`/movies/${movie.id}`)
-  }
+  const isUpcoming = movie.status === 'UPCOMING'
 
   return (
-    <article className="movie-card">
-      <button
-        className="movie-poster movie-poster--button"
-        style={{ backgroundImage: `url(${movie.posterUrl})` }}
-        type="button"
-        onClick={openMovieDetail}
-        aria-label={`Xem chi tiết phim ${movie.title}`}
-      >
-        <span>{movie.ageRating}</span>
-      </button>
-      <div className="movie-card__body">
-        <button className="movie-card__title-button" type="button" onClick={openMovieDetail}>
-          <h3>{movie.title}</h3>
+    <article className="hp-card">
+      <Link className="hp-card-poster" to={`/movies/${movie.id}`} aria-label={`Xem chi tiết phim ${movie.title}`}>
+        <img src={movie.posterUrl} alt={movie.title} loading="lazy" />
+        {movie.ageRating && <span className="hp-age">{movie.ageRating}</span>}
+        {isUpcoming && <span className="hp-card-flag">Sắp chiếu</span>}
+      </Link>
+
+      <div className="hp-card-overlay">
+        <button
+          type="button"
+          className="hp-btn hp-btn--primary"
+          onClick={() => navigate(`/movies/${movie.id}#movie-showtimes`)}
+        >
+          {isUpcoming ? 'Xem chi tiết' : 'Đặt vé'}
         </button>
-        <p>
-          {movie.durationMinutes} phút - {movie.language}
-        </p>
-        <p className="movie-card__description">{movie.description}</p>
-        <div className="movie-card__actions">
-          <a href={movie.trailerUrl} target="_blank" rel="noreferrer">
-            Xem trailer
+        {movie.trailerUrl && (
+          <a className="hp-btn" href={movie.trailerUrl} target="_blank" rel="noreferrer">
+            Trailer
           </a>
-          <button type="button" onClick={() => navigate(`/movies/${movie.id}#movie-showtimes`)}>
-            Đặt vé ngay
-          </button>
+        )}
+      </div>
+
+      <div className="hp-card-info">
+        <Link to={`/movies/${movie.id}`}>
+          <h3>{movie.title}</h3>
+        </Link>
+        <div className="hp-card-meta">
+          <span>{movie.durationMinutes} phút</span>
+          {movie.language && <span>{movie.language}</span>}
         </div>
       </div>
     </article>

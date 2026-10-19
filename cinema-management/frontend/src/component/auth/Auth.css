@@ -1,0 +1,480 @@
+/*
+ * Đăng nhập / Đăng ký — cùng ngôn ngữ thiết kế với các trang khách (HomePage.css,
+ * Showtime.css, PromotionsPage.css) và màn bán vé tại quầy (CounterSale.css).
+ */
+.au {
+    --au-red: #e50914;
+    --au-red-hover: #ff1f2b;
+    --au-red-soft: rgba(229, 9, 20, 0.12);
+    --au-bg: #0c1112;
+    --au-panel: #15191e;
+    --au-card: #1b2025;
+    --au-control: #20252b;
+    --au-border: #30363e;
+    --au-border-soft: #272d34;
+    --au-text: #f5f7f8;
+    --au-muted: #9ca5af;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(420px, 1fr);
+    min-height: 100svh;
+    color: var(--au-text);
+    background: var(--au-bg);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.au *,
+.au *::before,
+.au *::after {
+    box-sizing: border-box;
+}
+
+.au h1,
+.au h2,
+.au p,
+.au ul {
+    margin: 0;
+    font-family: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.au a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.au button,
+.au input {
+    font-family: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.au button:focus-visible,
+.au a:focus-visible {
+    outline: 2px solid var(--au-red-hover);
+    outline-offset: 2px;
+}
+
+/* ---------- Hero bên trái ---------- */
+
+.au .au-hero {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    padding: 40px;
+    background: #090b0e;
+    border-right: 1px solid var(--au-border-soft);
+}
+
+.au .au-posters {
+    position: absolute;
+    inset: -60px -40px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    transform: rotate(-8deg);
+    opacity: 0.45;
+}
+
+.au .au-posters img {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.au .au-posters img:nth-child(4n + 2),
+.au .au-posters img:nth-child(4n + 4) {
+    transform: translateY(-50px);
+}
+
+.au .au-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(0deg, rgba(9, 11, 14, 0.98) 18%, rgba(9, 11, 14, 0.7) 55%, rgba(9, 11, 14, 0.35) 100%),
+        radial-gradient(circle at 20% 100%, rgba(229, 9, 20, 0.22), transparent 60%);
+}
+
+.au .au-hero-copy {
+    position: relative;
+    z-index: 1;
+    max-width: 520px;
+}
+
+.au .au-eyebrow {
+    color: var(--au-red);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.au .au-hero-copy h1 {
+    margin-top: 10px;
+    color: #fff;
+    font-size: 38px;
+    line-height: 1.12;
+    font-weight: 800;
+}
+
+.au .au-hero-copy > p {
+    margin-top: 12px;
+    color: #c3cad1;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.au .au-features {
+    display: grid;
+    gap: 8px;
+    margin-top: 22px;
+    padding: 0;
+    list-style: none;
+}
+
+.au .au-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(21, 25, 30, 0.82);
+    border: 1px solid var(--au-border-soft);
+    border-radius: 10px;
+    backdrop-filter: blur(6px);
+}
+
+.au .au-features li > span {
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffb4b8;
+    background: var(--au-red-soft);
+    border: 1px solid rgba(229, 9, 20, 0.35);
+    border-radius: 8px;
+}
+
+.au .au-features strong {
+    display: block;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.au .au-features small {
+    color: var(--au-muted);
+    font-size: 11.5px;
+}
+
+/* ---------- Khu vực form ---------- */
+
+.au .au-workspace {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 24px 32px;
+}
+
+.au .au-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.au .au-logo {
+    color: var(--au-red);
+    font-size: 20px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.au .au-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 11px;
+    color: #c9d0d6;
+    background: var(--au-control);
+    border: 1px solid var(--au-border);
+    border-radius: 7px;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.au .au-back:hover {
+    color: #fff;
+    border-color: #555d66;
+}
+
+.au .au-form-wrap {
+    width: 100%;
+    max-width: 420px;
+    margin: auto;
+    padding: 28px 0;
+}
+
+.au--register .au-form-wrap {
+    max-width: 520px;
+}
+
+.au .au-tabs {
+    display: flex;
+    padding: 3px;
+    margin-bottom: 12px;
+    background: var(--au-control);
+    border: 1px solid var(--au-border);
+    border-radius: 9px;
+}
+
+.au .au-tabs button {
+    flex: 1;
+    height: 32px;
+    color: var(--au-muted);
+    background: transparent;
+    border: 0;
+    border-radius: 7px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.au .au-tabs button:hover {
+    color: #fff;
+}
+
+.au .au-tabs button.active {
+    color: #fff;
+    background: var(--au-red);
+}
+
+.au .au-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px;
+    background: var(--au-panel);
+    border: 1px solid var(--au-border);
+    border-radius: 13px;
+}
+
+.au .au-card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.au .au-step {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: var(--au-red);
+    border-radius: 9px;
+}
+
+.au .au-card-head h2 {
+    color: #fff;
+    font-size: 18px;
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.au .au-card-head p {
+    margin-top: 3px;
+    color: var(--au-muted);
+    font-size: 12px;
+}
+
+.au .au-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.au .au-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.au .au-field label {
+    color: #d8dde2;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.au .au-input {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 11px;
+    background: var(--au-control);
+    border: 1px solid var(--au-border);
+    border-radius: 8px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.au .au-input:focus-within {
+    border-color: var(--au-red);
+    box-shadow: 0 0 0 3px var(--au-red-soft);
+}
+
+.au .au-input-icon {
+    display: inline-flex;
+    color: #7f8892;
+}
+
+.au .au-input:focus-within .au-input-icon {
+    color: #ffb4b8;
+}
+
+.au .au-input input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    color: #fff;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    font-size: 13px;
+}
+
+.au .au-input input::placeholder {
+    color: #6c757e;
+}
+
+/* Autofill của Chrome: giữ nền tối */
+.au .au-input input:-webkit-autofill {
+    -webkit-text-fill-color: #fff;
+    -webkit-box-shadow: 0 0 0 40px var(--au-control) inset;
+    caret-color: #fff;
+}
+
+.au .au-input-toggle {
+    display: inline-flex;
+    padding: 4px;
+    color: #7f8892;
+    background: none;
+    border: 0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.au .au-input-toggle:hover {
+    color: #fff;
+}
+
+.au .au-field.has-error .au-input {
+    border-color: #b4232b;
+}
+
+.au .au-error {
+    color: #ff8a90;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.au .au-message {
+    padding: 9px 11px;
+    color: #ffb4b8;
+    background: var(--au-red-soft);
+    border: 1px solid rgba(229, 9, 20, 0.4);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.au .au-submit {
+    height: 42px;
+    margin-top: 4px;
+    color: #fff;
+    background: var(--au-red);
+    border: 0;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.au .au-submit:hover:not(:disabled) {
+    background: var(--au-red-hover);
+}
+
+.au .au-submit:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.au .au-switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: var(--au-muted);
+    font-size: 12px;
+}
+
+.au .au-switch button {
+    padding: 0;
+    color: #ff8a90;
+    background: none;
+    border: 0;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.au .au-switch button:hover {
+    text-decoration: underline;
+}
+
+.au .au-foot {
+    color: #6c757e;
+    font-size: 11px;
+    text-align: center;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 960px) {
+    .au {
+        grid-template-columns: 1fr;
+    }
+
+    .au .au-hero {
+        display: none;
+    }
+}
+
+@media (max-width: 520px) {
+    .au .au-workspace {
+        padding: 16px;
+    }
+
+    .au .au-row {
+        grid-template-columns: 1fr;
+    }
+
+    .au .au-card {
+        padding: 14px;
+    }
+}

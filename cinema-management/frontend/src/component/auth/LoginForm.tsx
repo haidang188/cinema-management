@@ -1,3 +1,4 @@
+import { Lock, LogIn, Mail } from 'lucide-react'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import type { AuthFieldErrors, LoginPayload } from '../../types/auth'
@@ -21,58 +22,45 @@ function LoginForm({ message, fieldErrors, isLoading, onSubmit, onRegisterClick 
   }
 
   return (
-    <form className="auth-card auth-card--login" onSubmit={handleSubmit} noValidate>
-      <div className="auth-card__brand">
-        <strong>PREMIERE</strong>
-        <span>Premiere Cinemas</span>
-      </div>
-
-      <div className="auth-card__heading">
-        <span aria-hidden="true" />
-        <h2>Đăng nhập</h2>
+    <form className="au-card" onSubmit={handleSubmit} noValidate>
+      <div className="au-card-head">
+        <span className="au-step"><LogIn size={15} /></span>
+        <div>
+          <h2>Đăng nhập</h2>
+          <p>Chào mừng bạn quay lại Premiere Cinemas.</p>
+        </div>
       </div>
 
       <FormInput
         id="login-email"
         label="Email"
-        type="text"
+        icon={<Mail size={15} />}
         value={email}
         onChange={(event) => setEmail(event.target.value)}
-        placeholder="Nhập email"
+        placeholder="ban@email.com"
         autoComplete="email"
-        aria-invalid={Boolean(fieldErrors.email)}
-        aria-describedby={fieldErrors.email ? 'login-email-error' : undefined}
+        error={fieldErrors.email}
       />
-      {fieldErrors.email && (
-        <small className="auth-field-error" id="login-email-error">
-          {fieldErrors.email}
-        </small>
-      )}
 
       <FormInput
         id="login-password"
         label="Mật khẩu"
         type="password"
+        icon={<Lock size={15} />}
         value={password}
         onChange={(event) => setPassword(event.target.value)}
         placeholder="Nhập mật khẩu"
         autoComplete="current-password"
-        aria-invalid={Boolean(fieldErrors.password)}
-        aria-describedby={fieldErrors.password ? 'login-password-error' : undefined}
+        error={fieldErrors.password}
       />
-      {fieldErrors.password && (
-        <small className="auth-field-error" id="login-password-error">
-          {fieldErrors.password}
-        </small>
-      )}
 
-      {message && <p className="form-message">{message}</p>}
+      {message && <p className="au-message" role="alert">{message}</p>}
 
-      <button className="primary-action" type="submit" disabled={isLoading}>
+      <button className="au-submit" type="submit" disabled={isLoading}>
         {isLoading ? 'Đang xử lý...' : 'Đăng nhập'}
       </button>
 
-      <div className="auth-switch">
+      <div className="au-switch">
         <span>Chưa có tài khoản?</span>
         <button type="button" onClick={onRegisterClick}>
           Đăng ký ngay

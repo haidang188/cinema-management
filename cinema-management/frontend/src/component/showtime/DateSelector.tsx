@@ -1,97 +1,106 @@
-interface DateItem {
-    value: string;
-    day: string;
-    month: string;
-    weekday: string;
-}
+import { useRef } from "react";
+import type { DateItem } from "./showtimeTypes";
 
 interface DateSelectorProps {
     dates: DateItem[];
     selectedDate: string;
     today: string;
-    startDate: Date;
+    canGoBack: boolean;
     onPreviousWeek: () => void;
     onNextWeek: () => void;
-    onDateClick: (date: DateItem) => void;
-    onCalendarChange: (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => void;
+    onDateClick: (value: string) => void;
+    onCalendarChange: (value: string) => void;
 }
 
 function DateSelector({
                           dates,
                           selectedDate,
                           today,
-                          startDate,
+                          canGoBack,
                           onPreviousWeek,
                           onNextWeek,
                           onDateClick,
                           onCalendarChange
                       }: DateSelectorProps) {
 
+    const calendarRef = useRef<HTMLInputElement>(null);
+
+    const openCalendar = () => {
+        const input = calendarRef.current;
+
+        if (!input) {
+            return;
+        }
+
+        if (typeof input.showPicker === "function") {
+            input.showPicker();
+        } else {
+            input.focus();
+            input.click();
+        }
+    };
+
     return (
-        <div className="date-selector">
+        <div className="st-date-row">
 
             <button
-                className="week-arrow"
+                type="button"
+                className="st-nav"
                 onClick={onPreviousWeek}
-                disabled={startDate <= new Date(`${today}T00:00:00`)}
+                disabled={!canGoBack}
+                aria-label="Tuần trước"
             >
                 ‹
             </button>
 
-            <div className="date-list">
-
+            <div className="st-dates" role="tablist" aria-label="Chọn ngày chiếu">
                 {dates.map((date) => (
-
                     <button
+                        type="button"
+                        role="tab"
+                        aria-selected={selectedDate === date.value}
                         key={date.value}
-                        className={`date-item ${
-                            selectedDate === date.value
-                                ? "active"
-                                : ""
-                        }`}
-                        onClick={() => onDateClick(date)}
+                        className={`st-date${selectedDate === date.value ? " selected" : ""}`}
+                        onClick={() => onDateClick(date.value)}
                     >
-
-                        <span className="date-number">
-                            {date.day}/{date.month}
-                        </span>
-
-                        <span className="date-weekday">
-                            {date.weekday}
-                        </span>
-
+                        <span className="st-date-value">{date.day}/{date.month}</span>
+                        <span className="st-date-day">{date.weekday}</span>
                     </button>
-
                 ))}
-
             </div>
 
             <button
-                className="week-arrow"
+                type="button"
+                className="st-nav"
                 onClick={onNextWeek}
+                aria-label="Tuần sau"
             >
                 ›
             </button>
 
-            <div className="calendar-wrapper">
-
-                <label
-                    htmlFor="calendar"
-                    className="calendar-button"
+            <div className="st-calendar">
+                <button
+                    type="button"
+                    className="st-nav"
+                    onClick={openCalendar}
+                    aria-label="Chọn ngày khác"
+                    title="Chọn ngày khác"
                 >
-                    📅
-                </label>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="16" rx="2" />
+                        <path d="M3 10h18M8 3v4M16 3v4" />
+                    </svg>
+                </button>
 
                 <input
-                    id="calendar"
+                    ref={calendarRef}
                     type="date"
                     min={today}
                     value={selectedDate}
-                    onChange={onCalendarChange}
+                    onChange={(event) => onCalendarChange(event.target.value)}
+                    tabIndex={-1}
+                    aria-hidden="true"
                 />
-
             </div>
 
         </div>
