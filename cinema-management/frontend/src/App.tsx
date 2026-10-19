@@ -1,6 +1,7 @@
 import AppRoutes from "./routes/AppRoutes";
 import { ThemeProvider } from "./theme/ThemeContext";
 import ThemeToggle from "./theme/ThemeToggle";
+import AiChatWidget from "./component/ai/AiChatWidget";
 
 import "./App.css";
 import "./styles/admin-theme.css";
@@ -17,6 +18,7 @@ function App() {
         <ThemeProvider>
             <ThemeToggle />
             <AppRoutes />
+            <AiChatWidget />
         </ThemeProvider>
     );
 }

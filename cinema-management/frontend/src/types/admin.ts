@@ -159,10 +159,6 @@ export interface EmployeeListItem {
   status?: string
 }
 
-export interface Employee extends EmployeeListItem {
-  userId?: number
-}
-
 export interface CreateEmployeeRequest {
   username: string
   password: string
