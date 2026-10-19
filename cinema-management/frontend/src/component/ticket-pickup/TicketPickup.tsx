@@ -63,7 +63,7 @@ export default function TicketPickup() {
     const [error, setError] = useState("");
     const [busy, setBusy] = useState(false);
     const [notice, setNotice] = useState("");
-    // Vé đang in (sau khi xác nhận hoặc in lại).
+
     const [printing, setPrinting] = useState<{ tickets: PrintableTicket[]; note: string } | null>(null);
     const [cameraOpen, setCameraOpen] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -84,7 +84,6 @@ export default function TicketPickup() {
         runSearch(keyword.trim());
     }
 
-    // Camera đọc được mã: điền vào ô tìm (để nhân viên thấy mã đã quét) rồi tìm luôn.
     function handleScanned(text: string) {
         setCameraOpen(false);
         setKeyword(text);

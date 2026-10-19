@@ -34,12 +34,6 @@ import {
 
 import "./CounterSaleConfirm.css";
 
-/*
- * Class dùng tiền tố "cs-" và scope trong .cs-confirm-page
- * để không đụng CSS của trang khác (CSS trong Vite là global).
- */
-
-
 type PaymentMethod = "CASH" | "TRANSFER";
 
 type PriceState = {
@@ -53,23 +47,16 @@ type ConfirmLocationState = {
     selectedSeatIds?: number[];
     selectedSeats?: ShowtimeSeat[];
     price?: PriceState;
-    // Mốc hết hạn giữ ghế (ms theo đồng hồ máy này), truyền từ trang chọn ghế.
+
     holdExpiresAt?: number;
 };
 
-/*
- * Chuyển khoản chỉ dùng VietQR: khách quét bằng mọi app ngân hàng và cả app MoMo.
- * Không có xác nhận tự động -> nhân viên kiểm tra tài khoản rồi bấm "Đã nhận tiền".
- */
 type QrState =
     | { phase: "idle" }
     | { phase: "ready"; payment: QrPayment }
     | { phase: "paid"; payment: QrPayment }
     | { phase: "failed"; message: string };
 
-/* ============================================================
- * HELPERS
- * ============================================================ */
 
 function formatMoney(value: number): string {
     return `${Math.round(value).toLocaleString("vi-VN")}đ`;
@@ -156,7 +143,6 @@ function getApiErrorMessage(err: unknown, fallback: string): string {
     return status ? `${message} (HTTP ${status})` : message;
 }
 
-// Gợi ý tiền khách đưa: đúng số tiền + các mệnh giá làm tròn lên.
 function getCashSuggestions(amount: number): number[] {
     if (amount <= 0) return [];
 
@@ -171,11 +157,6 @@ function getCashSuggestions(amount: number): number[] {
         .sort((a, b) => a - b)
         .slice(0, 5);
 }
-
-
-/* ============================================================
- * CONFIRM MODAL
- * ============================================================ */
 
 type ConfirmModalProps = {
     open: boolean;
@@ -314,10 +295,6 @@ function ConfirmModal({
     );
 }
 
-/* ============================================================
- * PAGE
- * ============================================================ */
-
 function CounterSaleConfirm() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -346,7 +323,6 @@ function CounterSaleConfirm() {
     const showtimeId = showtime?.id;
     const holdToken = useMemo(() => getHoldToken(), []);
 
-    /* ---------- Đơn nháp ---------- */
 
     const orderCode =
         (location.state as { orderCode?: string } | null)?.orderCode ?? getCurrentOrderRef()?.code ?? null;
@@ -372,7 +348,6 @@ function CounterSaleConfirm() {
 
     const isGroup = order?.mode === "GROUP";
 
-    /* ---------- Khách hàng ---------- */
 
     const [customerName, setCustomerName] = useState("");
     const [customerPhone, setCustomerPhone] = useState("");
@@ -382,7 +357,6 @@ function CounterSaleConfirm() {
     // Không bắt buộc; nếu có nhập SĐT thì phải đúng định dạng.
     const customerReady = phoneValid;
 
-    /* ---------- Mã giảm giá ---------- */
 
     const [promoInput, setPromoInput] = useState("");
     const [appliedCode, setAppliedCode] = useState<string | null>(null);
@@ -390,7 +364,6 @@ function CounterSaleConfirm() {
     const [promoMessage, setPromoMessage] = useState("");
     const [promoList, setPromoList] = useState<PromotionQuoteDto[]>([]);
 
-    /* ---------- Hạn giữ ghế ---------- */
 
     const [holdExpiresAt, setHoldExpiresAt] = useState<number | null>(
         typeof state?.holdExpiresAt === "number" ? state.holdExpiresAt : null
@@ -404,10 +377,9 @@ function CounterSaleConfirm() {
     }, []);
 
     const holdRemainingMs = holdExpiresAt === null ? null : holdExpiresAt - holdNow;
-    // Không có thông tin hạn (vào từ bản cũ) -> để backend tự kiểm tra khi bán.
+
     const holdExpired = holdRemainingMs !== null && holdRemainingMs <= 0;
 
-    // Đóng tab khi chưa bán -> nhả ghế ngay, không bắt quầy khác chờ hết 5 phút.
     useEffect(() => {
         if (!showtimeId) return;
 
@@ -437,7 +409,6 @@ function CounterSaleConfirm() {
                     final: data.finalAmount,
                 });
 
-                // Mã không áp được (hết hạn, chưa đủ tối thiểu…) -> gỡ mã, báo lý do.
                 if (appliedCode && data.promotion && !data.promotion.valid) {
                     setPromoMessage(data.promotion.message);
                     setAppliedCode(null);
@@ -460,7 +431,6 @@ function CounterSaleConfirm() {
         };
     }, [showtimeId, selectedSeatIds, appliedCode]);
 
-    // Gợi ý các mã đang dùng được cho đơn này (theo tiền vé trước giảm).
     useEffect(() => {
         if (price.total <= 0) return;
 
@@ -494,22 +464,17 @@ function CounterSaleConfirm() {
         setPromoInput("");
     }
 
-    /* ---------- Phương thức thanh toán ---------- */
 
     const [method, setMethod] = useState<PaymentMethod>("CASH");
 
-    // Tiền mặt
     const [cashInput, setCashInput] = useState("");
     const cashReceived = Number(cashInput.replace(/\D/g, "")) || 0;
     const cashChange = cashReceived - price.final;
     const cashSuggestions = useMemo(() => getCashSuggestions(price.final), [price.final]);
 
-    // VietQR
     const [qr, setQr] = useState<QrState>({ phase: "idle" });
     const [qrImageFailed, setQrImageFailed] = useState(false);
 
-    // Nội dung chuyển khoản cố định cho cả đơn: tạo lại mã không đổi nội dung,
-    // khách đã chuyển theo mã cũ vẫn đối soát được.
     const transferNote = useMemo(
         () => (showtimeId ? buildTransferNote(showtimeId) : ""),
         [showtimeId]
@@ -532,8 +497,6 @@ function CounterSaleConfirm() {
         setQr({ phase: "ready", payment: createVietQrPayment(price.final, transferNote) });
     }, [showtimeId, price.final, transferNote]);
 
-    // Chọn chuyển khoản -> tạo mã ngay, không cần bấm thêm.
-    // Giá thay đổi (tính lại xong) khi chưa nhận tiền -> tạo lại mã đúng số tiền.
     useEffect(() => {
         if (method !== "TRANSFER" || priceLoading || priceError) return;
         if (qr.phase === "paid") return;
@@ -548,7 +511,6 @@ function CounterSaleConfirm() {
         }
     }
 
-    // Bấm nhầm "Đã nhận tiền" -> hoàn tác trước khi bán.
     function handleUndoPaid() {
         if (qr.phase === "paid" && !submitting) {
             setQr({ phase: "ready", payment: qr.payment });
@@ -560,7 +522,6 @@ function CounterSaleConfirm() {
         setMethod(next);
     }
 
-    /* ---------- Điều kiện bán ---------- */
 
     const paymentReady =
         method === "CASH" ? cashReceived >= price.final : qr.phase === "paid";
@@ -595,7 +556,6 @@ function CounterSaleConfirm() {
                                 ? "Kiểm tra tài khoản đã nhận tiền rồi bấm “Đã nhận tiền”"
                                 : "Chưa tạo được mã chuyển khoản";
 
-    /* ---------- Modal + bán ---------- */
 
     const [modalOpen, setModalOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -615,23 +575,16 @@ function CounterSaleConfirm() {
 
             const paidPayment = qr.phase === "paid" ? qr.payment : null;
 
-            // Biến riêng (không phải object literal) để thêm trường mới mà
-            // không vướng kiểm tra "excess property" của kiểu request cũ.
             const request = {
                 showtimeId: showtime.id,
                 showtimeSeatIds: selectedSeatIds,
-                // Giữ để khớp kiểu request cũ; server dùng promotionCode.
                 promotionId: null,
                 paymentMethod: method,
-                // Server tự kiểm tra lại mã, tính tiền giảm và trừ lượt dùng.
                 promotionCode: appliedCode,
                 customerName: customerName.trim() || null,
                 customerPhone: phoneFilled ? normalizePhone(customerPhone) : null,
-                // Ghế phải đang do chính tab này giữ.
                 holdToken,
-                // Tiền mặt: lưu tiền khách đưa, server tự tính và lưu tiền thối.
                 ...(method === "CASH" ? { cashReceived } : {}),
-                // Chuyển khoản: lưu nội dung chuyển khoản để cuối ngày đối soát sao kê.
                 ...(method === "TRANSFER" && paidPayment
                     ? {
                         paymentProvider: "VIETQR",
@@ -643,7 +596,6 @@ function CounterSaleConfirm() {
             const response = await sellTickets(request);
 
             soldRef.current = true;
-            // Đơn đã bán xong: tab bắt đầu đơn mới cho khách tiếp theo.
             clearCurrentOrder();
 
             navigate("/counter-sale/result", {
@@ -681,7 +633,6 @@ function CounterSaleConfirm() {
         });
     }
 
-    // Khách đổi ý: huỷ đơn, nhả ghế ngay cho quầy khác / khách online.
     async function handleCancelOrder() {
         if (orderCode) {
             await cancelCounterOrder(orderCode).catch(() =>
@@ -691,7 +642,7 @@ function CounterSaleConfirm() {
             await releaseSeats(showtimeId).catch(() => undefined);
         }
 
-        soldRef.current = true; // không gửi thêm yêu cầu nhả ghế khi rời trang
+        soldRef.current = true;
         clearCurrentOrder();
         navigate("/counter-sale", { replace: true });
     }
@@ -722,7 +673,7 @@ function CounterSaleConfirm() {
 
         try {
             const parked = await parkCounterOrder(orderCode, name, phone);
-            soldRef.current = true; // ghế vẫn giữ cho đơn tạm gác, không nhả khi rời trang
+            soldRef.current = true;
             clearCurrentOrder();
             navigate("/counter-sale", {
                 replace: true,
@@ -754,7 +705,6 @@ function CounterSaleConfirm() {
         event.currentTarget.classList.add("is-broken");
     }
 
-    /* ---------- Empty ---------- */
 
     if (!showtime || selectedSeatIds.length === 0) {
         return (
@@ -801,11 +751,9 @@ function CounterSaleConfirm() {
                 ? [{ label: "Nội dung CK", value: qr.payment.transferNote ?? qr.payment.reference }]
                 : [];
 
-    /* ---------- Render ---------- */
 
     return (
         <div className="cs-confirm-page">
-            {/* ================= HEADER ================= */}
 
             <CounterSaleStepper
                 current={3}
@@ -844,7 +792,6 @@ function CounterSaleConfirm() {
             )}
 
             <div className="cs-confirm-body">
-                {/* ================= LEFT: ORDER ================= */}
 
                 <section className="cs-card cs-order">
                     <div className="cs-order-movie">
@@ -902,7 +849,6 @@ function CounterSaleConfirm() {
                         </ul>
                     </div>
 
-                    {/* ---------- Khách hàng ---------- */}
 
                     <div className="cs-order-block">
                         <div className="cs-section-label">
@@ -918,7 +864,6 @@ function CounterSaleConfirm() {
                         />
                     </div>
 
-                    {/* ---------- Mã giảm giá ---------- */}
 
                     <div className="cs-order-block">
                         <div className="cs-section-label">
@@ -1006,8 +951,6 @@ function CounterSaleConfirm() {
                     </div>
                 </section>
 
-                {/* ================= RIGHT: PAYMENT ================= */}
-
                 <section className="cs-card cs-payment">
                     <h2>Phương thức thanh toán</h2>
 
@@ -1042,7 +985,6 @@ function CounterSaleConfirm() {
                         </button>
                     </div>
 
-                    {/* ---------- CASH ---------- */}
 
                     {method === "CASH" && (
                         <div className="cs-cash">
@@ -1087,7 +1029,6 @@ function CounterSaleConfirm() {
                         </div>
                     )}
 
-                    {/* ---------- QR ---------- */}
 
                     {method === "TRANSFER" && (
                         <div className="cs-qr">
@@ -1206,7 +1147,6 @@ function CounterSaleConfirm() {
                 </section>
             </div>
 
-            {/* ================= ACTION BAR ================= */}
 
             <div className="cs-confirm-action">
                 <div className="cs-confirm-action-info">

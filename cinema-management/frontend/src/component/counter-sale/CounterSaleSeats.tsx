@@ -32,9 +32,8 @@ import { ParkOrderDialog } from "./CounterSaleDialogs";
 
 import "./CounterSaleSeats.css";
 
-// Dự phòng khi chưa tải được đơn; giới hạn thật do server trả về (đơn thường 20, đơn đoàn không giới hạn).
 const DEFAULT_MAX_SEATS = 20;
-// Có WebSocket thì chỉ làm mới dự phòng; mất kết nối thì làm mới dày hơn.
+
 const SEAT_REFRESH_ONLINE_MS = 60_000;
 const SEAT_REFRESH_OFFLINE_MS = 15_000;
 const PRICE_DEBOUNCE_MS = 250;
@@ -49,11 +48,9 @@ type PriceState = {
     final: number;
 };
 
-// Trạng thái sống của 1 ghế (từ API seat-states + WebSocket).
 type LiveSeat = {
     status: string;
     holdOwner: string | null;
-    // Mốc hết hạn giữ theo đồng hồ máy này (ms), tính từ expiresInSeconds của server.
     expiresAt: number | null;
 };
 
@@ -68,8 +65,6 @@ type SeatRow = {
 
 const EMPTY_PRICE: PriceState = { total: 0, discount: 0, final: 0 };
 
-// Đánh dấu tạm "ghế của tab này" khi chưa băm xong token (crypto.subtle chạy bất đồng bộ).
-// Nếu không có dấu này, ghế vừa giữ có thể bị coi là "mất" ngay khi mã băm tới sau.
 const SELF_OWNER = "__self__";
 
 function getSeatState(status?: string | null): SeatState {
@@ -154,9 +149,6 @@ function toLive(dto: SeatStateDto, receivedAt: number): LiveSeat {
     };
 }
 
-/* ============================================================
- * COMPONENT
- * ============================================================ */
 
 function CounterSaleSeats() {
     const navigate = useNavigate();
@@ -165,14 +157,13 @@ function CounterSaleSeats() {
     const showtime = location.state?.showtime as ShowtimeData | undefined;
     const showtimeId = showtime?.id;
 
-    /* ---------- Đơn nháp: ghế giữ theo đơn, không theo tab ---------- */
     const [order, setOrder] = useState<CounterOrderDto | null>(null);
     const [orderError, setOrderError] = useState("");
     const [orderRetry, setOrderRetry] = useState(0);
     const orderPromiseRef = useRef<{ key: string; promise: Promise<CounterOrderDto> } | null>(null);
     const holdToken = order?.holdToken ?? null;
     const [myOwner, setMyOwner] = useState<string | null>(null);
-    // Bản ref để các hàm async (giữ ghế) luôn đọc giá trị mới nhất, không bị closure cũ.
+
     const myOwnerRef = useRef<string | null>(null);
     myOwnerRef.current = myOwner;
 
@@ -189,7 +180,6 @@ function CounterSaleSeats() {
     const [error, setError] = useState("");
     const [lastUpdated, setLastUpdated] = useState<number | null>(null);
 
-    // Ghế tab này đang giữ (server là nguồn chính, UI cập nhật lạc quan).
     const [selectedSeatIds, setSelectedSeatIds] = useState<number[]>(() => {
         const initial = (location.state as { selectedSeatIds?: unknown } | null)?.selectedSeatIds;
         return Array.isArray(initial) ? initial.filter((id): id is number => typeof id === "number") : [];
@@ -200,8 +190,7 @@ function CounterSaleSeats() {
     });
     const [pendingIds, setPendingIds] = useState<number[]>([]);
     const pendingHoldRef = useRef<Set<number>>(new Set());
-    // Ghế server vừa xác nhận là của tab này. Dùng ref (cập nhật ngay, đồng bộ) để kiểm tra
-    // "ghế bị mất" không đọc nhầm trạng thái cũ trong lúc React chưa kịp render state mới.
+
     const confirmedMineRef = useRef<Set<number>>(new Set());
     const resumedRef = useRef(false);
 
@@ -215,9 +204,9 @@ function CounterSaleSeats() {
     const [notice, setNotice] = useState("");
 
     const seatRequestRef = useRef(0);
-    // Thời điểm quầy này giữ / nhả ghế gần nhất (để bỏ qua dữ liệu tải về đã cũ).
+
     const localChangeAtRef = useRef(0);
-    // Đi tiếp sang trang xác nhận -> không nhả ghế khi rời trang.
+
     const continuingRef = useRef(false);
 
     useEffect(() => {
@@ -225,13 +214,6 @@ function CounterSaleSeats() {
         hashHoldToken(holdToken).then(setMyOwner).catch(() => setMyOwner(null));
     }, [holdToken]);
 
-    /*
-     * Lấy / tạo đơn nháp cho suất này:
-     * - Mở lại từ danh sách tạm gác (state.orderCode) hoặc quay lại từ trang xác nhận / F5
-     *   -> dùng lại đơn DRAFT cùng suất.
-     * - Còn lại -> tạo đơn mới. Đơn nháp của suất khác trong tab này bị huỷ (trả ghế).
-     * Dùng chung 1 promise để StrictMode chạy effect 2 lần cũng không tạo 2 đơn.
-     */
     useEffect(() => {
         if (!showtimeId) return;
 
@@ -285,18 +267,16 @@ function CounterSaleSeats() {
         return () => {
             alive = false;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [showtimeId, orderRetry]);
 
     const maxSeats = order ? order.maxSeats : DEFAULT_MAX_SEATS;
     const isGroup = order?.mode === "GROUP";
 
-    /* ================= TRẠNG THÁI SỐNG ================= */
 
     const mergeLive = useCallback((list: SeatStateDto[], replaceAll = false) => {
         const receivedAt = Date.now();
 
-        // Server gửi trạng thái mới -> từ giờ tin server cho các ghế này.
         list.forEach((dto) => confirmedMineRef.current.delete(dto.showtimeSeatId));
 
         setLive((prev) => {
@@ -310,7 +290,6 @@ function CounterSaleSeats() {
 
     const socketStatus = useSeatSocket(showtimeId, (list) => mergeLive(list));
 
-    /* ================= LOAD / REFRESH ================= */
 
     const loadSeats = useCallback(
         async (silent: boolean) => {
@@ -327,7 +306,7 @@ function CounterSaleSeats() {
             try {
                 const [data, states] = await Promise.all([
                     getShowtimeSeats(showtimeId),
-                    // Backend cũ chưa có API này -> vẫn chạy với trạng thái từ danh sách ghế.
+
                     getSeatStates(showtimeId).catch(() => null),
                 ]);
 
@@ -335,8 +314,6 @@ function CounterSaleSeats() {
 
                 setSeats(Array.isArray(data) ? data : []);
 
-                // Trong lúc chờ phản hồi, quầy vừa giữ / nhả ghế -> dữ liệu này đã cũ,
-                // ghi đè sẽ làm ghế vừa giữ bị coi là "mất". Bỏ qua và tải lại ngay sau đó.
                 if (states && startedAt > localChangeAtRef.current) {
                     mergeLive(states, true);
                 } else if (states) {
@@ -376,7 +353,6 @@ function CounterSaleSeats() {
         seatRequestRef.current += 1;
     }, []);
 
-    /* ================= GHẾ: TRẠNG THÁI HIỂN THỊ ================= */
 
     const seatById = useMemo(() => {
         const map = new Map<number, ShowtimeSeat>();
@@ -390,7 +366,6 @@ function CounterSaleSeats() {
             const status = state?.status ?? seat.status;
             const expiresAt = state?.expiresAt ?? null;
 
-            // Giữ đã quá hạn nhưng job server chưa kịp thu hồi -> coi như trống.
             if (String(status).toUpperCase() === "HELD" && expiresAt !== null && expiresAt <= now) {
                 return { status: "AVAILABLE", owner: null, expiresAt: null };
             }
@@ -411,8 +386,6 @@ function CounterSaleSeats() {
         [liveStatusOf, myOwner]
     );
 
-    /* ================= KHÔI PHỤC GHẾ ĐANG GIỮ (quay lại / F5) ================= */
-
     useEffect(() => {
         if (resumedRef.current || !myOwner || seats.length === 0 || Object.keys(live).length === 0) return;
 
@@ -429,8 +402,6 @@ function CounterSaleSeats() {
         setNow(Date.now());
         setHoldExpiresAt(expiries.length > 0 ? Math.min(...expiries) : null);
     }, [myOwner, seats, live, isHeldByMe]);
-
-    /* ================= GHẾ BỊ MẤT (bán / hết hạn / nơi khác lấy) ================= */
 
     useEffect(() => {
         if (!myOwner || selectedSeatIds.length === 0) return;
@@ -455,7 +426,6 @@ function CounterSaleSeats() {
         setNotice(`Ghế ${codes.join(", ")} không còn do quầy này giữ nên đã bị bỏ chọn.`);
     }, [live, myOwner, selectedSeatIds, seatById, isHeldByMe]);
 
-    /* ================= ĐẾM NGƯỢC GIỮ GHẾ ================= */
 
     useEffect(() => {
         if (holdExpiresAt === null) return;
@@ -478,8 +448,6 @@ function CounterSaleSeats() {
         }
     }, [holdRemainingMs, selectedSeatIds.length, showtimeId]);
 
-    /* ================= NHẢ GHẾ KHI ĐÓNG TAB ================= */
-
     useEffect(() => {
         if (!showtimeId) return;
 
@@ -499,8 +467,6 @@ function CounterSaleSeats() {
         const id = window.setTimeout(() => setNotice(""), NOTICE_DURATION_MS);
         return () => window.clearTimeout(id);
     }, [notice]);
-
-    /* ================= SƠ ĐỒ THEO HÀNG ================= */
 
     const rows = useMemo<SeatRow[]>(() => {
         const groups = new Map<string, ShowtimeSeat[]>();
@@ -557,7 +523,6 @@ function CounterSaleSeats() {
         return Array.from(counts.entries()).map(([label, count]) => ({ label, count }));
     }, [selectedSeats]);
 
-    /* ================= TÍNH GIÁ ================= */
 
     useEffect(() => {
         if (!showtimeId || selectedSeatIds.length === 0) {
@@ -606,15 +571,12 @@ function CounterSaleSeats() {
     const canContinue =
         selectedSeats.length > 0 && !priceLoading && !priceError && !hasPending && holdActive && !!order;
 
-    /* ================= GIỮ / NHẢ ================= */
-
     function setPending(id: number, value: boolean) {
         setPendingIds((current) =>
             value ? [...current.filter((x) => x !== id), id] : current.filter((x) => x !== id)
         );
     }
 
-    // Kết quả server là nguồn chính; cộng thêm các ghế đang chờ giữ để không bị "nháy".
     function applyHoldResult(result: SeatHoldDto) {
         if (result.heldSeatIds.length === 0 && pendingHoldRef.current.size === 0) {
             resetGroupMode();
@@ -630,8 +592,6 @@ function CounterSaleSeats() {
             setNotice(`Bỏ qua ${result.skippedSeats.length} ghế đã có nơi khác giữ: ${result.skippedSeats.slice(0, 8).join(", ")}${result.skippedSeats.length > 8 ? "…" : ""}`);
         }
 
-        // Đồng hồ `now` chỉ chạy khi đang giữ ghế -> trước lần giữ đầu tiên nó còn
-        // là giá trị cũ (lúc mở trang). Cập nhật ngay để không hiện 5:08 rồi mới về 4:59.
         setNow(receivedAt);
 
         pendingHoldRef.current.forEach((id) => held.add(id));
@@ -639,7 +599,6 @@ function CounterSaleSeats() {
         setSelectedSeatIds(Array.from(held));
         setHoldExpiresAt(result.heldSeatIds.length > 0 ? receivedAt + result.expiresInSeconds * 1000 : null);
 
-        // Cập nhật lạc quan trạng thái sống của ghế mình (WebSocket sẽ gửi lại sau).
         const owner = myOwnerRef.current ?? SELF_OWNER;
 
         {
@@ -665,7 +624,6 @@ function CounterSaleSeats() {
             return;
         }
 
-        // Shift + bấm: chọn dải ghế liền nhau trong cùng hàng.
         const last = lastClickedRef.current;
         lastClickedRef.current = seat;
 
@@ -689,7 +647,7 @@ function CounterSaleSeats() {
                 applyHoldResult(await releaseSeats(showtimeId, [seat.id]));
                 markReleased([seat.id]);
             } catch (err) {
-                // Nhả lỗi không nghiêm trọng: server tự thu hồi khi hết hạn.
+
                 console.warn("Nhả ghế lỗi:", err);
             } finally {
                 setPending(seat.id, false);
@@ -724,7 +682,6 @@ function CounterSaleSeats() {
         }
     }
 
-    // Ghế vừa nhả: hiện "trống" ngay, không chờ WebSocket / làm mới.
     function markReleased(ids: number[]) {
         ids.forEach((id) => confirmedMineRef.current.delete(id));
         setLive((prev) => {
@@ -736,7 +693,6 @@ function CounterSaleSeats() {
         });
     }
 
-    // Bỏ hết ghế -> đơn quay về đơn thường (server cũng tự đổi), thẻ "Bao rạp" tắt.
     function resetGroupMode() {
         setOrder((current) =>
             current && current.mode === "GROUP"
@@ -760,7 +716,6 @@ function CounterSaleSeats() {
         }
     }
 
-    // Esc = bỏ chọn (nhả) tất cả.
     useEffect(() => {
         function onKeyDown(event: KeyboardEvent) {
             if (event.key === "Escape") releaseAll();
@@ -768,13 +723,8 @@ function CounterSaleSeats() {
 
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showtimeId]);
 
-    /* ================= CHỌN NHIỀU GHẾ (cả hàng / dải / tất cả) ================= */
-
-    // limit: giới hạn ghế dùng cho lần chọn này (mặc định theo đơn; bao rạp truyền null ngay
-    // sau khi bật đơn đoàn, vì state `order` chưa kịp cập nhật).
     async function holdMany(targets: ShowtimeSeat[], limit: number | null = maxSeats) {
         if (!showtimeId || !order) return;
 
@@ -823,7 +773,6 @@ function CounterSaleSeats() {
         }
     }
 
-    // Bấm nhãn hàng: giữ cả hàng; nếu cả hàng (phần còn trống) đã là của mình thì nhả cả hàng.
     async function toggleRow(rowLabel: string) {
         if (!showtimeId || !order) return;
 
@@ -850,8 +799,6 @@ function CounterSaleSeats() {
 
         await holdMany(rowSeats);
     }
-
-    /* ================= ĐƠN: GIA HẠN / TẠM GÁC / ĐƠN ĐOÀN ================= */
 
     function applyOrder(next: CounterOrderDto) {
         setOrder(next);
@@ -897,7 +844,6 @@ function CounterSaleSeats() {
         }
     }
 
-    // Đơn đoàn / bao rạp: 1 lần bấm -> bỏ giới hạn ghế và giữ luôn tất cả ghế còn trống.
     async function handleGroupSelectAll() {
         if (!order || groupBusy) return;
 
@@ -946,8 +892,6 @@ function CounterSaleSeats() {
         });
     }
 
-    /* ================= EMPTY ================= */
-
     if (!showtime) {
         return (
             <div className="cs-seats-page">
@@ -966,8 +910,6 @@ function CounterSaleSeats() {
             </div>
         );
     }
-
-    /* ================= RENDER ================= */
 
     return (
         <div className="cs-seats-page">

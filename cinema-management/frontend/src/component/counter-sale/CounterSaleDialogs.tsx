@@ -5,10 +5,6 @@ import { isValidPhone, lookupCustomer, normalizePhone } from "../../service/coun
 
 import "./CounterSaleStepper.css";
 
-/* ============================================================
- * KHUNG HỘP THOẠI DÙNG CHUNG
- * ============================================================ */
-
 type DialogProps = {
     open: boolean;
     title: string;
@@ -24,14 +20,11 @@ type DialogProps = {
 function Dialog({ open, title, description, busy, error, confirmLabel, onCancel, onSubmit, children }: DialogProps) {
     const panelRef = useRef<HTMLFormElement>(null);
 
-    // Giữ hàm mới nhất trong ref: trang cha render lại mỗi giây (đồng hồ giữ ghế)
-    // nên onCancel / busy đổi liên tục; không được để effect focus chạy lại theo chúng.
     const onCancelRef = useRef(onCancel);
     const busyRef = useRef(busy);
     onCancelRef.current = onCancel;
     busyRef.current = busy;
 
-    // Chỉ focus ô đầu tiên MỘT LẦN khi vừa mở hộp thoại.
     useEffect(() => {
         if (!open) return;
 
@@ -84,10 +77,6 @@ function Dialog({ open, title, description, busy, error, confirmLabel, onCancel,
     );
 }
 
-/* ============================================================
- * Ô NHẬP KHÁCH HÀNG (tra khách cũ theo SĐT)
- * ============================================================ */
-
 type CustomerFieldsProps = {
     name: string;
     phone: string;
@@ -102,7 +91,6 @@ export function CustomerFields({ name, phone, required, onNameChange, onPhoneCha
 
     nameRef.current = name;
 
-    // Nhập đủ SĐT hợp lệ -> tra khách cũ, tự điền tên nếu ô tên đang trống.
     useEffect(() => {
         setHint("");
 
@@ -123,7 +111,6 @@ export function CustomerFields({ name, phone, required, onNameChange, onPhoneCha
                     setHint("Khách mới");
                 }
             } catch {
-                // Tra cứu lỗi không chặn việc bán vé.
             }
         }, 350);
 
@@ -131,7 +118,6 @@ export function CustomerFields({ name, phone, required, onNameChange, onPhoneCha
             cancelled = true;
             window.clearTimeout(timer);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [phone]);
 
     const phoneInvalid = phone.trim() !== "" && !isValidPhone(phone);
@@ -174,10 +160,6 @@ export function CustomerFields({ name, phone, required, onNameChange, onPhoneCha
         </div>
     );
 }
-
-/* ============================================================
- * TẠM GÁC ĐƠN
- * ============================================================ */
 
 type ParkDialogProps = {
     open: boolean;

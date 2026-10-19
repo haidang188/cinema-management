@@ -9,7 +9,6 @@ type Status =
 type Camera = { id: string; label: string };
 
 type Props = {
-    /** Gọi một lần với nội dung mã QR đọc được; camera dừng ngay sau đó. */
     onDetected: (text: string) => void;
     onClose: () => void;
 };
@@ -28,7 +27,6 @@ function saveCamera(id: string) {
     try {
         window.localStorage.setItem(CAMERA_KEY, id);
     } catch {
-        // Bị chặn lưu trữ: lần sau chọn lại camera, không ảnh hưởng việc quét.
     }
 }
 
@@ -51,11 +49,6 @@ function cameraErrorMessage(err: unknown): string {
     return "Không mở được camera. Thử lại hoặc nhập mã bằng tay.";
 }
 
-/**
- * Quét mã QR bằng camera (webcam laptop hoặc camera rời) ngay trên trình duyệt.
- * Dùng qr-scanner (giải mã trong Web Worker) vì BarcodeDetector chưa có trên Chrome Windows.
- * Máy quét mã vạch cắm USB không cần khung này: nó gõ mã vào ô tìm như bàn phím.
- */
 export default function QrCameraScanner({ onDetected, onClose }: Props) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const scannerRef = useRef<QrScanner | null>(null);
@@ -111,7 +104,6 @@ export default function QrCameraScanner({ onDetected, onClose }: Props) {
 
                 setStatus({ kind: "scanning" });
 
-                // Nhãn camera chỉ có sau khi đã được cấp quyền, nên liệt kê sau start().
                 const list = await QrScannerLib.listCameras(true);
                 if (!cancelled) setCameras(list);
             } catch (err) {

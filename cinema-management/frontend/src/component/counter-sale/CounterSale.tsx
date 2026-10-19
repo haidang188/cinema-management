@@ -25,13 +25,13 @@ import "./CounterSale.css";
 
 const MOVIES_PER_PAGE = 5;
 const DATE_WINDOW_SIZE = 7;
-// Số ngày quét lịch chiếu để tìm phim / hiện "Tất cả ngày" (tính cả hôm nay).
+
 const SEARCH_RANGE_DAYS = 14;
 const SELLING_CUTOFF_MINUTES = 5;
 const CLOCK_TICK_MS = 30_000;
 const SEAT_REFRESH_MS = 60_000;
 const LOW_SEAT_RATIO = 0.2;
-// Giới hạn số request chạy song song để không dội backend.
+
 const DATE_FETCH_CONCURRENCY = 4;
 const SEAT_FETCH_CONCURRENCY = 6;
 const PARKED_REFRESH_MS = 15_000;
@@ -270,7 +270,7 @@ function ParkedOrders() {
                 setOrders(list);
                 setLoadedAt(Date.now());
             } catch {
-                // Không chặn trang bán vé nếu API lỗi.
+
             }
         }
 
@@ -377,11 +377,11 @@ function CounterSale() {
     const now = useNow(CLOCK_TICK_MS);
     const todayKey = formatDate(new Date(now));
 
-    // null = "Tất cả ngày" (không lọc theo ngày).
+
     const [selectedDate, setSelectedDate] = useState<string | null>(todayKey);
     const [dateWindowStart, setDateWindowStart] = useState(todayKey);
 
-    // Cache lịch chiếu theo ngày: tải 1 lần, dùng cho tìm kiếm / tất cả ngày.
+
     const [showtimesByDate, setShowtimesByDate] = useState<Record<string, ShowtimeData[]>>({});
     const [dateErrors, setDateErrors] = useState<Record<string, string>>({});
     const [dateRetryToken, setDateRetryToken] = useState(0);
@@ -541,7 +541,6 @@ function CounterSale() {
             .sort((a, b) => getStartMs(a) - getStartMs(b));
     }, [showtimesByDate, now]);
 
-    // Phạm vi hiện tại: đúng ngày đang chọn, hoặc cả dải 14 ngày.
     const scopeShowtimes = useMemo(
         () =>
             selectedDate

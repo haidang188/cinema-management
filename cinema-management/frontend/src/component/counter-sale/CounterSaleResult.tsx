@@ -13,11 +13,6 @@ import type { PrintableTicket, TicketShowInfo } from "../../component/ticket-pri
 
 import "./CounterSaleResult.css";
 
-/*
- * Class dùng tiền tố "cs-" và scope trong .cs-result-page
- * để không đụng CSS trang khác (CSS của Vite là global).
- */
-
 type PaymentInfo = {
     method?: string;
     provider?: string;
@@ -40,7 +35,6 @@ type TicketView = {
     seat?: ShowtimeSeat;
 };
 
-// Một số backend trả kèm danh sách vé có ghế; nếu có thì ưu tiên dùng.
 type ResponseTicket = {
     ticketCode?: string;
     code?: string;
@@ -49,10 +43,6 @@ type ResponseTicket = {
     showtimeSeatId?: number;
     seatId?: number;
 };
-
-/* ============================================================
- * HELPERS
- * ============================================================ */
 
 function formatMoney(value?: number | null): string {
     return `${Math.round(Number(value) || 0).toLocaleString("vi-VN")}đ`;
@@ -150,9 +140,6 @@ async function copyText(text: string): Promise<boolean> {
     }
 }
 
-/* ============================================================
- * PAGE
- * ============================================================ */
 
 function CounterSaleResult() {
     const navigate = useNavigate();
@@ -166,7 +153,6 @@ function CounterSaleResult() {
     const customer = state?.customer;
     const promotion = state?.promotion;
 
-    // Thời điểm bán: ưu tiên thời gian backend trả về, nếu không thì lúc mở trang.
     const [soldAt] = useState(() => {
         const raw = (response as unknown as { createdAt?: string; paidAt?: string } | undefined);
         const value = raw?.paidAt ?? raw?.createdAt;
@@ -174,12 +160,6 @@ function CounterSaleResult() {
         return Number.isNaN(date.getTime()) ? new Date() : date;
     });
 
-    /*
-     * Ghép mã vé với ghế.
-     * 1) Nếu response có mảng tickets kèm thông tin ghế -> ghép theo ghế (chính xác).
-     * 2) Nếu chỉ có ticketCodes -> ghép theo thứ tự. Backend tạo vé theo thứ tự
-     *    showtimeSeatIds gửi lên; trang xác nhận gửi đúng thứ tự selectedSeats.
-     */
     const tickets = useMemo<TicketView[]>(() => {
         if (!response) return [];
 
@@ -207,7 +187,6 @@ function CounterSaleResult() {
         }));
     }, [response, selectedSeats]);
 
-    /* ---------- Copy ---------- */
 
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -218,13 +197,9 @@ function CounterSaleResult() {
         }
     }
 
-    /* ---------- Print ---------- */
-
-    // null = không in; "all" = in tất cả; mã vé = in 1 vé.
     const [printTarget, setPrintTarget] = useState<string | null>(null);
     const [printedCount, setPrintedCount] = useState(0);
 
-    // Dạng vé dùng chung cho màn hình và bản in.
     const printable = useMemo<PrintableTicket[]>(
         () =>
             tickets.map((ticket) => ({
@@ -237,7 +212,6 @@ function CounterSaleResult() {
 
     const printTickets = printTarget === "all" ? printable : printable.filter((t) => t.code === printTarget);
 
-    /* ---------- Phím tắt ---------- */
 
     const newSaleRef = useRef<HTMLButtonElement>(null);
 
@@ -267,7 +241,6 @@ function CounterSaleResult() {
         event.currentTarget.classList.add("is-broken");
     }
 
-    /* ---------- Empty ---------- */
 
     if (!response || !showtime) {
         return (
@@ -302,11 +275,10 @@ function CounterSaleResult() {
         format: getFormatLabel(showtime),
     };
 
-    /* ---------- Render ---------- */
+
 
     return (
         <div className="cs-result-page">
-            {/* ================= SUCCESS ================= */}
 
             <div className="cs-no-print">
                 <CounterSaleStepper current={4} showtime={showtime} seatCodes={selectedSeats.map(seatCode)} />
@@ -332,7 +304,7 @@ function CounterSaleResult() {
             </section>
 
             <div className="cs-result-body cs-no-print">
-                {/* ================= LEFT ================= */}
+
 
                 <div className="cs-result-left">
                     {/* Booking */}
@@ -525,12 +497,6 @@ function CounterSaleResult() {
                 </div>
             </div>
 
-            {/* ================= PRINT AREA (chỉ hiện khi in) ================= */}
-
-            {/*
-             * Portal thẳng vào <body> để khi in có thể ẩn TOÀN BỘ layout
-             * (sidebar, header...) bằng display:none, không sinh trang trắng.
-             */}
             {printTarget && (
                 <TicketPrintArea
                     tickets={printTickets}

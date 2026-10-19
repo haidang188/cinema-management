@@ -4,13 +4,6 @@ import type { ShowtimeData } from "../../types/showtime/showtime";
 
 import "./CounterSaleStepper.css";
 
-/*
- * THANH TRẠNG THÁI BÁN VÉ TẠI QUẦY (dùng chung cho 4 trang)
- *   ① Suất chiếu ─ ② Ghế ─ ③ Khách hàng & Thanh toán ─ ④ Hoàn tất
- * Bước đã xong bấm được để quay lại. Bên phải: mã đơn, chế độ đoàn,
- * đồng hồ giữ ghế (+2 phút) và nút tạm gác.
- */
-
 export type CounterStep = 1 | 2 | 3 | 4;
 
 const STEPS: { id: CounterStep; label: string }[] = [
@@ -28,13 +21,13 @@ type Props = {
     seatCodes?: string[];
     orderCode?: string | null;
     isGroup?: boolean;
-    // Mốc hết hạn giữ ghế theo đồng hồ máy này (ms); null = chưa giữ.
+
     holdExpiresAt?: number | null;
     extendsLeft?: number;
     extending?: boolean;
     onExtend?: () => void;
     onPark?: () => void;
-    // Bấm vào bước đã hoàn thành để quay lại.
+
     onStepClick?: (step: CounterStep) => void;
 };
 
