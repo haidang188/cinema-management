@@ -1408,38 +1408,101 @@
     font-size: 12px;
 }
 
-.cs-confirm-page .cs-promo-suggest {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+.cs-confirm-page .cs-promo-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
 }
 
-.cs-confirm-page .cs-promo-suggest button {
-    display: inline-flex;
+.cs-confirm-page .cs-promo-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 9px 12px;
+    color: #fff;
+    text-align: left;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.cs-confirm-page .cs-promo-option:hover:not(:disabled) {
+    border-color: var(--red-line);
+}
+
+.cs-confirm-page .cs-promo-option:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cs-confirm-page .cs-promo-option.is-selected {
+    background: rgba(34, 192, 122, 0.1);
+    border-color: rgba(34, 192, 122, 0.55);
+}
+
+.cs-confirm-page .cs-promo-radio {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--muted);
+    border-radius: 50%;
+}
+
+.cs-confirm-page .cs-promo-option.is-selected .cs-promo-radio {
+    border-color: var(--green);
+    box-shadow: inset 0 0 0 3px var(--panel-2);
+    background: var(--green);
+}
+
+.cs-confirm-page .cs-promo-option-info {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cs-confirm-page .cs-promo-option-info b {
+    display: flex;
     align-items: center;
     gap: 6px;
-    height: 30px;
-    padding: 0 10px;
-    color: #fff;
-    background: var(--panel-2);
-    border: 1px dashed var(--red-line);
-    border-radius: 999px;
-    font-size: 11.5px;
-    cursor: pointer;
-}
-
-.cs-confirm-page .cs-promo-suggest button b {
     font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 13px;
 }
 
-.cs-confirm-page .cs-promo-suggest button span {
+.cs-confirm-page .cs-promo-option-info em {
+    padding: 1px 6px;
+    color: #ffd27a;
+    background: rgba(255, 196, 0, 0.12);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.cs-confirm-page .cs-promo-option-info small {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 11.5px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.cs-confirm-page .cs-promo-option strong {
+    flex: none;
     color: #8fd19e;
+    font-size: 13.5px;
     font-weight: 800;
 }
 
-.cs-confirm-page .cs-promo-suggest button:hover {
-    border-style: solid;
-    background: var(--red-soft);
+.cs-confirm-page .cs-promo-empty {
+    color: var(--muted);
+    font-size: 12px;
 }
 
 .cs-confirm-page .cs-promo-applied {

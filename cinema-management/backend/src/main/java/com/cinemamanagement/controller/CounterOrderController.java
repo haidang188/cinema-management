@@ -12,16 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * POST /api/counter-orders                    tạo đơn nháp {showtimeId}
- * GET  /api/counter-orders/{code}             xem đơn
- * POST /api/counter-orders/{code}/extend      +2 phút (tối đa 2 lần)
- * POST /api/counter-orders/{code}/park        tạm gác {customerName, customerPhone}
- * POST /api/counter-orders/{code}/resume      mở lại đơn tạm gác
- * POST /api/counter-orders/{code}/cancel      huỷ đơn, trả ghế
- * POST /api/counter-orders/{code}/group       bật đơn đoàn / bao rạp
- * GET  /api/counter-orders/parked             danh sách đơn đang tạm gác
- */
 @RestController
 @RequestMapping("/api/counter-orders")
 @RequiredArgsConstructor

@@ -33,8 +33,6 @@ public class ShowtimeSeatHoldController {
             @RequestBody SeatHoldRequest request,
             HttpServletRequest httpRequest
     ) {
-        // API giữ ghế này chỉ dành cho quầy; khách đặt online đi qua /api/seat-holds.
-        // Bắt buộc đăng nhập nhân viên để không ai sinh token ẩn danh và chiếm ghế hàng loạt.
         sessionEmployeeResolver.requireEmployeeId(httpRequest);
         return ResponseEntity.ok(seatHoldService.hold(
                 showtimeId,

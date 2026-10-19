@@ -438,7 +438,7 @@ function CounterSaleConfirm() {
 
         listApplicablePromotions(price.total)
             .then((list) => {
-                if (!cancelled) setPromoList(list.slice(0, 4));
+                if (!cancelled) setPromoList(list);
             })
             .catch(() => undefined);
 
@@ -455,6 +455,15 @@ function CounterSaleConfirm() {
         setPromoMessage("");
         setPromoInput(value);
         setAppliedCode(value);
+    }
+
+    // Chọn từ danh sách: không ghi đè ô nhập tay.
+    function selectPromotion(code: string | null) {
+        if (!code) return;
+
+        setPromoMessage("");
+        setPromoInput("");
+        setAppliedCode(code);
     }
 
     function removePromotion() {
@@ -870,7 +879,39 @@ function CounterSaleConfirm() {
                             <span>Mã giảm giá</span>
                         </div>
 
-                        {appliedCode && promotion ? (
+                        {promoList.length > 0 ? (
+                            <div className="cs-promo-list" role="radiogroup" aria-label="Mã giảm giá áp dụng được">
+                                {promoList.map((item, index) => {
+                                    const selected = !!item.code && appliedCode === item.code;
+
+                                    return (
+                                        <button
+                                            key={item.code ?? item.promotionId}
+                                            type="button"
+                                            role="radio"
+                                            aria-checked={selected}
+                                            className={`cs-promo-option ${selected ? "is-selected" : ""}`}
+                                            disabled={!item.code || qr.phase === "paid"}
+                                            onClick={() => (selected ? removePromotion() : selectPromotion(item.code))}
+                                        >
+                                            <span className="cs-promo-radio" aria-hidden="true" />
+                                            <span className="cs-promo-option-info">
+                                                <b>
+                                                    {item.code}
+                                                    {index === 0 && <em>Giảm nhiều nhất</em>}
+                                                </b>
+                                                <small>{item.title}</small>
+                                            </span>
+                                            <strong>−{formatMoney(item.discountAmount)}</strong>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <p className="cs-promo-empty">Đơn hàng chưa đủ điều kiện cho mã giảm giá nào.</p>
+                        )}
+
+                        {appliedCode && promotion && !promoList.some((item) => item.code === appliedCode) && (
                             <div className="cs-promo-applied">
                                 <div>
                                     <b>{promotion.code}</b>
@@ -881,49 +922,31 @@ function CounterSaleConfirm() {
                                     ×
                                 </button>
                             </div>
-                        ) : (
-                            <>
-                                <form
-                                    className="cs-promo-form"
-                                    onSubmit={(event) => {
-                                        event.preventDefault();
-                                        applyPromotion(promoInput);
-                                    }}
-                                >
-                                    <input
-                                        value={promoInput}
-                                        onChange={(event) => setPromoInput(event.target.value.toUpperCase())}
-                                        placeholder="Nhập mã, vd FAMILY20"
-                                        aria-label="Mã giảm giá"
-                                        disabled={qr.phase === "paid"}
-                                    />
-                                    <button
-                                        type="submit"
-                                        disabled={!promoInput.trim() || priceLoading || qr.phase === "paid"}
-                                    >
-                                        {appliedCode && priceLoading ? "Đang kiểm tra…" : "Áp dụng"}
-                                    </button>
-                                </form>
-
-                                {promoMessage && <p className="cs-promo-message">{promoMessage}</p>}
-
-                                {promoList.length > 0 && qr.phase !== "paid" && (
-                                    <div className="cs-promo-suggest">
-                                        {promoList.map((item) => (
-                                            <button
-                                                key={item.code ?? item.promotionId}
-                                                type="button"
-                                                onClick={() => item.code && applyPromotion(item.code)}
-                                                title={item.title ?? undefined}
-                                            >
-                                                <b>{item.code}</b>
-                                                <span>−{formatMoney(item.discountAmount)}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </>
                         )}
+
+                        <form
+                            className="cs-promo-form"
+                            onSubmit={(event) => {
+                                event.preventDefault();
+                                applyPromotion(promoInput);
+                            }}
+                        >
+                            <input
+                                value={promoInput}
+                                onChange={(event) => setPromoInput(event.target.value.toUpperCase())}
+                                placeholder="Mã khác (khách đọc mã)"
+                                aria-label="Nhập mã giảm giá khác"
+                                disabled={qr.phase === "paid"}
+                            />
+                            <button
+                                type="submit"
+                                disabled={!promoInput.trim() || priceLoading || qr.phase === "paid"}
+                            >
+                                {appliedCode && priceLoading ? "Đang kiểm tra…" : "Áp dụng"}
+                            </button>
+                        </form>
+
+                        {promoMessage && <p className="cs-promo-message">{promoMessage}</p>}
                     </div>
 
                     <div className={`cs-order-price ${priceLoading ? "is-loading" : ""}`}>
